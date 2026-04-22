@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>재건축·재개발 AI 플랫폼</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f5f0;
+    --surface: #ffffff;
+    --surface2: #f8f8f5;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.2);
+    --text: #1a1a1a;
+    --text2: #666660;
+    --text3: #999990;
+    --blue: #185FA5;
+    --blue-bg: #E6F1FB;
+    --blue-text: #0C447C;
+    --green: #3B6D11;
+    --green-bg: #EAF3DE;
+    --amber: #854F0B;
+    --amber-bg: #FAEEDA;
+    --red: #A32D2D;
+    --red-bg: #FCEBEB;
+    --gold: #633806;
+    --gold-bg: #FAEEDA;
+    --purple: #26215C;
+    --purple-bg: #EEEDFE;
+    --teal: #04342C;
+    --teal-bg: #E1F5EE;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+  /* 레이아웃 */
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--blue); }
+  .logo-text { font-size: 15px; font-weight: 600; }
+  .logo-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--purple-bg); color: var(--purple); font-weight: 500; }
+  .topbar-pills { display: flex; gap: 6px; }
+  .pill { font-size: 10px; padding: 3px 9px; border-radius: 20px; font-weight: 500; display: inline-block; }
+  .pill-green { background: var(--green-bg); color: var(--green); }
+  .pill-amber { background: var(--amber-bg); color: var(--amber); }
+  .pill-blue { background: var(--blue-bg); color: var(--blue-text); }
+  .pill-red { background: var(--red-bg); color: var(--red); }
+  .pill-gray { background: var(--surface2); color: var(--text2); }
+  .pill-purple { background: var(--purple-bg); color: var(--purple); }
+  .pill-gold { background: var(--gold-bg); color: var(--gold); }
+  .pill-teal { background: var(--teal-bg); color: var(--teal); }
+
+  /* 에이전트 탭 */
+  .agent-tabs { display: flex; background: var(--surface); border-bottom: 0.5px solid var(--border); }
+  .atab { flex: 1; padding: 10px 6px; font-size: 11px; font-weight: 500; text-align: center; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; transition: all .15s; line-height: 1.4; }
+  .atab:hover { background: var(--surface2); }
+  .atab.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .atab-icon { font-size: 13px; display: block; margin-bottom: 2px; }
+
+  /* 패널 */
+  .panel { display: none; flex-direction: column; gap: 12px; padding: 14px; max-width: 900px; margin: 0 auto; width: 100%; }
+  .panel.active { display: flex; }
+
+  /* 카드 */
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+  /* 메트릭 카드 */
+  .metric { background: var(--surface2); border-radius: var(--radius); padding: 12px 14px; }
+  .metric-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .metric-val { font-size: 22px; font-weight: 600; line-height: 1; }
+  .metric-sub { font-size: 11px; margin-top: 3px; }
+  .up { color: var(--green); }
+  .dn { color: var(--red); }
+
+  /* 바 차트 */
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .bar-label { font-size: 12px; width: 80px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-val { font-size: 11px; color: var(--text2); width: 36px; text-align: right; flex-shrink: 0; }
+
+  /* 신호 행 */
+  .signal-row { display: flex; align-items: center; padding: 6px 0; border-bottom: 0.5px solid var(--border); }
+  .signal-row:last-child { border-bottom: none; }
+  .signal-name { font-size: 12px; flex: 1; }
+  .signal-bar { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin: 0 10px; }
+  .signal-val { font-size: 11px; font-weight: 500; width: 28px; text-align: right; }
+
+  /* 뉴스 */
+  .news-item { display: flex; gap: 8px; align-items: flex-start; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .ndot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .ntext { font-size: 12px; line-height: 1.5; }
+  .ntime { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  /* 리스크 아이템 */
+  .risk-item { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: var(--radius); margin-bottom: 7px; border: 0.5px solid var(--border); }
+  .risk-item:last-child { margin-bottom: 0; }
+  .rdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .rtitle { font-size: 12px; font-weight: 600; line-height: 1.3; }
+  .rdesc { font-size: 11px; color: var(--text2); margin-top: 2px; line-height: 1.5; }
+
+  /* 프로젝트 행 */
+  .proj-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .proj-row:last-child { border-bottom: none; }
+  .proj-name { font-size: 12px; font-weight: 500; width: 80px; flex-shrink: 0; }
+  .proj-bar { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .proj-fill { height: 100%; border-radius: 3px; background: var(--blue); }
+  .proj-pct { font-size: 11px; color: var(--text2); width: 30px; text-align: right; flex-shrink: 0; }
+
+  /* 단계 추적 */
+  .step-track { display: flex; align-items: center; margin: 10px 0 14px; }
+  .snode { display: flex; flex-direction: column; align-items: center; flex: 1; }
+  .scirc { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 600; border: 1.5px solid var(--border2); z-index: 1; }
+  .scirc.done { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .scirc.active { background: var(--amber-bg); border-color: #BA7517; color: var(--amber); }
+  .scirc.pending { background: var(--surface2); color: var(--text3); }
+  .sname { font-size: 8px; color: var(--text2); margin-top: 3px; text-align: center; max-width: 44px; line-height: 1.2; }
+  .sline { flex: 1; height: 1.5px; background: var(--border); margin-top: -12px; }
+  .sline.done { background: var(--blue); }
+
+  /* 법령 */
+  .law-item { padding: 10px 12px; border-radius: var(--radius); border: 0.5px solid var(--border); margin-bottom: 7px; }
+  .law-item:last-child { margin-bottom: 0; }
+  .law-title { font-size: 12px; font-weight: 600; }
+  .law-meta { font-size: 10px; color: var(--text2); margin-top: 2px; }
+  .law-tag { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 8px; background: var(--blue-bg); color: var(--blue-text); margin: 3px 3px 0 0; }
+
+  /* AI 분석 버튼 */
+  .ask-btn { font-size: 12px; padding: 9px 14px; border-radius: var(--radius); border: 0.5px solid var(--blue); background: var(--surface); color: var(--blue); cursor: pointer; width: 100%; text-align: left; transition: background .12s; margin-bottom: 7px; display: flex; align-items: center; justify-content: space-between; }
+  .ask-btn:hover { background: var(--blue-bg); }
+  .ask-btn:last-child { margin-bottom: 0; }
+  .ask-btn.loading { opacity: .6; cursor: not-allowed; border-color: var(--border); color: var(--text2); }
+
+  /* AI 응답 패널 */
+  .ai-panel { background: var(--surface2); border-radius: var(--radius-lg); border: 0.5px solid var(--border); overflow: hidden; margin-top: 4px; }
+  .ai-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 0.5px solid var(--border); background: var(--surface); }
+  .ai-title { font-size: 12px; font-weight: 600; }
+  .ai-close { font-size: 12px; color: var(--text2); cursor: pointer; padding: 2px 8px; border-radius: 4px; border: 0.5px solid var(--border); background: var(--surface2); }
+  .ai-close:hover { background: var(--surface); }
+  .ai-resp { padding: 14px; font-size: 13px; line-height: 1.8; color: var(--text); min-height: 60px; white-space: pre-wrap; }
+  .ai-resp.streaming::after { content: '|'; animation: blink .7s infinite; color: var(--blue); }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
+  .ai-input-row { display: flex; gap: 8px; padding: 10px 14px; border-top: 0.5px solid var(--border); background: var(--surface); }
+  .ai-input { flex: 1; font-size: 12px; padding: 8px 12px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: var(--surface); color: var(--text); outline: none; font-family: inherit; }
+  .ai-input:focus { border-color: var(--blue); }
+  .ai-send { padding: 8px 16px; font-size: 12px; border-radius: var(--radius); border: none; background: var(--blue); color: #fff; cursor: pointer; font-weight: 500; }
+  .ai-send:hover { background: var(--blue-text); }
+  .ai-send:disabled { background: var(--surface2); color: var(--text3); cursor: not-allowed; }
+  .tdots { display: inline-flex; gap: 3px; align-items: center; }
+  .tdots span { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); animation: td 1.2s infinite; }
+  .tdots span:nth-child(2) { animation-delay: .2s; }
+  .tdots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes td { 0%,80%,100%{opacity:.2}40%{opacity:1} }
+
+  /* 투자자 섹션 */
+  .slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .slider-label { font-size: 12px; width: 100px; flex-shrink: 0; }
+  .slider-val { font-size: 12px; font-weight: 600; width: 70px; text-align: right; flex-shrink: 0; }
+  input[type=range] { flex: 1; accent-color: var(--blue); }
+  .result-big { font-size: 26px; font-weight: 700; line-height: 1; }
+  .result-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+  /* 조합 프로필 */
+  .zone-btn { font-size: 11px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid var(--border2); background: var(--surface); color: var(--text2); cursor: pointer; transition: all .15s; }
+  .zone-btn:hover { background: var(--surface2); }
+  .zone-btn.active { background: var(--amber-bg); border-color: #BA7517; color: var(--amber); font-weight: 500; }
+  .zone-btn.alert { border-color: #E24B4A; color: var(--red); }
+  .zone-btn.alert.active { background: var(--red-bg); }
+  .profile-header { display: flex; align-items: flex-start; gap: 12px; padding-bottom: 12px; border-bottom: 0.5px solid var(--border); margin-bottom: 12px; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .score-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .score-label { font-size: 11px; width: 80px; flex-shrink: 0; }
+  .score-track { flex: 1; height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 4px; }
+  .score-val { font-size: 11px; font-weight: 600; width: 30px; text-align: right; flex-shrink: 0; }
+  .tl-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { font-size: 10px; color: var(--text3); width: 54px; flex-shrink: 0; padding-top: 2px; line-height: 1.4; }
+  .tl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .tl-title { font-size: 12px; font-weight: 500; line-height: 1.4; }
+  .tl-note { font-size: 11px; color: var(--text2); margin-top: 1px; }
+
+  /* 면책 */
+  .disclaimer { background: var(--amber-bg); border: 0.5px solid #FAC775; border-radius: var(--radius); padding: 10px 13px; font-size: 11px; color: var(--gold); line-height: 1.7; }
+
+  /* 등급 표시 */
+  .grade-banner { background: linear-gradient(135deg, #FAEEDA 0%, #E6F1FB 100%); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .grade-name { font-size: 13px; font-weight: 600; }
+  .grade-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  @media (max-width: 600px) {
+    .g2, .g3, .g4 { grid-template-columns: 1fr 1fr; }
+    .panel { padding: 10px; }
+    .topbar-pills { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 상단 바 -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <div class="logo-text">재개발 AI 플랫폼</div>
+      <span class="logo-badge">Beta</span>
+    </div>
+    <div class="topbar-pills">
+      <span class="pill pill-green">에이전트 4개 활성</span>
+      <span class="pill pill-amber">리스크 감지 2건</span>
+      <span class="pill pill-blue">프로젝트 5건</span>
+    </div>
+  </div>
+
+  <!-- 에이전트 탭 -->
+  <div class="agent-tabs">
+    <div class="atab active" onclick="switchTab('market')"><span class="atab-icon">▲</span>시장 흐름<br>에이전트</div>
+    <div class="atab" onclick="switchTab('risk')"><span class="atab-icon">⚠</span>리스크 추적<br>에이전트</div>
+    <div class="atab" onclick="switchTab('project')"><span class="atab-icon">●</span>단계 관리<br>에이전트</div>
+    <div class="atab" onclick="switchTab('law')"><span class="atab-icon">▶</span>법령·판례<br>에이전트</div>
+    <div class="atab" onclick="switchTab('investor')"><span class="atab-icon">◆</span>투자자<br>분석센터</div>
+    <div class="atab" onclick="switchTab('union')"><span class="atab-icon">🔒</span>조합<br>인텔리전스</div>
+  </div>
+
+  <!-- ① 시장 흐름 패널 -->
+  <div id="panel-market" class="panel active">
+    <div class="g3">
+      <div class="metric"><div class="metric-label">서울 재건축 허가 건수</div><div class="metric-val">127<span style="font-size:13px;font-weight:400;color:var(--text2);">건</span></div><div class="metric-sub up">▲ 전월 대비 +12%</div></div>
+      <div class="metric"><div class="metric-label">평균 사업 기간</div><div class="metric-val">11.4<span style="font-size:13px;font-weight:400;color:var(--text2);">년</span></div><div class="metric-sub dn">▼ 지연 사업 증가</div></div>
+      <div class="metric"><div class="metric-label">시장 활성화 지수</div><div class="metric-val">68<span style="font-size:13px;font-weight:400;color:var(--text2);">/100</span></div><div class="metric-sub up">▲ 전분기 +5</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">구역별 사업 활성도</div>
+      <div class="bar-row"><div class="bar-label">강남·서초</div><div class="bar-track"><div class="bar-fill" style="width:88%;background:#185FA5;"></div></div><div class="bar-val">88%</div></div>
+      <div class="bar-row"><div class="bar-label">용산·마포</div><div class="bar-track"><div class="bar-fill" style="width:74%;background:#185FA5;"></div></div><div class="bar-val">74%</div></div>
+      <div class="bar-row"><div class="bar-label">노원·도봉</div><div class="bar-track"><div class="bar-fill" style="width:61%;background:#378ADD;"></div></div><div class="bar-val">61%</div></div>
+      <div class="bar-row"><div class="bar-label">영등포·구로</div><div class="bar-track"><div class="bar-fill" style="width:52%;background:#378ADD;"></div></div><div class="bar-val">52%</div></div>
+      <div class="bar-row"><div class="bar-label">성북·중랑</div><div class="bar-track"><div class="bar-fill" style="width:38%;background:#85B7EB;"></div></div><div class="bar-val">38%</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">시장 주요 신호</div>
+      <div class="signal-row"><div class="signal-name">금리 환경</div><div class="signal-bar"><div style="height:100%;width:35%;background:#E24B4A;border-radius:3px;"></div></div><div class="signal-val" style="color:var(--red);">부정</div></div>
+      <div class="signal-row"><div class="signal-name">규제 완화 기조</div><div class="signal-bar"><div style="height:100%;width:72%;background:#639922;border-radius:3px;"></div></div><div class="signal-val" style="color:var(--green);">긍정</div></div>
+      <div class="signal-row"><div class="signal-name">조합 분쟁 지수</div><div class="signal-bar"><div style="height:100%;width:58%;background:#EF9F27;border-radius:3px;"></div></div><div class="signal-val" style="color:var(--amber);">중립</div></div>
+      <div class="signal-row"><div class="signal-name">신규 정비구역 지정</div><div class="signal-bar"><div style="height:100%;width:80%;background:#639922;border-radius:3px;"></div></div><div class="signal-val" style="color:var(--green);">긍정</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">최근 뉴스·모니터링</div>
+      <div class="news-item"><div class="ndot" style="background:#E24B4A;"></div><div><div class="ntext">서울시, 재건축 안전진단 기준 완화 추진 — 강남구 노후 단지 대상</div><div class="ntime">2시간 전</div></div></div>
+      <div class="news-item"><div class="ndot" style="background:#EF9F27;"></div><div><div class="ntext">용산 한남3구역 조합원 총회 부결 — 사업 지연 가능성</div><div class="ntime">5시간 전</div></div></div>
+      <div class="news-item"><div class="ndot" style="background:#639922;"></div><div><div class="ntext">노원구 상계동 재건축 사업시행인가 접수 완료</div><div class="ntime">1일 전</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">AI 에이전트 분석</div>
+      <button class="ask-btn" onclick="triggerAI('market','현재 서울 재건축·재개발 시장의 전반적인 투자 타이밍을 분석해줘. 금리 환경, 규제 완화 기조, 시장 활성도를 종합해서 개인 투자자 관점에서 구체적인 판단 기준을 알려줘.')">현재 시장 투자 타이밍 종합 분석 ↗</button>
+      <button class="ask-btn" onclick="triggerAI('market','강남·서초 vs 노원·도봉 재건축 투자, 개인 투자자 입장에서 어느 쪽이 더 유리할까? 수익률, 리스크, 사업 속도를 비교해줘.')">지역별 투자 비교 분석 ↗</button>
+    </div>
+    <div id="ai-market"></div>
+  </div>
+
+  <!-- ② 리스크 추적 패널 -->
+  <div id="panel-risk" class="panel">
+    <div class="g2">
+      <div class="metric"><div class="metric-label">감지된 고위험 요소</div><div class="metric-val" style="color:var(--red);">3<span style="font-size:13px;font-weight:400;color:var(--text2);">건</span></div><div class="metric-sub">즉시 검토 필요</div></div>
+      <div class="metric"><div class="metric-label">모니터링 중 리스크</div><div class="metric-val" style="color:var(--amber);">7<span style="font-size:13px;font-weight:400;color:var(--text2);">건</span></div><div class="metric-sub">정기 추적 중</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">현재 감지된 주요 리스크</div>
+      <div class="risk-item" style="background:var(--red-bg);border-color:#F7C1C1;"><div class="rdot" style="background:#E24B4A;"></div><div style="flex:1;"><div class="rtitle">조합원 동의율 75% 미달 위험</div><div class="rdesc">강동구 A구역 — 현재 동의율 71.3%</div></div><span class="pill pill-red">고위험</span></div>
+      <div class="risk-item" style="background:var(--red-bg);border-color:#F7C1C1;"><div class="rdot" style="background:#E24B4A;"></div><div style="flex:1;"><div class="rtitle">시공사 도급금액 30% 증액 요구</div><div class="rdesc">마포구 B구역 — 공사비 갈등으로 착공 지연 가능성</div></div><span class="pill pill-red">고위험</span></div>
+      <div class="risk-item" style="background:var(--amber-bg);border-color:#FAC775;"><div class="rdot" style="background:#EF9F27;"></div><div style="flex:1;"><div class="rtitle">용적률 하향 조정 가능성</div><div class="rdesc">성동구 C구역 — 2종→1종 용도지역 변경 검토 중</div></div><span class="pill pill-amber">중위험</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">AI 에이전트 분석</div>
+      <button class="ask-btn" onclick="triggerAI('risk','재건축 조합원 동의율 75% 미달 상황에서 할 수 있는 법적·실무적 대응 방법을 단계별로 알려줘. 관련 판례도 포함해서.')">동의율 미달 리스크 해결 방법 분석 ↗</button>
+      <button class="ask-btn" onclick="triggerAI('risk','시공사가 공사비 30% 증액을 요구할 때 조합이 취할 수 있는 대응 전략을 알려줘. 계약 해지, 협상, 소송 각각의 장단점을 비교해줘.')">시공사 공사비 분쟁 대응 전략 ↗</button>
+    </div>
+    <div id="ai-risk"></div>
+  </div>
+
+  <!-- ③ 단계 관리 패널 -->
+  <div id="panel-project" class="panel">
+    <div class="g3">
+      <div class="metric"><div class="metric-label">전체 관리 프로젝트</div><div class="metric-val">5<span style="font-size:13px;font-weight:400;color:var(--text2);">건</span></div><div class="metric-sub">서울 4 · 경기 1</div></div>
+      <div class="metric"><div class="metric-label">이번 달 결정 사항</div><div class="metric-val" style="color:var(--amber);">3<span style="font-size:13px;font-weight:400;color:var(--text2);">건</span></div><div class="metric-sub">총회 2 · 인가 1</div></div>
+      <div class="metric"><div class="metric-label">평균 진행률</div><div class="metric-val">58<span style="font-size:13px;font-weight:400;color:var(--text2);">%</span></div><div class="metric-sub up">▲ 전월 +4%</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">프로젝트별 현황</div>
+      <div class="proj-row"><div class="proj-name">강동 A구역</div><span class="pill pill-amber" style="flex-shrink:0;font-size:10px;">조합설립인가</span><div class="proj-bar"><div class="proj-fill" style="width:28%;"></div></div><div class="proj-pct">28%</div><span class="pill pill-red">위험</span></div>
+      <div class="proj-row"><div class="proj-name">마포 B구역</div><span class="pill pill-amber" style="flex-shrink:0;font-size:10px;">사업시행인가</span><div class="proj-bar"><div class="proj-fill" style="width:52%;"></div></div><div class="proj-pct">52%</div><span class="pill pill-red">위험</span></div>
+      <div class="proj-row"><div class="proj-name">성동 C구역</div><span class="pill pill-blue" style="flex-shrink:0;font-size:10px;">관리처분인가</span><div class="proj-bar"><div class="proj-fill" style="width:68%;"></div></div><div class="proj-pct">68%</div><span class="pill pill-amber">주의</span></div>
+      <div class="proj-row"><div class="proj-name">노원 D구역</div><span class="pill pill-blue" style="flex-shrink:0;font-size:10px;">이주·철거</span><div class="proj-bar"><div class="proj-fill" style="width:75%;"></div></div><div class="proj-pct">75%</div><span class="pill pill-amber">주의</span></div>
+      <div class="proj-row"><div class="proj-name">수원 E구역</div><span class="pill pill-green" style="flex-shrink:0;font-size:10px;">착공</span><div class="proj-bar"><div class="proj-fill" style="width:88%;"></div></div><div class="proj-pct">88%</div><span class="pill pill-green">양호</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">마포 B구역 — 단계 상세</div>
+      <div class="step-track">
+        <div class="snode"><div class="scirc done">✓</div><div class="sname">구역지정</div></div><div class="sline done"></div>
+        <div class="snode"><div class="scirc done">✓</div><div class="sname">추진위</div></div><div class="sline done"></div>
+        <div class="snode"><div class="scirc done">✓</div><div class="sname">조합설립</div></div><div class="sline done"></div>
+        <div class="snode"><div class="scirc active">진행</div><div class="sname">사업시행</div></div><div class="sline"></div>
+        <div class="snode"><div class="scirc pending">-</div><div class="sname">관리처분</div></div><div class="sline"></div>
+        <div class="snode"><div class="scirc pending">-</div><div class="sname">이주</div></div><div class="sline"></div>
+        <div class="snode"><div class="scirc pending">-</div><div class="sname">착공</div></div><div class="sline"></div>
+        <div class="snode"><div class="scirc pending">-</div><div class="sname">준공</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">AI 에이전트 분석</div>
+      <button class="ask-btn" onclick="triggerAI('project','마포 B구역이 사업시행인가 단계에서 공사비 분쟁이 발생했을 때, 조합원 입장에서 취해야 할 행동 체크리스트를 단계별로 만들어줘.')">마포 B구역 공사비 분쟁 대응 체크리스트 ↗</button>
+      <button class="ask-btn" onclick="triggerAI('project','성동 C구역이 관리처분인가 단계인데, 이 시점에서 입주권을 매수하는 것이 유리한지 불리한지 분석해줘. 세금, 분담금, 타이밍 관점에서.')">관리처분인가 시점 입주권 매수 타이밍 분석 ↗</button>
+    </div>
+    <div id="ai-project"></div>
+  </div>
+
+  <!-- ④ 법령·판례 패널 -->
+  <div id="panel-law" class="panel">
+    <div class="g2">
+      <div class="metric"><div class="metric-label">관련 법령 DB</div><div class="metric-val">48<span style="font-size:13px;font-weight:400;color:var(--text2);">개</span></div><div class="metric-sub">도시정비법 외 12개</div></div>
+      <div class="metric"><div class="metric-label">최근 수집 판례</div><div class="metric-val">234<span style="font-size:13px;font-weight:400;color:var(--text2);">건</span></div><div class="metric-sub up">이번 주 +7건</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">핵심 관련 법령</div>
+      <div class="law-item"><div class="law-title">도시 및 주거환경정비법</div><div class="law-meta">최근 개정: 2024.02 · 재건축·재개발의 근거 법령</div><div><span class="law-tag">조합설립</span><span class="law-tag">사업시행</span><span class="law-tag">관리처분</span></div></div>
+      <div class="law-item"><div class="law-title">재건축초과이익 환수에 관한 법률</div><div class="law-meta">최근 개정: 2023.09 · 초과이익 부담금 산정</div><div><span class="law-tag">부담금</span><span class="law-tag">투자 수익</span></div></div>
+      <div class="law-item"><div class="law-title">집합건물의 소유 및 관리에 관한 법률</div><div class="law-meta">구분소유자 동의 요건, 재건축 결의</div><div><span class="law-tag">동의 요건</span><span class="law-tag">결의</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">AI 에이전트 분석</div>
+      <button class="ask-btn" onclick="triggerAI('law','재건축 조합설립 동의 요건인 75%를 충족하지 못했을 때, 도시정비법상 법적 대응 방법과 관련 판례를 알려줘.')">조합설립 동의 75% 미달 법적 대응 ↗</button>
+      <button class="ask-btn" onclick="triggerAI('law','재건축 초과이익 부담금이 얼마나 나올지 계산하는 방법을 알려줘. 실제 사례를 들어서 계산 과정을 보여줘.')">재건축 초과이익 부담금 계산 방법 ↗</button>
+      <button class="ask-btn" onclick="triggerAI('law','관리처분계획 취소 소송에서 조합원이 이길 수 있는 법적 조건과 최근 대법원 판례 흐름을 설명해줘.')">관리처분계획 취소 소송 승소 조건 ↗</button>
+    </div>
+    <div id="ai-law"></div>
+  </div>
+
+  <!-- ⑤ 투자자 분석센터 패널 -->
+  <div id="panel-investor" class="panel">
+    <div class="grade-banner">
+      <div><div class="grade-name">◆ 투자자 등급 — 수익률 분석센터</div><div class="grade-desc">IRR 계산 · 단계별 Exit · 구역별 투자 점수</div></div>
+      <span class="pill pill-gold">Investor Grade</span>
+    </div>
+    <div class="g4">
+      <div class="metric"><div class="metric-label">기준금리</div><div class="metric-val" style="color:var(--amber);">3.5<span style="font-size:12px;font-weight:400;">%</span></div><div class="metric-sub dn">▼ 0.25%p 인하</div></div>
+      <div class="metric"><div class="metric-label">대출 가능 금리</div><div class="metric-val">4.8<span style="font-size:12px;font-weight:400;color:var(--text2);">%</span></div><div class="metric-sub">주담대 기준</div></div>
+      <div class="metric"><div class="metric-label">재건축부담금</div><div class="metric-val">免<span style="font-size:12px;font-weight:400;color:var(--text2);"> 2026</span></div><div class="metric-sub up">▲ 면제 연장</div></div>
+      <div class="metric"><div class="metric-label">평균 사업 기간</div><div class="metric-val">11<span style="font-size:12px;font-weight:400;color:var(--text2);">년</span></div><div class="metric-sub dn">▼ 지연 증가</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">수익률 시뮬레이터</div>
+      <div class="slider-row"><span class="slider-label">초기 투자금</span><input type="range" min="5000" max="50000" value="15000" step="1000" id="sl-invest" oninput="calc()"><span class="slider-val" id="vl-invest">1.5억</span></div>
+      <div class="slider-row"><span class="slider-label">대출 비율</span><input type="range" min="0" max="70" value="40" step="5" id="sl-loan" oninput="calc()"><span class="slider-val" id="vl-loan">40%</span></div>
+      <div class="slider-row"><span class="slider-label">대출 금리</span><input type="range" min="30" max="80" value="48" step="1" id="sl-rate" oninput="calc()"><span class="slider-val" id="vl-rate">4.8%</span></div>
+      <div class="slider-row"><span class="slider-label">사업 기간</span><input type="range" min="5" max="20" value="10" step="1" id="sl-period" oninput="calc()"><span class="slider-val" id="vl-period">10년</span></div>
+      <div class="slider-row"><span class="slider-label">분양가 상승률</span><input type="range" min="0" max="100" value="40" step="5" id="sl-up" oninput="calc()"><span class="slider-val" id="vl-up">40%</span></div>
+      <div class="slider-row" style="margin-bottom:0;"><span class="slider-label">추가 분담금</span><input type="range" min="0" max="20000" value="5000" step="500" id="sl-burden" oninput="calc()"><span class="slider-val" id="vl-burden">5천만</span></div>
+    </div>
+    <div class="g3">
+      <div class="metric" style="text-align:center;"><div class="metric-label">예상 총 수익</div><div class="result-big" style="color:var(--amber);" id="r-profit">+8,200만</div><div class="result-sub" id="r-roi">수익률 54.7%</div></div>
+      <div class="metric" style="text-align:center;"><div class="metric-label">연평균 수익률(IRR)</div><div class="result-big" id="r-irr" style="color:var(--green);">4.4%</div><div class="result-sub" id="r-spread" style="color:var(--green);">금리 대비 -0.4%p</div></div>
+      <div class="metric" style="text-align:center;"><div class="metric-label">투자 판단</div><div class="result-big" id="r-judge" style="font-size:18px;color:var(--green);">검토 가능</div><div class="result-sub" id="r-reason">금리 대비 수익 우위</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">AI 투자 자문</div>
+      <button class="ask-btn" onclick="triggerAI('investor','현재 기준금리 3.5%, 대출금리 4.8% 환경에서 재건축 입주권 투자의 실질 수익률을 계산해줘. 초기 투자금 1.5억, 사업 기간 10년, 분양가 40% 상승 가정 시 IRR과 투자 적합성을 분석해줘.')">현재 금리 환경에서 재건축 투자 IRR 분석 ↗</button>
+      <button class="ask-btn" onclick="triggerAI('investor','재건축 사업의 단계별 Exit 전략을 알려줘. 조합설립인가 직후, 사업시행인가 직후, 관리처분인가 직후 각각의 매도 시 예상 수익률과 세금 부담을 비교해줘.')">단계별 Exit 전략 수익 비교 분석 ↗</button>
+      <button class="ask-btn" onclick="triggerAI('investor','재건축 투자 시 놓치기 쉬운 숨겨진 비용 항목들을 모두 알려줘. 추가 분담금, 이주비 이자, 세금, 중개 수수료 등 실제 투자자들이 간과하는 비용 위주로.')">숨겨진 투자 비용 전체 점검 ↗</button>
+    </div>
+    <div id="ai-investor"></div>
+    <div class="disclaimer">※ 이 분석은 참고용 정보이며 투자 권유가 아닙니다. 실제 투자 결정 전 반드시 감정평가사·세무사·법무사 등 전문가와 상담하시기 바랍니다.</div>
+  </div>
+
+  <!-- ⑥ 조합 인텔리전스 패널 -->
+  <div id="panel-union" class="panel">
+    <div class="grade-banner" style="background:linear-gradient(135deg,var(--red-bg) 0%,var(--amber-bg) 100%);">
+      <div><div class="grade-name">🔒 조합 인텔리전스 — 이너서클 전용</div><div class="grade-desc">조합·조합장 리스크 프로필 · 경보 시스템</div></div>
+      <span class="pill" style="background:var(--red-bg);color:var(--red);">고위험 2건</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="zone-btn alert active" onclick="selectZone(0,this)">북아현 2구역 ⚠</button>
+      <button class="zone-btn alert" onclick="selectZone(1,this)">북아현 3구역 ⚠</button>
+      <button class="zone-btn" onclick="selectZone(2,this)">노량진 5구역</button>
+    </div>
+    <div class="card" id="zone-profile">
+      <div class="profile-header">
+        <div class="avatar" style="background:var(--red-bg);color:var(--red);">북2</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;margin-bottom:3px;">북아현 2구역 재개발 조합</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.6;">서대문구 북아현동 · 사업시행인가 단계 · 조합원 약 1,200명<br>현 조합장 취임: 2021년 3월 · 2024년 재선</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:var(--text2);margin-bottom:2px;">종합 리스크</div>
+          <div style="font-size:28px;font-weight:700;color:var(--red);">78</div>
+          <div style="font-size:10px;color:var(--red);">고위험</div>
+        </div>
+      </div>
+      <div class="card-title">리스크 세부 점수</div>
+      <div class="score-bar-row"><div class="score-label">전문성</div><div class="score-track"><div class="score-fill" style="width:35%;background:#E24B4A;"></div></div><div class="score-val" style="color:var(--red);">35</div></div>
+      <div class="score-bar-row"><div class="score-label">투명성</div><div class="score-track"><div class="score-fill" style="width:28%;background:#E24B4A;"></div></div><div class="score-val" style="color:var(--red);">28</div></div>
+      <div class="score-bar-row"><div class="score-label">사업 추진력</div><div class="score-track"><div class="score-fill" style="width:45%;background:#EF9F27;"></div></div><div class="score-val" style="color:var(--amber);">45</div></div>
+      <div class="score-bar-row"><div class="score-label">조합원 신뢰</div><div class="score-track"><div class="score-fill" style="width:32%;background:#E24B4A;"></div></div><div class="score-val" style="color:var(--red);">32</div></div>
+    </div>
+    <div class="card" id="zone-timeline">
+      <div class="card-title">주요 이력</div>
+      <div class="tl-item"><div class="tl-date">2024.11</div><div class="tl-dot" style="background:#E24B4A;"></div><div><div class="tl-title">총회 결의 무효 소송 제기</div><div class="tl-note">조합원 38명, 2024년 정기총회 결의 취소 청구</div></div></div>
+      <div class="tl-item"><div class="tl-date">2024.08</div><div class="tl-dot" style="background:#E24B4A;"></div><div><div class="tl-title">시공사 선정 재입찰 논란</div><div class="tl-note">1차 입찰 유찰 후 수의계약 시도 → 조합원 반발</div></div></div>
+      <div class="tl-item"><div class="tl-date">2024.03</div><div class="tl-dot" style="background:#EF9F27;"></div><div><div class="tl-title">조합장 재선 — 찬성 51.3%</div><div class="tl-note">경쟁 후보 출마, 내부 분열 징후</div></div></div>
+      <div class="tl-item"><div class="tl-date">2022.06</div><div class="tl-dot" style="background:#3B6D11;"></div><div><div class="tl-title">사업시행인가 취득</div><div class="tl-note">예정보다 8개월 지연</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">AI 조합 리스크 분석</div>
+      <button class="ask-btn" onclick="triggerAI('union','북아현 2구역 총회결의 무효소송이 투자자에게 미치는 영향을 분석해줘. 1심 인용 시 시나리오, 기각 시 시나리오, 각각의 경우 입주권 가치 변동과 투자자 대응 전략을 알려줘.')">북아현 2구역 소송 결과별 시나리오 분석 ↗</button>
+      <button class="ask-btn" onclick="triggerAI('union','재건축 조합장 해임 총회가 가결될 경우 사업 진행에 어떤 영향이 있는지 알려줘. 새 조합장 선출까지 공백 기간, 사업 지연 가능성, 투자자가 취해야 할 행동을 단계별로 설명해줘.')">조합장 해임 가결 시 사업 영향 분석 ↗</button>
+    </div>
+    <div id="ai-union"></div>
+    <div class="disclaimer">※ 이 정보는 법원 공개 소송정보·구청 공개자료·언론 보도 등 합법적 공개 정보를 기반으로 합니다. 개인 신상 정보는 포함하지 않습니다. 이너서클 회원 외부 공유 금지.</div>
+  </div>
+
+</div>
+
+<script>
+const SYSTEM = `당신은 한국 재건축·재개발 전문 AI 어드바이저입니다.
+
+[원칙]
+1. 법령 근거(도시정비법 조항 번호 등) 명시
+2. 구체적 수치와 계산 과정 포함
+3. 투자자 관점에서 실질적인 액션 아이템 제시
+4. 확신하기 어려운 내용엔 "※ 확인 필요" 표기
+5. 답변은 400~600자 핵심 위주로 간결하게
+6. 마지막에 항상: "※ 이 분석은 참고용이며, 중요한 의사결정 전 전문가(변호사, 감정평가사 등)와 상담을 권장합니다."`;
+
+const history = { market:[], risk:[], project:[], law:[], investor:[], union:[] };
+let busy = false;
+
+function switchTab(name) {
+  document.querySelectorAll('.atab').forEach((t,i) => {
+    t.classList.toggle('active', ['market','risk','project','law','investor','union'][i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// 수익률 계산기
+function fmt만(v) {
+  v = Math.round(v);
+  if (v >= 10000) {
+    const 억 = Math.floor(v / 10000);
+    const 천 = Math.round((v % 10000) / 1000);
+    return 억 + '억' + (천 > 0 ? 천 + '천' : '') + '만';
+  }
+  return Math.round(v / 1000) + '천만';
+}
+
+function calc() {
+  const invest = parseInt(document.getElementById('sl-invest').value);
+  const loanPct = parseInt(document.getElementById('sl-loan').value) / 100;
+  const rate = parseInt(document.getElementById('sl-rate').value) / 10;
+  const period = parseInt(document.getElementById('sl-period').value);
+  const upPct = parseInt(document.getElementById('sl-up').value) / 100;
+  const burden = parseInt(document.getElementById('sl-burden').value);
+
+  document.getElementById('vl-invest').textContent = fmt만(invest * 10000);
+  document.getElementById('vl-loan').textContent = Math.round(loanPct * 100) + '%';
+  document.getElementById('vl-rate').textContent = rate.toFixed(1) + '%';
+  document.getElementById('vl-period').textContent = period + '년';
+  document.getElementById('vl-up').textContent = Math.round(upPct * 100) + '%';
+  document.getElementById('vl-burden').textContent = fmt만(burden * 10000);
+
+  const loanAmt = invest * loanPct;
+  const equity = invest * (1 - loanPct);
+  const loanCost = loanAmt * rate / 100 * period;
+  const finalVal = invest * (1 + upPct);
+  const profit = finalVal - invest - loanCost - burden / 1000;
+  const roi = (profit / (equity + burden / 1000)) * 100;
+  const irr = (Math.pow((finalVal - loanCost - burden / 1000) / equity, 1 / period) - 1) * 100;
+  const spread = irr - rate;
+
+  const profitWan = Math.round(profit * 10000);
+  document.getElementById('r-profit').textContent = (profit >= 0 ? '+' : '') + fmt만(Math.abs(profitWan));
+  document.getElementById('r-roi').textContent = '수익률 ' + roi.toFixed(1) + '%';
+  document.getElementById('r-irr').textContent = irr.toFixed(1) + '%';
+  document.getElementById('r-irr').style.color = irr > rate ? 'var(--green)' : 'var(--red)';
+  document.getElementById('r-spread').textContent = '금리 대비 ' + (spread >= 0 ? '+' : '') + spread.toFixed(1) + '%p';
+  document.getElementById('r-spread').style.color = spread >= 0 ? 'var(--green)' : 'var(--red)';
+
+  let judge, reason, color;
+  if (irr > rate + 1) { judge = '적극 검토'; reason = '금리 대비 수익 충분'; color = 'var(--green)'; }
+  else if (irr > rate) { judge = '검토 가능'; reason = '금리 대비 소폭 우위'; color = 'var(--amber)'; }
+  else if (irr > rate - 1) { judge = '보류 권고'; reason = '리스크 대비 수익 미흡'; color = 'var(--amber)'; }
+  else { judge = '투자 주의'; reason = '금리 대비 수익 열위'; color = 'var(--red)'; }
+  document.getElementById('r-judge').textContent = judge;
+  document.getElementById('r-judge').style.color = color;
+  document.getElementById('r-reason').textContent = reason;
+}
+
+// 조합 구역 전환
+const zoneData = [
+  { id:'북2', name:'북아현 2구역 재개발 조합', area:'서대문구 북아현동', stage:'사업시행인가', members:'약 1,200명', chief:'2021년 3월 취임 · 2024년 재선', score:78, scoreColor:'var(--red)', scoreLabel:'고위험', avatarBg:'var(--red-bg)', avatarColor:'var(--red)',
+    scores:[{k:'전문성',v:35,c:'#E24B4A'},{k:'투명성',v:28,c:'#E24B4A'},{k:'사업 추진력',v:45,c:'#EF9F27'},{k:'조합원 신뢰',v:32,c:'#E24B4A'}],
+    tl:[{d:'2024.11',c:'#E24B4A',t:'총회 결의 무효 소송 제기',n:'조합원 38명, 총회 결의 취소 청구'},{d:'2024.08',c:'#E24B4A',t:'시공사 선정 재입찰 논란',n:'수의계약 시도 → 조합원 반발'},{d:'2024.03',c:'#EF9F27',t:'조합장 재선 — 찬성 51.3%',n:'경쟁 후보 출마, 내부 분열'},{d:'2022.06',c:'#3B6D11',t:'사업시행인가 취득',n:'예정보다 8개월 지연'}]},
+  { id:'북3', name:'북아현 3구역 재개발 조합', area:'서대문구 북아현동', stage:'조합설립인가', members:'약 980명', chief:'2022년 6월 취임 · 해임 청구 진행 중', score:72, scoreColor:'var(--red)', scoreLabel:'고위험', avatarBg:'var(--red-bg)', avatarColor:'var(--red)',
+    scores:[{k:'전문성',v:40,c:'#EF9F27'},{k:'투명성',v:38,c:'#EF9F27'},{k:'사업 추진력',v:35,c:'#E24B4A'},{k:'조합원 신뢰',v:25,c:'#E24B4A'}],
+    tl:[{d:'2025.01',c:'#E24B4A',t:'조합장 해임 임시총회 소집 예정',n:'조합원 20% 이상 연서'},{d:'2024.10',c:'#E24B4A',t:'조합원 감사 요구 → 거부',n:'집행부 회계 자료 열람 거부'},{d:'2024.05',c:'#EF9F27',t:'사업시행인가 신청 지연',n:'설계 변경 요구로 연기'},{d:'2022.06',c:'#3B6D11',t:'조합설립인가 취득',n:''}]},
+  { id:'노5', name:'노량진 5구역 재개발 조합', area:'동작구 노량진동', stage:'사업시행인가', members:'약 750명', chief:'2020년 취임 · 임기 중', score:54, scoreColor:'var(--amber)', scoreLabel:'주의', avatarBg:'var(--amber-bg)', avatarColor:'var(--amber)',
+    scores:[{k:'전문성',v:62,c:'#EF9F27'},{k:'투명성',v:55,c:'#EF9F27'},{k:'사업 추진력',v:58,c:'#EF9F27'},{k:'조합원 신뢰',v:60,c:'#EF9F27'}],
+    tl:[{d:'2024.12',c:'#EF9F27',t:'시공사 교체 논의 시작',n:'공사비 협상 결렬, 재입찰 검토'},{d:'2024.07',c:'#3B6D11',t:'사업시행인가 취득',n:'예정 대비 4개월 지연'},{d:'2023.11',c:'#EF9F27',t:'설계 변경 인가 신청',n:''},{d:'2022.08',c:'#3B6D11',t:'시공사 선정 완료',n:'현재 교체 논의 중'}]}
+];
+
+function selectZone(i, btn) {
+  document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const z = zoneData[i];
+  document.getElementById('zone-profile').innerHTML = `
+    <div class="profile-header">
+      <div class="avatar" style="background:${z.avatarBg};color:${z.avatarColor};">${z.id}</div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:600;margin-bottom:3px;">${z.name}</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6;">${z.area} · ${z.stage} · 조합원 ${z.members}<br>현 조합장: ${z.chief}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:10px;color:var(--text2);margin-bottom:2px;">종합 리스크</div>
+        <div style="font-size:28px;font-weight:700;color:${z.scoreColor};">${z.score}</div>
+        <div style="font-size:10px;color:${z.scoreColor};">${z.scoreLabel}</div>
+      </div>
+    </div>
+    <div class="card-title">리스크 세부 점수</div>
+    ${z.scores.map(s=>`<div class="score-bar-row"><div class="score-label">${s.k}</div><div class="score-track"><div class="score-fill" style="width:${s.v}%;background:${s.c};"></div></div><div class="score-val" style="color:${s.c};">${s.v}</div></div>`).join('')}`;
+  document.getElementById('zone-timeline').innerHTML = `<div class="card-title">주요 이력</div>` +
+    z.tl.map(t=>`<div class="tl-item"><div class="tl-date">${t.d}</div><div class="tl-dot" style="background:${t.c};"></div><div><div class="tl-title">${t.t}</div>${t.n?`<div class="tl-note">${t.n}</div>`:''}</div></div>`).join('');
+}
+
+// AI 분석
+function showAIPanel(tab) {
+  const el = document.getElementById('ai-' + tab);
+  el.innerHTML = `
+    <div class="ai-panel">
+      <div class="ai-head">
+        <div class="ai-title">AI 에이전트 분석 중...</div>
+        <span class="ai-close" onclick="closeAI('${tab}')">닫기</span>
+      </div>
+      <div class="ai-resp" id="resp-${tab}"><div class="tdots"><span></span><span></span><span></span></div></div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="inp-${tab}" placeholder="추가로 궁금한 점을 물어보세요..." onkeydown="if(event.key==='Enter')followUp('${tab}')"/>
+        <button class="ai-send" id="send-${tab}" onclick="followUp('${tab}')">전송</button>
+      </div>
+    </div>`;
+}
+
+function closeAI(tab) {
+  document.getElementById('ai-' + tab).innerHTML = '';
+  history[tab] = [];
+}
+
+async function triggerAI(tab, prompt) {
+  if (busy) return;
+  busy = true;
+  document.querySelectorAll('.ask-btn').forEach(b => b.classList.add('loading'));
+  history[tab] = [];
+  history[tab].push({ role: 'user', content: prompt });
+  showAIPanel(tab);
+  await streamResponse(tab);
+  busy = false;
+  document.querySelectorAll('.ask-btn').forEach(b => b.classList.remove('loading'));
+}
+
+async function followUp(tab) {
+  const inp = document.getElementById('inp-' + tab);
+  const txt = inp.value.trim();
+  if (!txt || busy) return;
+  busy = true;
+  inp.value = '';
+  document.getElementById('send-' + tab).disabled = true;
+  history[tab].push({ role: 'user', content: txt });
+  const resp = document.getElementById('resp-' + tab);
+  resp.innerHTML = '<div class="tdots"><span></span><span></span><span></span></div>';
+  await streamResponse(tab);
+  busy = false;
+  document.getElementById('send-' + tab).disabled = false;
+}
+
+async function streamResponse(tab) {
+  const respEl = document.getElementById('resp-' + tab);
+  try {
+    const response = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM,
+        stream: true,
+        messages: history[tab]
+      })
+    });
+
+    if (!response.ok) throw new Error('API 오류: ' + response.status);
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    respEl.textContent = '';
+    respEl.classList.add('streaming');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const lines = decoder.decode(value).split('\n');
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
+            fullText += parsed.delta.text;
+            respEl.textContent = fullText;
+          }
+        } catch(e) {}
+      }
+    }
+
+    respEl.classList.remove('streaming');
+    history[tab].push({ role: 'assistant', content: fullText });
+
+  } catch (err) {
+    respEl.classList.remove('streaming');
+    respEl.textContent = '오류가 발생했습니다: ' + err.message;
+  }
+}
+
+// 초기화
+calc();
+</script>
+</body>
+</html>
