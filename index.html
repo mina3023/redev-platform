@@ -1,43 +1,10 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>재건축·재개발 AI 플랫폼</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  /* 로그인 화면 */
-  .login-screen { position: fixed; inset: 0; background: #f5f5f0; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-  .login-box { background: #fff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 16px; padding: 36px 32px; width: 360px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-  .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-  .login-logo-dot { width: 10px; height: 10px; border-radius: 50%; background: #185FA5; }
-  .login-logo-text { font-size: 16px; font-weight: 600; color: #1a1a1a; }
-  .login-title { font-size: 20px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
-  .login-sub { font-size: 13px; color: #666660; margin-bottom: 24px; }
-  .login-input { width: 100%; padding: 11px 14px; border: 0.5px solid rgba(0,0,0,0.2); border-radius: 8px; font-size: 14px; color: #1a1a1a; outline: none; margin-bottom: 10px; font-family: inherit; background: #fff; }
-  .login-input:focus { border-color: #185FA5; }
-  .login-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #185FA5; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 4px; transition: background .15s; }
-  .login-btn:hover { background: #0C447C; }
-  .login-btn:disabled { background: #ccc; cursor: not-allowed; }
-  .login-msg { font-size: 12px; margin-top: 10px; text-align: center; min-height: 18px; }
-  .login-err { color: #A32D2D; }
-  .login-ok { color: #3B6D11; }
-  .login-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
-  .login-divider hr { flex: 1; border: none; border-top: 0.5px solid rgba(0,0,0,0.1); }
-  .login-divider span { font-size: 11px; color: #999990; }
-  .login-toggle { text-align: center; font-size: 12px; color: #666660; margin-top: 14px; }
-  .login-toggle a { color: #185FA5; cursor: pointer; text-decoration: none; }
-  .login-toggle a:hover { text-decoration: underline; }
-  .grade-tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
-  .grade-free { background: #f0f0ec; color: #666660; }
-  .grade-pro { background: #E6F1FB; color: #0C447C; }
-  .grade-investor { background: #FAEEDA; color: #633806; }
-  .grade-business { background: #EEEDFE; color: #26215C; }
-  .locked-overlay { position: relative; }
-  .locked-overlay::after { content: '🔒 구독자 이상 열람 가능'; position: absolute; inset: 0; background: rgba(245,245,240,0.92); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #666660; border-radius: 8px; }
-  .locked-tab { opacity: .45; pointer-events: none; }
-</style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #f5f5f0;
@@ -237,24 +204,6 @@
 </style>
 </head>
 <body>
-<!-- 로그인 화면 -->
-<div class="login-screen" id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo"><div class="login-logo-dot"></div><div class="login-logo-text">재개발 AI 플랫폼</div></div>
-    <div class="login-title" id="loginTitle">로그인</div>
-    <div class="login-sub" id="loginSub">계정에 로그인하여 서비스를 이용하세요</div>
-    <input class="login-input" id="loginEmail" type="email" placeholder="이메일 주소" />
-    <input class="login-input" id="loginPassword" type="password" placeholder="비밀번호" />
-    <div id="loginNameWrap" style="display:none;"><input class="login-input" id="loginName" type="text" placeholder="이름 (회원가입 시)" /></div>
-    <button class="login-btn" id="loginBtn" onclick="doLogin()">로그인</button>
-    <div class="login-msg" id="loginMsg"></div>
-    <div class="login-divider"><hr><span>또는</span><hr></div>
-    <div class="login-toggle" id="loginToggle">
-      계정이 없으신가요? <a onclick="toggleMode()">회원가입</a>
-    </div>
-  </div>
-</div>
-
 <div class="app">
 
   <!-- 상단 바 -->
@@ -268,7 +217,6 @@
       <span class="pill pill-green">에이전트 4개 활성</span>
       <span class="pill pill-amber">리스크 감지 2건</span>
       <span class="pill pill-blue">프로젝트 5건</span>
-      <div id="userInfo" style="display:flex;align-items:center;gap:6px;margin-left:8px;"></div>
     </div>
   </div>
 
@@ -689,143 +637,8 @@ async function streamResponse(tab) {
   }
 }
 
-// ===== Supabase 로그인 시스템 =====
-let sbClient = null;
-let currentUser = null;
-let currentRole = 'free';
-let isSignup = false;
-
-async function initSupabase() {
-  try {
-    const res = await fetch('/api/supabase-config');
-    if (res.ok) {
-      const cfg = await res.json();
-      sbClient = window.supabase.createClient(cfg.url, cfg.key);
-    } else {
-      showApp('free');
-      return;
-    }
-
-    // 기존 세션 확인
-    const { data: { session } } = await sbClient.auth.getSession();
-    if (session) {
-      await onLogin(session.user);
-    }
-
-    // 인증 상태 변경 감지
-    sbClient.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        await onLogin(session.user);
-      } else if (event === 'SIGNED_OUT') {
-        onLogout();
-      }
-    });
-  } catch(e) {
-    console.log('Supabase 초기화 오류:', e);
-    showApp('free');
-  }
-}
-
-async function onLogin(user) {
-  currentUser = user;
-  try {
-    const { data } = await sbClient.from('profiles').select('role').eq('id', user.id).single();
-    currentRole = data?.role || 'free';
-  } catch(e) {
-    currentRole = 'free';
-  }
-  showApp(currentRole);
-}
-
-function onLogout() {
-  currentUser = null;
-  currentRole = 'free';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.querySelector('.app').style.display = 'none';
-}
-
-function showApp(role) {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.querySelector('.app').style.display = 'flex';
-
-  const gradeLabels = { free:'일반', pro:'구독자', investor:'투자자', business:'사업자' };
-  const gradeClasses = { free:'grade-free', pro:'grade-pro', investor:'grade-investor', business:'grade-business' };
-  const userInfo = document.getElementById('userInfo');
-  if (userInfo && currentUser) {
-    userInfo.innerHTML = `<span class="grade-tag ${gradeClasses[role]}">${gradeLabels[role]}</span> <span style="font-size:11px;color:var(--text2);">${currentUser.email}</span> <button onclick="doLogout()" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;margin-left:6px;">로그아웃</button>`;
-  }
-
-  applyGradeLock(role);
-}
-
-function applyGradeLock(role) {
-  const tabs = document.querySelectorAll('.atab');
-  const panels = document.querySelectorAll('.panel');
-
-  // 투자자 탭 (index 4) — investor 이상만
-  if (role === 'free' || role === 'pro') {
-    tabs[4]?.classList.add('locked-tab');
-    tabs[5]?.classList.add('locked-tab');
-  }
-  // 조합 인텔리전스 탭 (index 5) — business만
-  if (role !== 'business' && role !== 'investor') {
-    tabs[5]?.classList.add('locked-tab');
-  }
-}
-
-async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const btn = document.getElementById('loginBtn');
-  const msg = document.getElementById('loginMsg');
-
-  if (!email || !password) { msg.textContent = '이메일과 비밀번호를 입력해주세요.'; msg.className = 'login-msg login-err'; return; }
-
-  btn.disabled = true;
-  btn.textContent = isSignup ? '가입 중...' : '로그인 중...';
-  msg.textContent = '';
-
-  try {
-    if (isSignup) {
-      const { error } = await sbClient.auth.signUp({ email, password });
-      if (error) throw error;
-      msg.textContent = '가입 완료! 이메일 인증 후 로그인하세요. (인증 없이 바로 로그인 시도도 가능)';
-      msg.className = 'login-msg login-ok';
-    } else {
-      const { error } = await sbClient.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-    }
-  } catch(e) {
-    const errMap = {
-      'Invalid login credentials': '이메일 또는 비밀번호가 올바르지 않습니다.',
-      'Email not confirmed': '이메일 인증이 필요합니다. 메일함을 확인하세요.',
-      'User already registered': '이미 가입된 이메일입니다.',
-    };
-    msg.textContent = errMap[e.message] || e.message;
-    msg.className = 'login-msg login-err';
-  }
-
-  btn.disabled = false;
-  btn.textContent = isSignup ? '회원가입' : '로그인';
-}
-
-function toggleMode() {
-  isSignup = !isSignup;
-  document.getElementById('loginTitle').textContent = isSignup ? '회원가입' : '로그인';
-  document.getElementById('loginSub').textContent = isSignup ? '새 계정을 만들어 서비스를 이용하세요' : '계정에 로그인하여 서비스를 이용하세요';
-  document.getElementById('loginBtn').textContent = isSignup ? '회원가입' : '로그인';
-  document.getElementById('loginToggle').innerHTML = isSignup
-    ? '이미 계정이 있으신가요? <a onclick="toggleMode()">로그인</a>'
-    : '계정이 없으신가요? <a onclick="toggleMode()">회원가입</a>';
-  document.getElementById('loginNameWrap').style.display = isSignup ? 'block' : 'none';
-}
-
-async function doLogout() {
-  await sbClient.auth.signOut();
-}
-
 // 초기화
 calc();
-initSupabase();</script>
+</script>
 </body>
 </html>
