@@ -427,7 +427,81 @@
 
 </div>
 
-<script>
+// Supabase 데이터 로딩
+const SUPABASE_URL = 'https://jhmhocgzjstwrstjwopm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_UkUrQN6HO03ntKd8aI-hpg_qgTseYLG'; // Publishable key 전체
+
+async function loadSupabaseData() {
+  try {
+    // 아파트 실거래가 최근 10건
+    const aptRes = await fetch(`${SUPABASE_URL}/rest/v1/apartment_transactions?order=collected_at.desc&limit=10`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const aptData = await aptRes.json();
+
+    // 서울시 정비사업 최근 10건
+    const redevRes = await fetch(`${SUPABASE_URL}/rest/v1/redev_projects_seoul?order=collected_at.desc&limit=10`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const redevData = await redevRes.json();
+
+    // 경제지표 최근 데이터
+    const econRes = await fetch(`${SUPABASE_URL}/rest/v1/economic_indicators?order=collected_at.desc&limit=10`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const econData = await econRes.json();
+
+    // 아파트 실거래가 뉴스 영역 업데이트
+    if (aptData.length > 0) {
+      const newsEl = document.querySelector('#panel-market .card:nth-child(4) .card-title');
+      if (newsEl) {
+        const parent = newsEl.parentElement;
+        const existingNews = parent.querySelectorAll('.news-item');
+        existingNews.forEach(n => n.remove());
+        aptData.slice(0, 3).forEach(apt => {
+          const div = document.createElement('div');
+          div.className = 'news-item';
+          div.innerHTML = `<div class="ndot" style="background:#185FA5;"></div><div>
+            <div class="ntext">${apt.apt_name || '아파트'} (${apt.dong_name || ''}) — ${apt.area_sqm || ''}㎡ · ${apt.floor || ''}층 · ${apt.deal_amount ? Math.round(apt.deal_amount/100) + '억' : '-'}</div>
+            <div class="ntime">${apt.deal_year || ''}.${apt.deal_month || ''}.${apt.deal_day || ''} 거래</div>
+          </div>`;
+          parent.appendChild(div);
+        });
+      }
+    }
+
+    // 정비사업 프로젝트 업데이트
+    if (redevData.length > 0) {
+      const projCard = document.querySelector('#panel-project .card:nth-child(2)');
+      if (projCard) {
+        const title = projCard.querySelector('.card-title').outerHTML;
+        projCard.innerHTML = title + redevData.slice(0, 5).map(p => `
+          <div class="proj-row">
+            <div class="proj-name" style="font-size:11px;">${(p.project_name || '').slice(0, 8)}</div>
+            <span class="pill pill-blue" style="flex-shrink:0;font-size:10px;">${p.stage || '-'}</span>
+            <div class="proj-bar"><div class="proj-fill" style="width:50%;"></div></div>
+            <div class="proj-pct">-</div>
+            <span class="pill pill-gray">${p.gu_name || ''}</span>
+          </div>`).join('');
+      }
+    }
+
+    // 기준금리 업데이트
+    if (econData.length > 0) {
+      const latest = econData[0];
+      const rateEl = document.querySelector('#panel-investor .metric:first-child .metric-val');
+      if (rateEl && latest.data_value) {
+        rateEl.innerHTML = latest.data_value + '<span style="font-size:12px;font-weight:400;">%</span>';
+      }
+    }
+
+  } catch(e) {
+    console.log('Supabase 로딩 오류:', e);
+  }
+}
+
+// 페이지 로드 시 실행
+window.addEventListener('DOMContentLoaded', loadSupabaseData);
 const SYSTEM = `당신은 한국 재건축·재개발 전문 AI 어드바이저입니다.
 
 [원칙]
