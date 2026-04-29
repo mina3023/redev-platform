@@ -35,7 +35,6 @@
   }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
 
-  /* 레이아웃 */
   .app { display: flex; flex-direction: column; min-height: 100vh; }
   .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
   .logo { display: flex; align-items: center; gap: 10px; }
@@ -53,25 +52,21 @@
   .pill-gold { background: var(--gold-bg); color: var(--gold); }
   .pill-teal { background: var(--teal-bg); color: var(--teal); }
 
-  /* 에이전트 탭 */
   .agent-tabs { display: flex; background: var(--surface); border-bottom: 0.5px solid var(--border); }
   .atab { flex: 1; padding: 10px 6px; font-size: 11px; font-weight: 500; text-align: center; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; transition: all .15s; line-height: 1.4; }
   .atab:hover { background: var(--surface2); }
   .atab.active { color: var(--blue); border-bottom-color: var(--blue); }
   .atab-icon { font-size: 13px; display: block; margin-bottom: 2px; }
 
-  /* 패널 */
   .panel { display: none; flex-direction: column; gap: 12px; padding: 14px; max-width: 900px; margin: 0 auto; width: 100%; }
   .panel.active { display: flex; }
 
-  /* 카드 */
   .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; }
   .card-title { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
   .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 
-  /* 메트릭 카드 */
   .metric { background: var(--surface2); border-radius: var(--radius); padding: 12px 14px; }
   .metric-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
   .metric-val { font-size: 22px; font-weight: 600; line-height: 1; }
@@ -79,35 +74,30 @@
   .up { color: var(--green); }
   .dn { color: var(--red); }
 
-  /* 바 차트 */
   .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
   .bar-label { font-size: 12px; width: 80px; flex-shrink: 0; }
   .bar-track { flex: 1; height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
   .bar-fill { height: 100%; border-radius: 4px; }
   .bar-val { font-size: 11px; color: var(--text2); width: 36px; text-align: right; flex-shrink: 0; }
 
-  /* 신호 행 */
   .signal-row { display: flex; align-items: center; padding: 6px 0; border-bottom: 0.5px solid var(--border); }
   .signal-row:last-child { border-bottom: none; }
   .signal-name { font-size: 12px; flex: 1; }
   .signal-bar { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin: 0 10px; }
   .signal-val { font-size: 11px; font-weight: 500; width: 28px; text-align: right; }
 
-  /* 뉴스 */
   .news-item { display: flex; gap: 8px; align-items: flex-start; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
   .news-item:last-child { border-bottom: none; }
   .ndot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
   .ntext { font-size: 12px; line-height: 1.5; }
   .ntime { font-size: 10px; color: var(--text3); margin-top: 2px; }
 
-  /* 리스크 아이템 */
   .risk-item { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: var(--radius); margin-bottom: 7px; border: 0.5px solid var(--border); }
   .risk-item:last-child { margin-bottom: 0; }
   .rdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
   .rtitle { font-size: 12px; font-weight: 600; line-height: 1.3; }
   .rdesc { font-size: 11px; color: var(--text2); margin-top: 2px; line-height: 1.5; }
 
-  /* 프로젝트 행 */
   .proj-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
   .proj-row:last-child { border-bottom: none; }
   .proj-name { font-size: 12px; font-weight: 500; width: 80px; flex-shrink: 0; }
@@ -115,7 +105,6 @@
   .proj-fill { height: 100%; border-radius: 3px; background: var(--blue); }
   .proj-pct { font-size: 11px; color: var(--text2); width: 30px; text-align: right; flex-shrink: 0; }
 
-  /* 단계 추적 */
   .step-track { display: flex; align-items: center; margin: 10px 0 14px; }
   .snode { display: flex; flex-direction: column; align-items: center; flex: 1; }
   .scirc { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 600; border: 1.5px solid var(--border2); z-index: 1; }
@@ -126,20 +115,17 @@
   .sline { flex: 1; height: 1.5px; background: var(--border); margin-top: -12px; }
   .sline.done { background: var(--blue); }
 
-  /* 법령 */
   .law-item { padding: 10px 12px; border-radius: var(--radius); border: 0.5px solid var(--border); margin-bottom: 7px; }
   .law-item:last-child { margin-bottom: 0; }
   .law-title { font-size: 12px; font-weight: 600; }
   .law-meta { font-size: 10px; color: var(--text2); margin-top: 2px; }
   .law-tag { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 8px; background: var(--blue-bg); color: var(--blue-text); margin: 3px 3px 0 0; }
 
-  /* AI 분석 버튼 */
   .ask-btn { font-size: 12px; padding: 9px 14px; border-radius: var(--radius); border: 0.5px solid var(--blue); background: var(--surface); color: var(--blue); cursor: pointer; width: 100%; text-align: left; transition: background .12s; margin-bottom: 7px; display: flex; align-items: center; justify-content: space-between; }
   .ask-btn:hover { background: var(--blue-bg); }
   .ask-btn:last-child { margin-bottom: 0; }
   .ask-btn.loading { opacity: .6; cursor: not-allowed; border-color: var(--border); color: var(--text2); }
 
-  /* AI 응답 패널 */
   .ai-panel { background: var(--surface2); border-radius: var(--radius-lg); border: 0.5px solid var(--border); overflow: hidden; margin-top: 4px; }
   .ai-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 0.5px solid var(--border); background: var(--surface); }
   .ai-title { font-size: 12px; font-weight: 600; }
@@ -160,7 +146,6 @@
   .tdots span:nth-child(3) { animation-delay: .4s; }
   @keyframes td { 0%,80%,100%{opacity:.2}40%{opacity:1} }
 
-  /* 투자자 섹션 */
   .slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .slider-label { font-size: 12px; width: 100px; flex-shrink: 0; }
   .slider-val { font-size: 12px; font-weight: 600; width: 70px; text-align: right; flex-shrink: 0; }
@@ -168,7 +153,6 @@
   .result-big { font-size: 26px; font-weight: 700; line-height: 1; }
   .result-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
 
-  /* 조합 프로필 */
   .zone-btn { font-size: 11px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid var(--border2); background: var(--surface); color: var(--text2); cursor: pointer; transition: all .15s; }
   .zone-btn:hover { background: var(--surface2); }
   .zone-btn.active { background: var(--amber-bg); border-color: #BA7517; color: var(--amber); font-weight: 500; }
@@ -188,10 +172,8 @@
   .tl-title { font-size: 12px; font-weight: 500; line-height: 1.4; }
   .tl-note { font-size: 11px; color: var(--text2); margin-top: 1px; }
 
-  /* 면책 */
   .disclaimer { background: var(--amber-bg); border: 0.5px solid #FAC775; border-radius: var(--radius); padding: 10px 13px; font-size: 11px; color: var(--gold); line-height: 1.7; }
 
-  /* 등급 표시 */
   .grade-banner { background: linear-gradient(135deg, #FAEEDA 0%, #E6F1FB 100%); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
   .grade-name { font-size: 13px; font-weight: 600; }
   .grade-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
@@ -206,7 +188,6 @@
 <body>
 <div class="app">
 
-  <!-- 상단 바 -->
   <div class="topbar">
     <div class="logo">
       <div class="logo-dot"></div>
@@ -220,7 +201,6 @@
     </div>
   </div>
 
-  <!-- 에이전트 탭 -->
   <div class="agent-tabs">
     <div class="atab active" onclick="switchTab('market')"><span class="atab-icon">▲</span>시장 흐름<br>에이전트</div>
     <div class="atab" onclick="switchTab('risk')"><span class="atab-icon">⚠</span>리스크 추적<br>에이전트</div>
@@ -252,11 +232,9 @@
       <div class="signal-row"><div class="signal-name">조합 분쟁 지수</div><div class="signal-bar"><div style="height:100%;width:58%;background:#EF9F27;border-radius:3px;"></div></div><div class="signal-val" style="color:var(--amber);">중립</div></div>
       <div class="signal-row"><div class="signal-name">신규 정비구역 지정</div><div class="signal-bar"><div style="height:100%;width:80%;background:#639922;border-radius:3px;"></div></div><div class="signal-val" style="color:var(--green);">긍정</div></div>
     </div>
-    <div class="card">
-      <div class="card-title">최근 뉴스·모니터링</div>
-      <div class="news-item"><div class="ndot" style="background:#E24B4A;"></div><div><div class="ntext">서울시, 재건축 안전진단 기준 완화 추진 — 강남구 노후 단지 대상</div><div class="ntime">2시간 전</div></div></div>
-      <div class="news-item"><div class="ndot" style="background:#EF9F27;"></div><div><div class="ntext">용산 한남3구역 조합원 총회 부결 — 사업 지연 가능성</div><div class="ntime">5시간 전</div></div></div>
-      <div class="news-item"><div class="ndot" style="background:#639922;"></div><div><div class="ntext">노원구 상계동 재건축 사업시행인가 접수 완료</div><div class="ntime">1일 전</div></div></div>
+    <div class="card" id="news-card">
+      <div class="card-title">최근 아파트 실거래가</div>
+      <div class="news-item"><div class="ndot" style="background:#E24B4A;"></div><div><div class="ntext">데이터 로딩 중...</div></div></div>
     </div>
     <div class="card">
       <div class="card-title">AI 에이전트 분석</div>
@@ -293,13 +271,9 @@
       <div class="metric"><div class="metric-label">이번 달 결정 사항</div><div class="metric-val" style="color:var(--amber);">3<span style="font-size:13px;font-weight:400;color:var(--text2);">건</span></div><div class="metric-sub">총회 2 · 인가 1</div></div>
       <div class="metric"><div class="metric-label">평균 진행률</div><div class="metric-val">58<span style="font-size:13px;font-weight:400;color:var(--text2);">%</span></div><div class="metric-sub up">▲ 전월 +4%</div></div>
     </div>
-    <div class="card">
-      <div class="card-title">프로젝트별 현황</div>
-      <div class="proj-row"><div class="proj-name">강동 A구역</div><span class="pill pill-amber" style="flex-shrink:0;font-size:10px;">조합설립인가</span><div class="proj-bar"><div class="proj-fill" style="width:28%;"></div></div><div class="proj-pct">28%</div><span class="pill pill-red">위험</span></div>
-      <div class="proj-row"><div class="proj-name">마포 B구역</div><span class="pill pill-amber" style="flex-shrink:0;font-size:10px;">사업시행인가</span><div class="proj-bar"><div class="proj-fill" style="width:52%;"></div></div><div class="proj-pct">52%</div><span class="pill pill-red">위험</span></div>
-      <div class="proj-row"><div class="proj-name">성동 C구역</div><span class="pill pill-blue" style="flex-shrink:0;font-size:10px;">관리처분인가</span><div class="proj-bar"><div class="proj-fill" style="width:68%;"></div></div><div class="proj-pct">68%</div><span class="pill pill-amber">주의</span></div>
-      <div class="proj-row"><div class="proj-name">노원 D구역</div><span class="pill pill-blue" style="flex-shrink:0;font-size:10px;">이주·철거</span><div class="proj-bar"><div class="proj-fill" style="width:75%;"></div></div><div class="proj-pct">75%</div><span class="pill pill-amber">주의</span></div>
-      <div class="proj-row"><div class="proj-name">수원 E구역</div><span class="pill pill-green" style="flex-shrink:0;font-size:10px;">착공</span><div class="proj-bar"><div class="proj-fill" style="width:88%;"></div></div><div class="proj-pct">88%</div><span class="pill pill-green">양호</span></div>
+    <div class="card" id="redev-projects-card">
+      <div class="card-title">서울시 정비사업 현황</div>
+      <div class="proj-row"><div class="proj-name" style="color:var(--text2);">데이터 로딩 중...</div></div>
     </div>
     <div class="card">
       <div class="card-title">마포 B구역 — 단계 상세</div>
@@ -350,7 +324,7 @@
       <span class="pill pill-gold">Investor Grade</span>
     </div>
     <div class="g4">
-      <div class="metric"><div class="metric-label">기준금리</div><div class="metric-val" style="color:var(--amber);">3.5<span style="font-size:12px;font-weight:400;">%</span></div><div class="metric-sub dn">▼ 0.25%p 인하</div></div>
+      <div class="metric"><div class="metric-label">기준금리</div><div class="metric-val" id="econ-rate" style="color:var(--amber);">-<span style="font-size:12px;font-weight:400;">%</span></div><div class="metric-sub dn">한국은행 기준</div></div>
       <div class="metric"><div class="metric-label">대출 가능 금리</div><div class="metric-val">4.8<span style="font-size:12px;font-weight:400;color:var(--text2);">%</span></div><div class="metric-sub">주담대 기준</div></div>
       <div class="metric"><div class="metric-label">재건축부담금</div><div class="metric-val">免<span style="font-size:12px;font-weight:400;color:var(--text2);"> 2026</span></div><div class="metric-sub up">▲ 면제 연장</div></div>
       <div class="metric"><div class="metric-label">평균 사업 기간</div><div class="metric-val">11<span style="font-size:12px;font-weight:400;color:var(--text2);">년</span></div><div class="metric-sub dn">▼ 지연 증가</div></div>
@@ -427,55 +401,46 @@
 
 </div>
 
-// Supabase 데이터 로딩
+<script>
+// ===== Supabase 데이터 로딩 =====
 const SUPABASE_URL = 'https://jhmhocgzjstwrstjwopm.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_UkUrQN6HO03ntKd8aI-hpg_qgTseYLG'; // Publishable key 전체
+const SUPABASE_KEY = 'sb_publishable_UkUrQN6HO03ntKd8aI-hpg_qgTseYLG';
 
 async function loadSupabaseData() {
   try {
+    const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
+
     // 아파트 실거래가 최근 10건
-    const aptRes = await fetch(`${SUPABASE_URL}/rest/v1/apartment_transactions?order=collected_at.desc&limit=10`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
+    const aptRes = await fetch(`${SUPABASE_URL}/rest/v1/apartment_transactions?order=collected_at.desc&limit=10`, { headers });
     const aptData = await aptRes.json();
 
     // 서울시 정비사업 최근 10건
-    const redevRes = await fetch(`${SUPABASE_URL}/rest/v1/redev_projects_seoul?order=collected_at.desc&limit=10`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
+    const redevRes = await fetch(`${SUPABASE_URL}/rest/v1/redev_projects_seoul?order=collected_at.desc&limit=10`, { headers });
     const redevData = await redevRes.json();
 
-    // 경제지표 최근 데이터
-    const econRes = await fetch(`${SUPABASE_URL}/rest/v1/economic_indicators?order=collected_at.desc&limit=10`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
+    // 경제지표
+    const econRes = await fetch(`${SUPABASE_URL}/rest/v1/economic_indicators?order=collected_at.desc&limit=5`, { headers });
     const econData = await econRes.json();
 
-    // 아파트 실거래가 뉴스 영역 업데이트
-    if (aptData.length > 0) {
-      const newsEl = document.querySelector('#panel-market .card:nth-child(4) .card-title');
-      if (newsEl) {
-        const parent = newsEl.parentElement;
-        const existingNews = parent.querySelectorAll('.news-item');
-        existingNews.forEach(n => n.remove());
-        aptData.slice(0, 3).forEach(apt => {
-          const div = document.createElement('div');
-          div.className = 'news-item';
-          div.innerHTML = `<div class="ndot" style="background:#185FA5;"></div><div>
-            <div class="ntext">${apt.apt_name || '아파트'} (${apt.dong_name || ''}) — ${apt.area_sqm || ''}㎡ · ${apt.floor || ''}층 · ${apt.deal_amount ? Math.round(apt.deal_amount/100) + '억' : '-'}</div>
-            <div class="ntime">${apt.deal_year || ''}.${apt.deal_month || ''}.${apt.deal_day || ''} 거래</div>
-          </div>`;
-          parent.appendChild(div);
-        });
-      }
+    // 아파트 실거래가 카드 업데이트
+    const newsCard = document.getElementById('news-card');
+    if (newsCard && Array.isArray(aptData) && aptData.length > 0) {
+      newsCard.innerHTML = '<div class="card-title">최근 아파트 실거래가</div>' +
+        aptData.slice(0, 5).map(apt => `
+          <div class="news-item">
+            <div class="ndot" style="background:#185FA5;"></div>
+            <div>
+              <div class="ntext">${apt.apt_name || '아파트'} (${apt.dong_name || ''}) — ${apt.area_sqm || ''}㎡ · ${apt.floor || ''}층 · ${apt.deal_amount ? Math.round(apt.deal_amount / 100) + '억' : '-'}</div>
+              <div class="ntime">${apt.deal_year || ''}.${String(apt.deal_month || '').padStart(2,'0')}.${String(apt.deal_day || '').padStart(2,'0')} 거래</div>
+            </div>
+          </div>`).join('');
     }
 
-    // 정비사업 프로젝트 업데이트
-    if (redevData.length > 0) {
-      const projCard = document.querySelector('#panel-project .card:nth-child(2)');
-      if (projCard) {
-        const title = projCard.querySelector('.card-title').outerHTML;
-        projCard.innerHTML = title + redevData.slice(0, 5).map(p => `
+    // 정비사업 카드 업데이트
+    const projCard = document.getElementById('redev-projects-card');
+    if (projCard && Array.isArray(redevData) && redevData.length > 0) {
+      projCard.innerHTML = '<div class="card-title">서울시 정비사업 현황 (실시간)</div>' +
+        redevData.slice(0, 5).map(p => `
           <div class="proj-row">
             <div class="proj-name" style="font-size:11px;">${(p.project_name || '').slice(0, 8)}</div>
             <span class="pill pill-blue" style="flex-shrink:0;font-size:10px;">${p.stage || '-'}</span>
@@ -483,13 +448,12 @@ async function loadSupabaseData() {
             <div class="proj-pct">-</div>
             <span class="pill pill-gray">${p.gu_name || ''}</span>
           </div>`).join('');
-      }
     }
 
     // 기준금리 업데이트
-    if (econData.length > 0) {
+    if (Array.isArray(econData) && econData.length > 0) {
       const latest = econData[0];
-      const rateEl = document.querySelector('#panel-investor .metric:first-child .metric-val');
+      const rateEl = document.getElementById('econ-rate');
       if (rateEl && latest.data_value) {
         rateEl.innerHTML = latest.data_value + '<span style="font-size:12px;font-weight:400;">%</span>';
       }
@@ -500,8 +464,9 @@ async function loadSupabaseData() {
   }
 }
 
-// 페이지 로드 시 실행
 window.addEventListener('DOMContentLoaded', loadSupabaseData);
+
+// ===== AI 시스템 =====
 const SYSTEM = `당신은 한국 재건축·재개발 전문 AI 어드바이저입니다.
 
 [원칙]
@@ -523,7 +488,6 @@ function switchTab(name) {
   document.getElementById('panel-' + name).classList.add('active');
 }
 
-// 수익률 계산기
 function fmt만(v) {
   v = Math.round(v);
   if (v >= 10000) {
@@ -576,7 +540,6 @@ function calc() {
   document.getElementById('r-reason').textContent = reason;
 }
 
-// 조합 구역 전환
 const zoneData = [
   { id:'북2', name:'북아현 2구역 재개발 조합', area:'서대문구 북아현동', stage:'사업시행인가', members:'약 1,200명', chief:'2021년 3월 취임 · 2024년 재선', score:78, scoreColor:'var(--red)', scoreLabel:'고위험', avatarBg:'var(--red-bg)', avatarColor:'var(--red)',
     scores:[{k:'전문성',v:35,c:'#E24B4A'},{k:'투명성',v:28,c:'#E24B4A'},{k:'사업 추진력',v:45,c:'#EF9F27'},{k:'조합원 신뢰',v:32,c:'#E24B4A'}],
@@ -612,7 +575,6 @@ function selectZone(i, btn) {
     z.tl.map(t=>`<div class="tl-item"><div class="tl-date">${t.d}</div><div class="tl-dot" style="background:${t.c};"></div><div><div class="tl-title">${t.t}</div>${t.n?`<div class="tl-note">${t.n}</div>`:''}</div></div>`).join('');
 }
 
-// AI 분석
 function showAIPanel(tab) {
   const el = document.getElementById('ai-' + tab);
   el.innerHTML = `
@@ -711,7 +673,6 @@ async function streamResponse(tab) {
   }
 }
 
-// 초기화
 calc();
 </script>
 </body>
