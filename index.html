@@ -703,8 +703,44 @@ function closeProject() {
 
 function triggerProjectAI() {
   if (!curProject) return;
-  const s = document.getElementById('sp-stage-badge').textContent;
-  triggerAI('search', `서울 ${curProject.gu} ${curProject.name} 재건축·재개발 구역을 분석해줘. 현재 단계는 "${s}"야. 이 구역의 투자 가능성, 예상 사업 기간, 주요 리스크를 분석해줘.`);
+  const stage = document.getElementById('sp-stage-badge').textContent;
+
+  // 타임라인 데이터 수집 (이미 DOM에 렌더링된 정보 활용)
+  const nodes = document.querySelectorAll('#tl-track .tl-node');
+  let timelineText = '';
+  if (nodes.length > 0) {
+    const entries = [];
+    nodes.forEach(n => {
+      const period = n.querySelector('.tl-period')?.textContent?.trim() || '';
+      const st     = n.querySelector('.tl-stage')?.textContent?.trim()  || '';
+      if (period && st) entries.push(`${period}: ${st}`);
+    });
+    if (entries.length > 0) {
+      timelineText = `\n\n[실제 사업 이력 — ${entries.length}개 기간]\n` + entries.join(' → ');
+
+      // 정체 기간 자동 감지
+      const stagnant = [];
+      for (let i = 1; i < entries.length; i++) {
+        const prev = entries[i-1].split(': ')[1];
+        const curr = entries[i].split(': ')[1];
+        if (prev && curr && prev === curr) stagnant.push(entries[i].split(': ')[0]);
+      }
+      if (stagnant.length > 0)
+        timelineText += `\n정체 감지 기간: ${stagnant.join(', ')} (이전 기간과 동일 단계 유지)`;
+    }
+  }
+
+  const prompt = `서울 ${curProject.gu} ${curProject.name} 재건축·재개발 구역을 분석해 주세요.${timelineText}
+
+현재 단계: ${stage}
+
+위 실제 사업 이력 데이터를 근거로 다음을 분석해 주세요.
+1. 사업 진행 속도 평가 (정체 구간이 있다면 원인 추정)
+2. 현재 단계에서 다음 단계까지 예상 소요 기간
+3. 투자 관점에서의 기회와 주요 리스크
+4. 지금 시점 투자자에게 권고할 행동`;
+
+  triggerAI('search', prompt);
 }
 
 /* ════════════════════════════════
@@ -841,7 +877,21 @@ function calc() {
    AI 스트리밍
 ════════════════════════════════ */
 const SYS = `당신은 한국 재건축·재개발 전문 AI 어드바이저입니다.
-[원칙] 1.법령 근거 명시 2.구체적 수치 포함 3.실질적 액션 아이템 4.불확실한 내용엔 "※ 확인 필요" 5.400~600자 핵심 위주 6.마지막엔 "※ 이 분석은 참고용이며 전문가 상담을 권장합니다."`;
+
+[응답 형식 규칙 — 반드시 준수]
+- 마크다운 문법(**, __, #, -, * 등) 절대 사용 금지. 일반 텍스트로만 작성.
+- 오타, 띄어쓰기 오류 없이 완전한 문장으로 작성.
+- 숫자와 단위 사이 띄어쓰기 정확히 (예: 3년, 75%, 1억 원).
+- 응답은 500자 내외로 핵심만 간결하게.
+- 문단 구분은 빈 줄 하나로만.
+
+[분석 원칙]
+1. 관련 법령(도시정비법 등) 조문 번호 또는 내용 근거 명시
+2. 구체적 수치와 기간 포함
+3. 실질적인 액션 아이템 제시
+4. 불확실한 내용은 "확인 필요:" 앞에 붙여 표시
+5. 마지막 문장: "이 분석은 참고용이며, 중요한 결정 전에는 반드시 전문가 상담을 권장합니다."`;
+
 
 const HIS = {};
 let busy = false;
