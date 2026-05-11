@@ -28,80 +28,102 @@ export default async function handler(req, res) {
     const results = {};
 
     // ── 1. 기준금리
-    // 통계표: 722Y001 (한국은행 기준금리)
-    // 주기: MM(월), 항목코드: 0101000
+    // KeyStatisticList에서 한국은행 기준금리 직접 조회 (가장 안정적)
     if (type === 'rate' || type === 'all') {
-      const url = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/24/722Y001/MM/${startYM}/${endYM}/0101000`;
+      // KeyStatisticList: 주요 경제지표 목록 전체 가져오기
+      const url = `${BASE}/KeyStatisticList/${API_KEY}/json/kr/1/100`;
       const r = await fetch(url);
-      const text = await r.text();
-      let d;
-      try { d = JSON.parse(text); } catch(e) { d = {}; }
+      const d = await r.json();
+      const rows = d?.KeyStatisticList?.row || [];
 
-      const rows = d?.StatisticSearch?.row || [];
+      // "기준금리" 항목 찾기
+      const rateItem = rows.find(r =>
+        r.KEYSTAT_NAME?.includes('기준금리') ||
+        r.KEYSTAT_NAME?.includes('Base Rate')
+      );
 
-      if (rows.length === 0) {
-        // 데이터 없으면 KeyStatisticList로 fallback (기준금리 key=1000000)
-        const url2 = `${BASE}/KeyStatisticList/${API_KEY}/json/kr/1/1/1000000`;
-        const r2 = await fetch(url2);
-        const d2 = await r2.json();
-        const item = d2?.KeyStatisticList?.row?.[0];
-        results.rate = {
-          current: parseFloat(item?.DATA_VALUE || 2.75),
-          prev: parseFloat(item?.DATA_VALUE || 2.75),
-          date: item?.TIME || endYM,
-          history: Array.from({length:12},(_,i)=>{
-            const d=new Date(now);d.setMonth(d.getMonth()-11+i);
-            return {date:`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`,value:2.75};
-          }),
-        };
-      } else {
-        const latest = rows[rows.length - 1];
-        const prev   = rows.length >= 2 ? rows[rows.length - 2] : rows[0];
-        results.rate = {
-          current: parseFloat(latest?.DATA_VALUE || 0),
-          prev:    parseFloat(prev?.DATA_VALUE || 0),
-          date:    latest?.TIME || '',
-          history: rows.slice(-12).map(r => ({
-            date: r.TIME,
-            value: parseFloat(r.DATA_VALUE || 0),
-          })),
-        };
+      const currentRate = parseFloat(rateItem?.DATA_VALUE || 2.75);
+      const rateDate = rateItem?.TIME || endYM;
+
+      // 월별 히스토리: StatisticSearch로 기준금리 추이 조회
+      // 통계표 722Y001, 항목 0101000 (한국은행 기준금리)
+      let history = [];
+      try {
+        const hUrl = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/36/722Y001/DD/${startYM}01/${endYM}31/0101000`;
+        const hR = await fetch(hUrl);
+        const hD = await hR.json();
+        const hRows = hD?.StatisticSearch?.row || [];
+
+        // 일별 데이터를 월별로 집계 (월 마지막 값 사용)
+        const monthMap = {};
+        hRows.forEach(row => {
+          const ym = row.TIME?.slice(0,6);
+          if (ym) monthMap[ym] = parseFloat(row.DATA_VALUE || 0);
+        });
+        history = Object.entries(monthMap)
+          .sort((a,b) => a[0].localeCompare(b[0]))
+          .slice(-12)
+          .map(([date, value]) => ({ date, value }));
+      } catch(e) {
+        // 히스토리 실패해도 현재값은 표시
+        history = [{ date: rateDate, value: currentRate }];
       }
+
+      results.rate = {
+        current: currentRate,
+        prev: history.length >= 2 ? history[history.length-2].value : currentRate,
+        date: rateDate,
+        history,
+      };
     }
 
-    // ── 2. 생산자물가지수 (PPI)
-    // 통계표: 404Y014 (생산자물가지수), 항목: AA (전체)
+    // ── 2. 생산자물가지수 (PPI) - KeyStatisticList에서 조회
     if (type === 'ppi' || type === 'all') {
-      const url = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/24/404Y014/MM/${startYM}/${endYM}/AA`;
-      const r = await fetch(url);
-      const text = await r.text();
-      let d;
-      try { d = JSON.parse(text); } catch(e) { d = {}; }
+      // KeyStatisticList 전체에서 생산자물가 항목 찾기
+      let ppiItem = null;
+      try {
+        const url = `${BASE}/KeyStatisticList/${API_KEY}/json/kr/1/100`;
+        const r = await fetch(url);
+        const d = await r.json();
+        const rows = d?.KeyStatisticList?.row || [];
+        ppiItem = rows.find(r =>
+          r.KEYSTAT_NAME?.includes('생산자물가') ||
+          r.KEYSTAT_NAME?.includes('Producer Price')
+        );
+      } catch(e) {}
 
-      let rows = d?.StatisticSearch?.row || [];
+      // StatisticSearch로 PPI 히스토리 조회
+      // 통계표: 404Y014 (생산자물가지수 총지수), 항목: AA00
+      let ppiRows = [];
+      const ppiCodes = [
+        { stat: '404Y014', item: 'AA00' },
+        { stat: '404Y014', item: 'AA' },
+        { stat: '404Y001', item: 'P00' },
+        { stat: '404Y001', item: 'PA' },
+      ];
 
-      // AA 안되면 AAAA 시도
-      if (rows.length === 0) {
-        const url2 = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/24/404Y014/MM/${startYM}/${endYM}/AAAA`;
-        const r2 = await fetch(url2);
-        const d2 = await r2.json();
-        rows = d2?.StatisticSearch?.row || [];
+      for (const code of ppiCodes) {
+        try {
+          const url = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/24/${code.stat}/MM/${startYM}/${endYM}/${code.item}`;
+          const r = await fetch(url);
+          const d = await r.json();
+          ppiRows = d?.StatisticSearch?.row || [];
+          if (ppiRows.length > 0) break;
+        } catch(e) {}
       }
 
-      // 그래도 없으면 다른 PPI 코드 시도 (P00)
-      if (rows.length === 0) {
-        const url3 = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/24/404Y001/MM/${startYM}/${endYM}/P00`;
-        const r3 = await fetch(url3);
-        const d3 = await r3.json();
-        rows = d3?.StatisticSearch?.row || [];
-      }
-
-      if (rows.length === 0) {
-        results.ppi = { current: 0, yoy: 0, date: endYM, history: [] };
-      } else {
-        const latest  = rows[rows.length - 1];
-        const prev12  = rows.length >= 13 ? rows[rows.length - 13] : rows[0];
-        const yoy = prev12?.DATA_VALUE
+      if (ppiRows.length === 0 && ppiItem) {
+        // KeyStatisticList에서 현재값만 사용
+        results.ppi = {
+          current: parseFloat(ppiItem.DATA_VALUE || 0),
+          yoy: 0,
+          date: ppiItem.TIME || endYM,
+          history: [],
+        };
+      } else if (ppiRows.length > 0) {
+        const latest  = ppiRows[ppiRows.length - 1];
+        const prev12  = ppiRows.length >= 13 ? ppiRows[ppiRows.length - 13] : ppiRows[0];
+        const yoy = prev12?.DATA_VALUE && parseFloat(prev12.DATA_VALUE) !== 0
           ? Math.round(((parseFloat(latest.DATA_VALUE) - parseFloat(prev12.DATA_VALUE))
               / parseFloat(prev12.DATA_VALUE) * 100) * 10) / 10
           : 0;
@@ -109,11 +131,13 @@ export default async function handler(req, res) {
           current: parseFloat(latest?.DATA_VALUE || 0),
           yoy,
           date: latest?.TIME || '',
-          history: rows.slice(-12).map(r => ({
+          history: ppiRows.slice(-12).map(r => ({
             date: r.TIME,
             value: parseFloat(r.DATA_VALUE || 0),
           })),
         };
+      } else {
+        results.ppi = { current: 0, yoy: 0, date: endYM, history: [] };
       }
     }
 
