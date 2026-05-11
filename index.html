@@ -679,9 +679,39 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
 
   <!-- ══ 단계 관리 ══ -->
   <div id="tab-stage" class="tab-panel">
-    <div class="page-h"><div><h2>단계 관리</h2><p>정비사업 9단계 현황</p></div></div>
-    <div class="card" style="margin-bottom:12px;"><div class="card-h"><div class="card-title">단계별 구역 수</div><span class="bdg bdg-green">실데이터</span></div><div class="cw2" style="height:220px;"><canvas id="stageBarchart" role="img" aria-label="단계별 구역 수">로딩 중</canvas></div></div>
-    <div class="card"><div class="card-h"><div class="card-title">단계별 상세 현황</div></div>
+    <div class="page-h">
+      <div><h2>단계 관리</h2><p>정비사업 9단계 현황 · 서울시 실시간 데이터</p></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="bdg bdg-green" id="seoulApiStatus">Supabase 데이터</span>
+        <button onclick="loadSeoulRedev()" style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:11.5px;cursor:pointer;font-family:var(--font);">서울시 API 새로고침</button>
+      </div>
+    </div>
+
+    <!-- 서울시 API 현황 카드 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;" id="seoulKpiRow" style="display:none;">
+      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">서울시 API 총 구역</div></div><div class="kpi-val c-blue" id="seoulTotal">—</div><div class="kpi-foot"><span class="kpi-sub">실시간 조회</span><span class="kpi-tag bdg-green">서울시</span></div></div>
+      <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">재건축</div></div><div class="kpi-val c-green" id="seoulRecon">—</div><div class="kpi-foot"><span class="kpi-sub">사업 유형별</span></div></div>
+      <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">재개발</div></div><div class="kpi-val c-orange" id="seoulRedev">—</div><div class="kpi-foot"><span class="kpi-sub">사업 유형별</span></div></div>
+      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">도시환경정비</div></div><div class="kpi-val c-red" id="seoulUrban">—</div><div class="kpi-foot"><span class="kpi-sub">사업 유형별</span></div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">단계별 구역 수</div><span class="bdg bdg-green">실데이터</span></div>
+      <div class="cw2" style="height:220px;"><canvas id="stageBarchart" role="img" aria-label="단계별 구역 수">로딩 중</canvas></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;" id="seoulChartRow">
+      <div class="card" id="seoulGuCard" style="display:none;">
+        <div class="card-h"><div class="card-title">서울시 API — 구별 현황</div><span class="bdg bdg-blue">실시간</span></div>
+        <div class="cw2" style="height:200px;"><canvas id="seoulGuChart" role="img" aria-label="구별 현황">로딩 중</canvas></div>
+      </div>
+      <div class="card" id="seoulStageCard" style="display:none;">
+        <div class="card-h"><div class="card-title">서울시 API — 단계별 현황</div><span class="bdg bdg-blue">실시간</span></div>
+        <div class="cw2" style="height:200px;"><canvas id="seoulStageChart" role="img" aria-label="단계별 현황">로딩 중</canvas></div>
+      </div>
+    </div>
+
+    <div class="card"><div class="card-h"><div class="card-title">단계별 상세 현황 (Supabase)</div></div>
       <table class="dtable">
         <thead><tr><th>단계</th><th>단계명</th><th>구역 수</th><th>비율</th><th>진행률</th></tr></thead>
         <tbody id="stageTbody"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--gray-400);"><span class="spinner"></span>로딩 중...</td></tr></tbody>
@@ -1152,9 +1182,111 @@ function sw(tab,el){
   if(tab==='investor')setTimeout(calcSim,80);
   if(tab==='trade')setTimeout(loadTrade,80);
   if(tab==='risk')setTimeout(loadRisk,80);
+  if(tab==='stage')setTimeout(loadSeoulRedev,80);
 }
 
-/* ── 리스크 실데이터 (한국은행 ECOS) ── */
+/* ── 서울시 정비사업 API ── */
+let seoulCH = {};
+
+async function loadSeoulRedev() {
+  const statusEl = document.getElementById('seoulApiStatus');
+  statusEl.textContent = '서울시 API 로딩 중...';
+  statusEl.className = 'bdg bdg-gray';
+
+  try {
+    const res = await fetch('/api/seoul-redev?page=1&size=1000');
+    const data = await res.json();
+
+    if (!data.success) {
+      statusEl.textContent = 'API 오류: ' + (data.error || '알 수 없음');
+      statusEl.className = 'bdg bdg-red';
+      return;
+    }
+
+    const items = data.items || [];
+    const summary = data.summary || {};
+
+    // KPI 업데이트
+    document.getElementById('seoulTotal').textContent = data.totalCount.toLocaleString();
+    document.getElementById('seoulKpiRow').style.display = 'grid';
+
+    // 사업 유형별 집계
+    const typeMap = {};
+    items.forEach(item => {
+      const t = item.projectType || '기타';
+      typeMap[t] = (typeMap[t] || 0) + 1;
+    });
+    document.getElementById('seoulRecon').textContent =
+      (typeMap['주택재건축'] || typeMap['재건축'] || 0).toLocaleString();
+    document.getElementById('seoulRedev').textContent =
+      (typeMap['주택재개발'] || typeMap['재개발'] || 0).toLocaleString();
+    document.getElementById('seoulUrban').textContent =
+      (typeMap['도시환경정비'] || typeMap['도시환경'] || 0).toLocaleString();
+
+    // 구별 현황 차트
+    const guData = Object.entries(summary.guCount || {})
+      .sort((a,b) => b[1]-a[1]).slice(0,15);
+    document.getElementById('seoulGuCard').style.display = 'block';
+    if (seoulCH.gu) seoulCH.gu.destroy();
+    seoulCH.gu = new Chart(document.getElementById('seoulGuChart'), {
+      type: 'bar',
+      data: {
+        labels: guData.map(d => d[0].replace('구','')),
+        datasets: [{
+          data: guData.map(d => d[1]),
+          backgroundColor: guData.map((_,i) => `rgba(27,79,216,${0.85-i*0.04})`),
+          borderRadius: 4, borderSkipped: false,
+        }]
+      },
+      options: { ...OPTS,
+        scales: {
+          x: { grid:{display:false}, ticks:{color:'#9CA3AF',font:{size:10}} },
+          y: { grid:{color:'#F3F4F6'}, ticks:{color:'#9CA3AF',font:{size:10}} }
+        },
+        plugins: { ...OPTS.plugins, tooltip: { ...OPTS.plugins.tooltip,
+          callbacks: { label: c => `${c.raw}개 구역` }
+        }}
+      }
+    });
+
+    // 단계별 현황 차트
+    const stageData = Object.entries(summary.stageCount || {})
+      .sort((a,b) => b[1]-a[1]).slice(0,10);
+    document.getElementById('seoulStageCard').style.display = 'block';
+    if (seoulCH.stage) seoulCH.stage.destroy();
+    seoulCH.stage = new Chart(document.getElementById('seoulStageChart'), {
+      type: 'doughnut',
+      data: {
+        labels: stageData.map(d => d[0]),
+        datasets: [{
+          data: stageData.map(d => d[1]),
+          backgroundColor: stageData.map((_,i) => SC[i+1] || '#9CA3AF'),
+          borderWidth: 2, borderColor: '#fff',
+        }]
+      },
+      options: { ...OPTS, cutout: '60%',
+        plugins: { ...OPTS.plugins,
+          legend: { display: true, position: 'right',
+            labels: { color:'#6B7280', font:{size:10,family:'IBM Plex Sans KR'}, padding:8, boxWidth:10 }
+          },
+          tooltip: { ...OPTS.plugins.tooltip,
+            callbacks: { label: c => `${c.label}: ${c.raw}개` }
+          }
+        }
+      }
+    });
+
+    statusEl.textContent = `서울시 API · ${data.totalCount.toLocaleString()}건`;
+    statusEl.className = 'bdg bdg-blue';
+
+  } catch(e) {
+    console.error('서울시 API 오류:', e);
+    statusEl.textContent = 'API 연결 실패';
+    statusEl.className = 'bdg bdg-red';
+  }
+}
+
+
 let riskCH={};
 
 async function loadRisk(){
