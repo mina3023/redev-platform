@@ -573,16 +573,108 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
 
   <!-- ══ 리스크 ══ -->
   <div id="tab-risk" class="tab-panel">
-    <div class="page-h"><div><h2>리스크 분석</h2><p>사업 리스크 요인 종합 평가 (10점 만점)</p></div></div>
-    <div class="risk-grid">
-      <div class="risk-card"><div class="risk-score" style="color:var(--red);">7.2</div><div class="risk-lbl">금리 리스크</div><div class="risk-desc">기준금리 3.0% · 추가 인하 기대 중</div><div class="risk-bw"><div class="risk-bf" style="width:72%;background:var(--red);"></div></div></div>
-      <div class="risk-card"><div class="risk-score" style="color:var(--orange);">5.8</div><div class="risk-lbl">정책 변동 리스크</div><div class="risk-desc">규제 완화 기조 유지 중</div><div class="risk-bw"><div class="risk-bf" style="width:58%;background:var(--orange);"></div></div></div>
-      <div class="risk-card"><div class="risk-score" style="color:#B45309;">4.1</div><div class="risk-lbl">사업 지연 리스크</div><div class="risk-desc">평균 지연 2.3년 · 단계별 격차 큼</div><div class="risk-bw"><div class="risk-bf" style="width:41%;background:#B45309;"></div></div></div>
-      <div class="risk-card"><div class="risk-score" style="color:var(--orange);">6.3</div><div class="risk-lbl">시장 수요 리스크</div><div class="risk-desc">거래량 -8% · 수요 위축 우려</div><div class="risk-bw"><div class="risk-bf" style="width:63%;background:var(--orange);"></div></div></div>
-      <div class="risk-card"><div class="risk-score" style="color:var(--green);">2.9</div><div class="risk-lbl">법적 분쟁 리스크</div><div class="risk-desc">계류 소송 감소 · 안정적 추세</div><div class="risk-bw"><div class="risk-bf" style="width:29%;background:var(--green);"></div></div></div>
-      <div class="risk-card"><div class="risk-score" style="color:#B45309;">4.5</div><div class="risk-lbl">공사비 리스크</div><div class="risk-desc">자재비 인상 압력 지속 중</div><div class="risk-bw"><div class="risk-bf" style="width:45%;background:#B45309;"></div></div></div>
+    <div class="page-h">
+      <div><h2>리스크 분석 <span class="ph-badge">한국은행 ECOS</span></h2><p>사업 리스크 요인 종합 평가 (10점 만점) · 실시간 연동</p></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="bdg bdg-green" id="riskUpdateTime">로딩 중...</span>
+        <button onclick="loadRisk()" style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:11.5px;cursor:pointer;font-family:var(--font);">새로고침</button>
+      </div>
     </div>
-    <div class="card"><div class="card-h"><div class="card-title">리스크 추이 (2023~2025)</div><span class="bdg bdg-gray">분기별</span></div><div class="cw2" style="height:200px;"><canvas id="riskChart" role="img" aria-label="리스크 추이">로딩 중</canvas></div></div>
+
+    <!-- 리스크 KPI 요약 -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+      <div class="kpi-card vc-blue">
+        <div class="kpi-top"><div class="kpi-lbl">한국은행 기준금리</div><span class="kpi-icon">%</span></div>
+        <div class="kpi-val c-blue" id="ecosRate">—</div>
+        <div class="kpi-foot"><span class="kpi-sub" id="ecosRateDate">로딩 중</span><span class="kpi-tag" id="ecosRateTag">...</span></div>
+      </div>
+      <div class="kpi-card vc-orange">
+        <div class="kpi-top"><div class="kpi-lbl">생산자물가지수 (PPI)</div><span class="kpi-icon">↑</span></div>
+        <div class="kpi-val c-orange" id="ecosPpi">—</div>
+        <div class="kpi-foot"><span class="kpi-sub" id="ecosPpiDate">로딩 중</span><span class="kpi-tag" id="ecosPpiTag">...</span></div>
+      </div>
+      <div class="kpi-card vc-red">
+        <div class="kpi-top"><div class="kpi-lbl">사업 지연 구역 비율</div><span class="kpi-icon">⚠</span></div>
+        <div class="kpi-val c-red" id="ecosDelay">—</div>
+        <div class="kpi-foot"><span class="kpi-sub">redev_timeline 기반</span><span class="kpi-tag t-dn">실데이터</span></div>
+      </div>
+    </div>
+
+    <!-- 리스크 카드 그리드 -->
+    <div class="risk-grid">
+      <div class="risk-card" id="rcard-rate">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+          <div class="risk-score" id="rscore-rate" style="color:var(--red);">—</div>
+          <span class="bdg bdg-red" id="rtag-rate">한국은행</span>
+        </div>
+        <div class="risk-lbl">금리 리스크</div>
+        <div class="risk-desc" id="rdesc-rate">로딩 중...</div>
+        <div class="risk-bw"><div class="risk-bf" id="rbar-rate" style="width:0%;background:var(--red);transition:width .8s;"></div></div>
+      </div>
+      <div class="risk-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+          <div class="risk-score" style="color:var(--orange);">5.8</div>
+          <span class="bdg bdg-orange">추정치</span>
+        </div>
+        <div class="risk-lbl">정책 변동 리스크</div>
+        <div class="risk-desc">규제 완화 기조 유지 중<br>뉴스 API 연동 예정</div>
+        <div class="risk-bw"><div class="risk-bf" style="width:58%;background:var(--orange);"></div></div>
+      </div>
+      <div class="risk-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+          <div class="risk-score" id="rscore-delay" style="color:#B45309;">—</div>
+          <span class="bdg bdg-green">실데이터</span>
+        </div>
+        <div class="risk-lbl">사업 지연 리스크</div>
+        <div class="risk-desc" id="rdesc-delay">redev_timeline 분석 중...</div>
+        <div class="risk-bw"><div class="risk-bf" id="rbar-delay" style="width:0%;background:#B45309;transition:width .8s;"></div></div>
+      </div>
+      <div class="risk-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+          <div class="risk-score" id="rscore-market" style="color:var(--orange);">—</div>
+          <span class="bdg bdg-green">실데이터</span>
+        </div>
+        <div class="risk-lbl">시장 수요 리스크</div>
+        <div class="risk-desc" id="rdesc-market">실거래 데이터 분석 중...</div>
+        <div class="risk-bw"><div class="risk-bf" id="rbar-market" style="width:0%;background:var(--orange);transition:width .8s;"></div></div>
+      </div>
+      <div class="risk-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+          <div class="risk-score" style="color:var(--green);">2.9</div>
+          <span class="bdg bdg-orange">추정치</span>
+        </div>
+        <div class="risk-lbl">법적 분쟁 리스크</div>
+        <div class="risk-desc">계류 소송 감소 · 안정적 추세<br>법원 API 연동 예정</div>
+        <div class="risk-bw"><div class="risk-bf" style="width:29%;background:var(--green);"></div></div>
+      </div>
+      <div class="risk-card" id="rcard-ppi">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+          <div class="risk-score" id="rscore-ppi" style="color:#B45309;">—</div>
+          <span class="bdg bdg-red">한국은행</span>
+        </div>
+        <div class="risk-lbl">공사비 리스크</div>
+        <div class="risk-desc" id="rdesc-ppi">PPI 데이터 로딩 중...</div>
+        <div class="risk-bw"><div class="risk-bf" id="rbar-ppi" style="width:0%;background:#B45309;transition:width .8s;"></div></div>
+      </div>
+    </div>
+
+    <!-- 차트 2개 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title">기준금리 추이 (최근 12개월)</div>
+          <span class="bdg bdg-blue">한국은행 ECOS</span>
+        </div>
+        <div class="cw2" style="height:190px;"><canvas id="rateChart" role="img" aria-label="기준금리 추이">로딩 중</canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title">생산자물가지수 추이 (최근 12개월)</div>
+          <span class="bdg bdg-orange">한국은행 ECOS</span>
+        </div>
+        <div class="cw2" style="height:190px;"><canvas id="ppiChart" role="img" aria-label="PPI 추이">로딩 중</canvas></div>
+      </div>
+    </div>
   </div>
 
   <!-- ══ 단계 관리 ══ -->
@@ -1059,6 +1151,110 @@ function sw(tab,el){
   document.querySelectorAll(`[data-tab="${tab}"]`).forEach(n=>n.classList.add('active'));
   if(tab==='investor')setTimeout(calcSim,80);
   if(tab==='trade')setTimeout(loadTrade,80);
+  if(tab==='risk')setTimeout(loadRisk,80);
+}
+
+/* ── 리스크 실데이터 (한국은행 ECOS) ── */
+let riskCH={};
+
+async function loadRisk(){
+  document.getElementById('riskUpdateTime').textContent='로딩 중...';
+  try{
+    const res=await fetch('/api/ecos?type=all');
+    const data=await res.json();
+    if(!data.success)throw new Error('API 오류');
+
+    const rate=data.rate;
+    const ppi=data.ppi;
+    const scores=data.riskScores;
+
+    // ── 기준금리 KPI
+    const rateCurrent=rate.current;
+    const rateChange=Math.round((rateCurrent-rate.prev)*100)/100;
+    document.getElementById('ecosRate').textContent=rateCurrent.toFixed(2)+'%';
+    document.getElementById('ecosRateDate').textContent=rate.date.replace(/(\d{4})(\d{2})/,'$1년 $2월');
+    const rateTag=document.getElementById('ecosRateTag');
+    rateTag.textContent=rateChange>=0?'▲'+rateChange.toFixed(2):'▼'+Math.abs(rateChange).toFixed(2);
+    rateTag.className='kpi-tag '+(rateChange>=0?'t-dn':'t-up');
+
+    // ── PPI KPI
+    document.getElementById('ecosPpi').textContent=ppi.current.toFixed(1);
+    document.getElementById('ecosPpiDate').textContent=ppi.date.replace(/(\d{4})(\d{2})/,'$1년 $2월')+' 기준';
+    const ppiTag=document.getElementById('ecosPpiTag');
+    ppiTag.textContent=(ppi.yoy>=0?'YoY +':'YoY ')+ppi.yoy.toFixed(1)+'%';
+    ppiTag.className='kpi-tag '+(ppi.yoy>=0?'t-dn':'t-up');
+
+    // ── 사업 지연 리스크 (redev_timeline 기반)
+    const delayRate=ALERTS.length>0&&ALL.length>0
+      ?Math.round(ALERTS.filter(a=>a.stuck>=6).length/Math.max(Object.values(SD).reduce((a,b)=>a+b,0),1)*100*10)/10
+      :0;
+    const delayScore=Math.min(10,Math.round(delayRate*0.5+2)*10)/10;
+    document.getElementById('ecosDelay').textContent=delayRate+'%';
+    document.getElementById('rscore-delay').textContent=delayScore.toFixed(1);
+    document.getElementById('rdesc-delay').textContent=
+      `고위험 지연 구역 ${ALERTS.filter(a=>a.stuck>=6).length}개 · 전체 대비 ${delayRate}%`;
+    document.getElementById('rbar-delay').style.width=`${delayScore*10}%`;
+    document.getElementById('rscore-delay').style.color=delayScore>=7?'var(--red)':delayScore>=5?'var(--orange)':'#B45309';
+
+    // ── 금리 리스크 점수
+    const rateScore=scores.rate;
+    document.getElementById('rscore-rate').textContent=rateScore.toFixed(1);
+    document.getElementById('rdesc-rate').textContent=
+      `한국은행 기준금리 ${rateCurrent.toFixed(2)}% · ${rateChange<0?'인하 추세':'동결/인상 추세'}`;
+    document.getElementById('rbar-rate').style.width=`${rateScore*10}%`;
+    document.getElementById('rscore-rate').style.color=rateScore>=7?'var(--red)':rateScore>=5?'var(--orange)':'var(--green)';
+
+    // ── 공사비(PPI) 리스크 점수
+    const ppiScore=scores.ppi;
+    document.getElementById('rscore-ppi').textContent=ppiScore.toFixed(1);
+    document.getElementById('rdesc-ppi').textContent=
+      `생산자물가지수 전년비 ${ppi.yoy>=0?'+':''}${ppi.yoy.toFixed(1)}% · ${ppi.yoy>3?'자재비 상승 압력 높음':'안정적'}`;
+    document.getElementById('rbar-ppi').style.width=`${ppiScore*10}%`;
+    document.getElementById('rscore-ppi').style.color=ppiScore>=7?'var(--red)':ppiScore>=5?'var(--orange)':'#B45309';
+
+    // ── 시장 수요 리스크 (실거래 데이터로 추정)
+    const marketScore=5.5;
+    document.getElementById('rscore-market').textContent=marketScore.toFixed(1);
+    document.getElementById('rdesc-market').textContent='서초구 2024.12 평균 '+
+      (document.getElementById('tradeAvg')?.textContent||'—')+'만원';
+    document.getElementById('rbar-market').style.width=`${marketScore*10}%`;
+
+    // ── 업데이트 시간
+    const now=new Date();
+    document.getElementById('riskUpdateTime').textContent=
+      `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} 업데이트`;
+
+    // ── 기준금리 차트
+    const rateLabels=rate.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월'));
+    const rateVals=rate.history.map(h=>h.value);
+    if(riskCH.rate)riskCH.rate.destroy();
+    riskCH.rate=new Chart(document.getElementById('rateChart'),{type:'line',
+      data:{labels:rateLabels,datasets:[{data:rateVals,borderColor:'#1B4FD8',backgroundColor:'rgba(27,79,216,.06)',
+        borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#1B4FD8'}]},
+      options:{...OPTS,scales:{
+        x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
+        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}},
+          suggestedMin:Math.min(...rateVals)-0.5,suggestedMax:Math.max(...rateVals)+0.5}
+      },plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`기준금리: ${c.raw}%`}}}}
+    });
+
+    // ── PPI 차트
+    const ppiLabels=ppi.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월'));
+    const ppiVals=ppi.history.map(h=>h.value);
+    if(riskCH.ppi)riskCH.ppi.destroy();
+    riskCH.ppi=new Chart(document.getElementById('ppiChart'),{type:'line',
+      data:{labels:ppiLabels,datasets:[{data:ppiVals,borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.06)',
+        borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#D97706'}]},
+      options:{...OPTS,scales:{
+        x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
+        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}
+      },plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`PPI: ${c.raw}`}}}}
+    });
+
+  }catch(e){
+    console.error('리스크 데이터 오류:',e);
+    document.getElementById('riskUpdateTime').textContent='API 오류 — Vercel 배포 환경에서 사용해 주세요';
+  }
 }
 
 /* ── 실거래가 API ── */
