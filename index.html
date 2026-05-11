@@ -360,6 +360,7 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
     <button class="gnb-tab" data-tab="risk" onclick="sw('risk',this)">리스크</button>
     <button class="gnb-tab" data-tab="stage" onclick="sw('stage',this)">단계 관리</button>
     <button class="gnb-tab" data-tab="investor" onclick="sw('investor',this)">투자 분석</button>
+    <button class="gnb-tab" data-tab="trade" onclick="sw('trade',this)">실거래가</button>
     <button class="gnb-tab" data-tab="legal" onclick="sw('legal',this)">법령·판례</button>
     <button class="gnb-tab" data-tab="union" onclick="sw('union',this)">조합</button>
   </nav>
@@ -388,6 +389,7 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
     <div class="sb-item" data-tab="search" onclick="sw('search',this)"><span class="sb-icon">◎</span>구역 검색</div>
     <div class="sb-item" data-tab="alert" onclick="sw('alert',this)"><span class="sb-icon">△</span>지연 경보<span class="sb-badge" id="sbBadge">-</span></div>
     <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">◈</span>리스크</div>
+    <div class="sb-item" data-tab="trade" onclick="sw('trade',this)"><span class="sb-icon">₩</span>실거래가</div>
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
@@ -644,6 +646,98 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
     </div>
   </div>
 
+  <!-- ══ 실거래가 ══ -->
+  <div id="tab-trade" class="tab-panel">
+    <div class="page-h">
+      <div>
+        <h2>아파트 실거래가 <span class="ph-badge">국토교통부</span></h2>
+        <p>서울시 아파트 매매 실거래 자료 · 국토교통부 실거래가 공개시스템</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="tradeGu" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;color:var(--gray-700);background:#fff;cursor:pointer;outline:none;" onchange="loadTrade()">
+          <option value="11110">종로구</option><option value="11140">중구</option>
+          <option value="11170">용산구</option><option value="11200">성동구</option>
+          <option value="11215">광진구</option><option value="11230">동대문구</option>
+          <option value="11260">중랑구</option><option value="11290">성북구</option>
+          <option value="11305">강북구</option><option value="11320">도봉구</option>
+          <option value="11350">노원구</option><option value="11380">은평구</option>
+          <option value="11410">서대문구</option><option value="11440">마포구</option>
+          <option value="11470">양천구</option><option value="11500">강서구</option>
+          <option value="11530">구로구</option><option value="11545">금천구</option>
+          <option value="11560">영등포구</option><option value="11590">동작구</option>
+          <option value="11620">관악구</option><option value="11650" selected>서초구</option>
+          <option value="11680">강남구</option><option value="11710">송파구</option>
+          <option value="11740">강동구</option>
+        </select>
+        <select id="tradeYmd" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;color:var(--gray-700);background:#fff;cursor:pointer;outline:none;" onchange="loadTrade()">
+          <option value="202503">2025년 3월</option><option value="202502">2025년 2월</option>
+          <option value="202501">2025년 1월</option><option value="202412" selected>2024년 12월</option>
+          <option value="202411">2024년 11월</option><option value="202410">2024년 10월</option>
+          <option value="202409">2024년 9월</option><option value="202408">2024년 8월</option>
+          <option value="202407">2024년 7월</option><option value="202406">2024년 6월</option>
+          <option value="202405">2024년 5월</option><option value="202404">2024년 4월</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 실거래 KPI -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
+      <div class="kpi-card vc-blue">
+        <div class="kpi-top"><div class="kpi-lbl">총 거래 건수</div><span class="kpi-icon">📋</span></div>
+        <div class="kpi-val c-blue" id="tradeCount">—</div>
+        <div class="kpi-foot"><span class="kpi-sub">해당 월 신고 건수</span></div>
+      </div>
+      <div class="kpi-card vc-green">
+        <div class="kpi-top"><div class="kpi-lbl">평균 거래금액</div><span class="kpi-icon">₩</span></div>
+        <div class="kpi-val c-green" style="font-size:22px;" id="tradeAvg">—</div>
+        <div class="kpi-foot"><span class="kpi-sub">만원</span></div>
+      </div>
+      <div class="kpi-card vc-orange">
+        <div class="kpi-top"><div class="kpi-lbl">최고 거래금액</div><span class="kpi-icon">↑</span></div>
+        <div class="kpi-val c-orange" style="font-size:22px;" id="tradeMax">—</div>
+        <div class="kpi-foot"><span class="kpi-sub">만원</span></div>
+      </div>
+      <div class="kpi-card vc-red">
+        <div class="kpi-top"><div class="kpi-lbl">평당 평균가</div><span class="kpi-icon">㎡</span></div>
+        <div class="kpi-val c-red" style="font-size:22px;" id="tradePyeong">—</div>
+        <div class="kpi-foot"><span class="kpi-sub">만원/평</span></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div class="card">
+        <div class="card-h"><div class="card-title">금액대별 분포</div><span class="bdg bdg-blue" id="tradeDistBadge"></span></div>
+        <div class="cw2" style="height:200px;"><canvas id="tradeDistChart">로딩 중</canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="card-title">단지별 거래 TOP 10</div></div>
+        <div class="cw2" style="height:200px;"><canvas id="tradeAptChart">로딩 중</canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <div class="card-title">실거래 목록</div>
+        <span class="bdg bdg-green" id="tradeTotalBadge">로딩 중</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="dtable" style="min-width:720px;">
+          <thead>
+            <tr>
+              <th>아파트명</th><th>법정동</th><th>전용면적(㎡)</th>
+              <th>층</th><th>계약일</th>
+              <th style="text-align:right;">거래금액(만원)</th>
+              <th style="text-align:right;">평당가(만원)</th>
+            </tr>
+          </thead>
+          <tbody id="tradeTableBody">
+            <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>구 · 기간을 선택하면 데이터가 로딩됩니다</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- ══ 조합 ══ -->
   <div id="tab-union" class="tab-panel">
     <div class="page-h"><div><h2>조합 관리</h2></div></div>
@@ -663,6 +757,7 @@ for(let y=2017;y<=2025;y++)for(let q of['03','06','09','12']){if(y===2025&&+q>12
 
 let ALL=[],ALERTS=[],SD={},DD={},CH={};
 let curZ=null,selGu='all',simCH=null;
+let tradeData=[],tradeCH={};
 
 const OPTS={
   responsive:true,maintainAspectRatio:false,
@@ -963,6 +1058,107 @@ function sw(tab,el){
   document.querySelectorAll('.gnb-tab,.sb-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll(`[data-tab="${tab}"]`).forEach(n=>n.classList.add('active'));
   if(tab==='investor')setTimeout(calcSim,80);
+  if(tab==='trade')setTimeout(loadTrade,80);
+}
+
+/* ── 실거래가 API ── */
+async function loadTrade(){
+  const lawdCd=document.getElementById('tradeGu').value;
+  const dealYmd=document.getElementById('tradeYmd').value;
+  const guNm=document.getElementById('tradeGu').options[document.getElementById('tradeGu').selectedIndex].text;
+
+  // 로딩 초기화
+  ['tradeCount','tradeAvg','tradeMax','tradePyeong'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('tradeTotalBadge').textContent='로딩 중';
+  document.getElementById('tradeTableBody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400);"><span class="spinner"></span>국토교통부 API 호출 중...</td></tr>';
+
+  try{
+    const res=await fetch(`/api/apt-trade?lawdCd=${lawdCd}&dealYmd=${dealYmd}&numOfRows=100`);
+    const data=await res.json();
+
+    if(!data.success||!data.items||!data.items.length){
+      document.getElementById('tradeTableBody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400);">해당 기간 데이터 없음</td></tr>';
+      document.getElementById('tradeTotalBadge').textContent='0건';
+      return;
+    }
+
+    tradeData=data.items;
+    const amounts=tradeData.map(d=>parseInt(d.dealAmount)||0).filter(v=>v>0);
+    const areas=tradeData.map(d=>parseFloat(d.area)||0).filter(v=>v>0);
+    const avgAmt=Math.round(amounts.reduce((a,b)=>a+b,0)/amounts.length);
+    const maxAmt=Math.max(...amounts);
+
+    // 평당가 계산
+    const pyeongPrices=tradeData.map(d=>{
+      const amt=parseInt(d.dealAmount)||0;
+      const area=parseFloat(d.area)||1;
+      return Math.round(amt/(area/3.3058));
+    }).filter(v=>v>0);
+    const avgPyeong=Math.round(pyeongPrices.reduce((a,b)=>a+b,0)/pyeongPrices.length);
+
+    document.getElementById('tradeCount').textContent=data.totalCount.toLocaleString()+'건';
+    document.getElementById('tradeAvg').textContent=avgAmt.toLocaleString();
+    document.getElementById('tradeMax').textContent=maxAmt.toLocaleString();
+    document.getElementById('tradePyeong').textContent=avgPyeong.toLocaleString();
+    document.getElementById('tradeTotalBadge').textContent='총 '+data.totalCount+'건';
+
+    // 테이블
+    document.getElementById('tradeTableBody').innerHTML=tradeData.map(d=>{
+      const amt=parseInt(d.dealAmount)||0;
+      const area=parseFloat(d.area)||1;
+      const perPyeong=Math.round(amt/(area/3.3058));
+      const amtColor=amt>=200000?'var(--red)':amt>=100000?'var(--orange)':'var(--blue)';
+      return`<tr>
+        <td style="font-weight:600;">${d.aptName}</td>
+        <td>${d.umdNm}</td>
+        <td style="font-family:var(--mono);text-align:right;">${area}</td>
+        <td style="font-family:var(--mono);text-align:center;">${d.floor}층</td>
+        <td style="font-family:var(--mono);">${d.dealYear}.${String(d.dealMonth).padStart(2,'0')}.${String(d.dealDay).padStart(2,'0')}</td>
+        <td style="font-family:var(--mono);font-weight:700;color:${amtColor};text-align:right;">${amt.toLocaleString()}</td>
+        <td style="font-family:var(--mono);color:var(--gray-400);text-align:right;">${perPyeong.toLocaleString()}</td>
+      </tr>`;
+    }).join('');
+
+    // 금액대 분포 차트
+    const bands={'5억↓':0,'5~10억':0,'10~15억':0,'15~20억':0,'20억↑':0};
+    amounts.forEach(a=>{
+      const m=a/10000;
+      if(m<5)bands['5억↓']++;
+      else if(m<10)bands['5~10억']++;
+      else if(m<15)bands['10~15억']++;
+      else if(m<20)bands['15~20억']++;
+      else bands['20억↑']++;
+    });
+    document.getElementById('tradeDistBadge').textContent=guNm;
+    if(tradeCH.dist)tradeCH.dist.destroy();
+    tradeCH.dist=new Chart(document.getElementById('tradeDistChart'),{type:'bar',
+      data:{labels:Object.keys(bands),datasets:[{data:Object.values(bands),
+        backgroundColor:['rgba(27,79,216,.7)','rgba(5,150,105,.7)','rgba(217,119,6,.7)','rgba(220,38,38,.7)','rgba(109,40,217,.7)'],
+        borderRadius:4,borderSkipped:false}]},
+      options:{...OPTS,scales:{
+        x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},
+        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}
+      },plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`${c.raw}건`}}}}
+    });
+
+    // 단지별 TOP 10 가로 바
+    const aptMap={};
+    tradeData.forEach(d=>{aptMap[d.aptName]=(aptMap[d.aptName]||0)+1;});
+    const top10=Object.entries(aptMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    if(tradeCH.apt)tradeCH.apt.destroy();
+    tradeCH.apt=new Chart(document.getElementById('tradeAptChart'),{type:'bar',
+      data:{labels:top10.map(d=>d[0].length>9?d[0].slice(0,9)+'…':d[0]),datasets:[{data:top10.map(d=>d[1]),
+        backgroundColor:'rgba(27,79,216,.7)',borderColor:'#1B4FD8',borderWidth:1,borderRadius:4,borderSkipped:false}]},
+      options:{...OPTS,indexAxis:'y',scales:{
+        x:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10}}},
+        y:{grid:{display:false},ticks:{color:'#374151',font:{size:10,family:'IBM Plex Sans KR'}}}
+      },plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`${c.raw}건`}}}}
+    });
+
+  }catch(e){
+    console.error(e);
+    document.getElementById('tradeTableBody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red);">API 호출 오류 — Vercel 배포 환경에서 사용해 주세요</td></tr>';
+  }
 }
 
 init();
