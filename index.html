@@ -400,7 +400,7 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
   <div class="sb-sec">
     <div class="sb-sec-lbl">정보</div>
     <div class="sb-item" data-tab="news" onclick="sw('news',this)"><span class="sb-icon">📰</span>뉴스·정책</div>
-    <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">📊</span>금융 지표</div>
+    <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">📊</span>경제 지표</div>
     <div class="sb-item" data-tab="trade" onclick="sw('trade',this)"><span class="sb-icon">₩</span>실거래가</div>
   </div>
 
@@ -599,15 +599,16 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
   <!-- ══ 리스크 ══ -->
   <div id="tab-risk" class="tab-panel">
     <div class="page-h">
-      <div><h2>금융 지표 <span class="ph-badge">한국은행 ECOS</span></h2><p>기준금리 · 물가지수 · 사업 리스크 요인 종합 · 실시간 연동</p></div>
+      <div><h2>경제 지표 <span class="ph-badge">한국은행 ECOS</span></h2><p>기준금리 · 글로벌 지표 · 재개발 투자 판단 참고 데이터</p></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <span class="bdg bdg-green" id="riskUpdateTime">로딩 중...</span>
         <button onclick="loadRisk()" style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:11.5px;cursor:pointer;font-family:var(--font);">새로고침</button>
       </div>
     </div>
 
-    <!-- 리스크 KPI 요약 -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+    <!-- 섹션1: 기준금리 -->
+    <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🏦 기준금리</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
       <div class="kpi-card vc-blue">
         <div class="kpi-top"><div class="kpi-lbl">한국은행 기준금리</div><span class="kpi-icon">%</span></div>
         <div class="kpi-val c-blue" id="ecosRate">—</div>
@@ -625,79 +626,59 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
       </div>
     </div>
 
-    <!-- 리스크 카드 그리드 -->
-    <div class="risk-grid">
-      <div class="risk-card" id="rcard-rate">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-          <div class="risk-score" id="rscore-rate" style="color:var(--red);">—</div>
-          <span class="bdg bdg-red" id="rtag-rate">한국은행</span>
-        </div>
-        <div class="risk-lbl">금리 리스크</div>
-        <div class="risk-desc" id="rdesc-rate">로딩 중...</div>
-        <div class="risk-bw"><div class="risk-bf" id="rbar-rate" style="width:0%;background:var(--red);transition:width .8s;"></div></div>
+    <!-- 섹션2: 글로벌 지표 -->
+    <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🌐 글로벌 지표 <span style="font-weight:400;font-size:10px;color:var(--gray-300);">· 연동 준비 중</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+      <div class="kpi-card" style="border:1px dashed var(--border);">
+        <div class="kpi-top"><div class="kpi-lbl">미국 10년물 국채금리</div><span class="kpi-icon">🇺🇸</span></div>
+        <div class="kpi-val" style="color:var(--gray-300);font-size:20px;">준비 중</div>
+        <div class="kpi-foot"><span class="kpi-sub">FRED API 연동 예정</span></div>
       </div>
-      <div class="risk-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-          <div class="risk-score" style="color:var(--orange);">5.8</div>
-          <span class="bdg bdg-orange">추정치</span>
-        </div>
-        <div class="risk-lbl">정책 변동 리스크</div>
-        <div class="risk-desc">규제 완화 기조 유지 중<br>뉴스 API 연동 예정</div>
-        <div class="risk-bw"><div class="risk-bf" style="width:58%;background:var(--orange);"></div></div>
+      <div class="kpi-card" style="border:1px dashed var(--border);">
+        <div class="kpi-top"><div class="kpi-lbl">WTI 유가</div><span class="kpi-icon">🛢</span></div>
+        <div class="kpi-val" style="color:var(--gray-300);font-size:20px;">준비 중</div>
+        <div class="kpi-foot"><span class="kpi-sub">EIA API 연동 예정</span></div>
       </div>
-      <div class="risk-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-          <div class="risk-score" id="rscore-delay" style="color:#B45309;">—</div>
-          <span class="bdg bdg-green">실데이터</span>
-        </div>
-        <div class="risk-lbl">사업 지연 리스크</div>
-        <div class="risk-desc" id="rdesc-delay">redev_timeline 분석 중...</div>
-        <div class="risk-bw"><div class="risk-bf" id="rbar-delay" style="width:0%;background:#B45309;transition:width .8s;"></div></div>
+      <div class="kpi-card" style="border:1px dashed var(--border);">
+        <div class="kpi-top"><div class="kpi-lbl">USD/KRW 환율</div><span class="kpi-icon">💱</span></div>
+        <div class="kpi-val" style="color:var(--gray-300);font-size:20px;">준비 중</div>
+        <div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS 연동 예정</span></div>
       </div>
-      <div class="risk-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-          <div class="risk-score" id="rscore-market" style="color:var(--orange);">—</div>
-          <span class="bdg bdg-green">실데이터</span>
-        </div>
-        <div class="risk-lbl">시장 수요 리스크</div>
-        <div class="risk-desc" id="rdesc-market">실거래 데이터 분석 중...</div>
-        <div class="risk-bw"><div class="risk-bf" id="rbar-market" style="width:0%;background:var(--orange);transition:width .8s;"></div></div>
-      </div>
-      <div class="risk-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-          <div class="risk-score" style="color:var(--green);">2.9</div>
-          <span class="bdg bdg-orange">추정치</span>
-        </div>
-        <div class="risk-lbl">법적 분쟁 리스크</div>
-        <div class="risk-desc">계류 소송 감소 · 안정적 추세<br>법원 API 연동 예정</div>
-        <div class="risk-bw"><div class="risk-bf" style="width:29%;background:var(--green);"></div></div>
-      </div>
-      <div class="risk-card" id="rcard-ppi">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-          <div class="risk-score" id="rscore-ppi" style="color:#B45309;">—</div>
-          <span class="bdg bdg-red">한국은행</span>
-        </div>
-        <div class="risk-lbl">공사비 리스크</div>
-        <div class="risk-desc" id="rdesc-ppi">PPI 데이터 로딩 중...</div>
-        <div class="risk-bw"><div class="risk-bf" id="rbar-ppi" style="width:0%;background:#B45309;transition:width .8s;"></div></div>
+      <div class="kpi-card" style="border:1px dashed var(--border);">
+        <div class="kpi-top"><div class="kpi-lbl">건설공사비지수</div><span class="kpi-icon">🏗</span></div>
+        <div class="kpi-val" style="color:var(--gray-300);font-size:20px;">준비 중</div>
+        <div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS 연동 예정</span></div>
       </div>
     </div>
 
     <!-- 차트 2개 -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
       <div class="card">
-        <div class="card-h">
-          <div class="card-title">기준금리 추이 (최근 12개월)</div>
-          <span class="bdg bdg-blue">한국은행 ECOS</span>
-        </div>
+        <div class="card-h"><div class="card-title">기준금리 추이 (최근 12개월)</div><span class="bdg bdg-blue">한국은행 ECOS</span></div>
         <div class="cw2" style="height:190px;"><canvas id="rateChart" role="img" aria-label="기준금리 추이">로딩 중</canvas></div>
       </div>
       <div class="card">
-        <div class="card-h">
-          <div class="card-title">생산자물가지수 추이 (최근 12개월)</div>
-          <span class="bdg bdg-orange">한국은행 ECOS</span>
-        </div>
+        <div class="card-h"><div class="card-title">생산자물가지수 추이 (최근 12개월)</div><span class="bdg bdg-orange">한국은행 ECOS</span></div>
         <div class="cw2" style="height:190px;"><canvas id="ppiChart" role="img" aria-label="PPI 추이">로딩 중</canvas></div>
+      </div>
+    </div>
+
+    <!-- 투자 판단 가이드 -->
+    <div class="card">
+      <div class="card-h"><div class="card-title">재개발·재건축 투자 판단 참고</div><span class="bdg bdg-gray">데이터 인프라</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:4px 0;">
+        <div style="padding:12px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);">
+          <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px;">금리 방향성</div>
+          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">기준금리 인하 → 이주비 대출금리 하락 → 사업 진행 속도 개선<br>미국 국채금리는 국내 금리 선행지표</div>
+        </div>
+        <div style="padding:12px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);">
+          <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px;">공사비 영향</div>
+          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">WTI·PPI 상승 시 철근·시멘트 가격 상승 → 추가 분담금 증가 가능</div>
+        </div>
+        <div style="padding:12px;background:#ECFDF5;border-radius:var(--r);border-left:3px solid var(--green);">
+          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px;">환율 영향</div>
+          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">원화 약세(환율 상승) → 수입 원자재 비용 증가 → 공사비 상승 → 사업성 악화</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1790,7 +1771,98 @@ function calcCgtTax(){
 /* ── 뉴스·정책 ── */
 let newsKeywordFreq = {};
 
+async function loadMolitNews(){
+  const el = document.getElementById('molit-news');
+  if(!el) return;
+  try {
+    const res  = await fetch('/api/news?type=molit');
+    const data = await res.json();
+    if(!data.success || !data.items?.length){
+      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">국토부 보도자료 로딩 실패</div>';
+      return;
+    }
+    el.innerHTML = data.items.map(item => {
+      const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}) : '';
+      return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
+          <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title||'제목 없음'}</div>
+          <div style="font-size:10.5px;color:var(--gray-400);">국토교통부 · ${date}</div>
+        </div>
+      </a>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">국토부 RSS 연결 실패</div>';
+  }
+}
+
 async function loadNews(){
+  const keyword = document.getElementById('newsKeyword')?.value || '재개발';
+  const listEl  = document.getElementById('newsListBody');
+  if(!listEl) return;
+  listEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div>';
+
+  // 국토부 보도자료 병렬 로딩
+  loadMolitNews();
+
+  try {
+    const res  = await fetch(`/api/news?query=${encodeURIComponent(keyword)}&display=20&sort=date`);
+    const data = await res.json();
+
+    if(!data.success || !data.items?.length) {
+      listEl.innerHTML = '<div class="empty"><div class="ei">📰</div><p>검색 결과가 없습니다</p></div>';
+      return;
+    }
+
+    // 키워드 빈도 집계 (워드클라우드용)
+    const stopWords = new Set(['있다','없다','했다','한다','됩니다','위해','대한','통해','관련','이번','지난','올해','최근','계획','예정','발표','제공','진행','추진','것으로','에서','으로','하는','하고','하여','이후','까지','부터','대해','따라','위한','받은','있는','없는','통한','된다','된다고','이라고','라고']);
+    data.items.forEach(item => {
+      const words = (item.title + ' ' + item.description).split(/[\s,\.·\[\]""''!?()]+/);
+      words.forEach(w => {
+        w = w.replace(/[^\uAC00-\uD7A3a-zA-Z0-9]/g,'');
+        if(w.length >= 2 && !stopWords.has(w)) {
+          newsKeywordFreq[w] = (newsKeywordFreq[w] || 0) + 1;
+        }
+      });
+    });
+
+    // 워드클라우드 업데이트
+    const wcEl = document.getElementById('newsWordCloud');
+    if(wcEl) {
+      const sorted = Object.entries(newsKeywordFreq).sort((a,b)=>b[1]-a[1]).slice(0,28);
+      const maxF = sorted[0]?.[1] || 1;
+      const colors = ['var(--blue)','var(--green)','var(--orange)','#6D28D9','var(--red)','#0891B2','#BE185D'];
+      wcEl.innerHTML = sorted.map(([word,freq]) => {
+        const size  = Math.round(10 + (freq/maxF)*20);
+        const color = colors[Math.floor(Math.random()*colors.length)];
+        return `<span style="font-size:${size}px;color:${color};opacity:${0.45+freq/maxF*0.55};font-weight:${freq>4?700:400};cursor:pointer;padding:2px 5px;transition:opacity .2s;" onclick="document.getElementById('newsKeyword').value='${word}';loadNews();" title="${freq}건 등장">${word}</span>`;
+      }).join('');
+    }
+
+    // 뉴스 목록 렌더
+    document.getElementById('newsTotalBadge').textContent = `총 ${data.total?.toLocaleString()}건`;
+    listEl.innerHTML = data.items.map(item => {
+      const date = new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
+        <div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .12s;margin-bottom:6px;" onmouseover="this.style.background='var(--blue-light)';this.style.borderColor='var(--blue-mid)'" onmouseout="this.style.background='#fff';this.style.borderColor='var(--border)'">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:var(--gray-900);margin-bottom:4px;line-height:1.5;">${item.title}</div>
+              <div style="font-size:11.5px;color:var(--gray-500);line-height:1.6;">${item.description?.slice(0,90)}...</div>
+            </div>
+            <div style="flex-shrink:0;text-align:right;">
+              <span class="law-mtag">${item.source}</span>
+              <div style="font-size:10.5px;color:var(--gray-400);margin-top:4px;">${date}</div>
+            </div>
+          </div>
+        </div>
+      </a>`;
+    }).join('');
+
+  } catch(e) {
+    console.error('뉴스 오류:', e);
+    listEl.innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>뉴스 로딩 오류</p></div>';
+  }
+}
   const keyword = document.getElementById('newsKeyword')?.value || '재개발';
   const listEl  = document.getElementById('newsListBody');
   if(!listEl) return;
