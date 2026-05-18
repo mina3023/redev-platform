@@ -981,7 +981,7 @@ async function init(){await Promise.all([loadAll(),detectAlerts()]);buildGuChips
 
 async function loadAll(){
   try{
-    const d=await sbf('redev_timeline','select=gu_name,project_name,stage,period,stage_score&limit=20531');
+    const d=await sbf('redev_timeline','select=gu_name,project_name,stage,period,stage_score&limit=50000');
     if(!Array.isArray(d))return;ALL=d;
     const lm={};d.forEach(r=>{if(!lm[r.project_name]||r.period>lm[r.project_name].period)lm[r.project_name]=r;});
     const zones=Object.values(lm);
@@ -1003,7 +1003,7 @@ async function loadAll(){
 
 async function detectAlerts(){
   try{
-    const d=await sbf('redev_timeline','select=gu_name,project_name,stage,period,stage_score&limit=20531');
+    const d=await sbf('redev_timeline','select=gu_name,project_name,stage,period,stage_score&limit=50000');
     if(!Array.isArray(d))return;
     const zm={};d.forEach(r=>{if(!zm[r.project_name])zm[r.project_name]=[];zm[r.project_name].push(r);});
     const al=[];
