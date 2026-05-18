@@ -1840,23 +1840,55 @@ async function loadMolitNews(){
   if(!el) return;
   el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);"><span class="spinner"></span>로딩 중...</div>';
   try {
-    const res  = await fetch('/api/news?type=molit');
-    const data = await res.json();
-    if(!data.success || !data.items?.length){
-      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">보도자료 로딩 실패</div>';
+    // 브라우저에서 직접 korea.kr RSS 파싱
+    const rssUrl = 'https://www.korea.kr/rss/dept_mltm.xml';
+    const r = await fetch(rssUrl);
+    const xml = await r.text();
+
+    // XML 파싱
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'application/xml');
+    const items = [...doc.querySelectorAll('item')].slice(0, 10);
+
+    if(!items.length){
+      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">보도자료 없음</div>';
       return;
     }
-    el.innerHTML = data.items.map(item => {
-      const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}) : '';
-      return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
+
+    el.innerHTML = items.map(item => {
+      const title   = item.querySelector('title')?.textContent?.trim() || '';
+      const link    = item.querySelector('link')?.textContent?.trim() || '#';
+      const pubDate = item.querySelector('pubDate')?.textContent?.trim() || '';
+      const date    = pubDate ? new Date(pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}) : '';
+      return `<a href="${link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
         <div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
-          <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title}</div>
+          <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${title}</div>
           <div style="font-size:10.5px;color:var(--gray-400);">국토교통부 · ${date}</div>
         </div>
       </a>`;
     }).join('');
   } catch(e) {
-    el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">연결 실패</div>';
+    // CORS 차단 시 네이버 뉴스 fallback
+    try {
+      const res  = await fetch('/api/news?query=국토교통부+재개발+재건축&display=8&sort=date');
+      const data = await res.json();
+      if(data.success && data.items?.length){
+        el.innerHTML = data.items
+          .filter(i => i.title?.includes('국토') || i.source?.includes('국토'))
+          .slice(0,6)
+          .map(item => {
+            const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}) : '';
+            return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
+                <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title}</div>
+                <div style="font-size:10.5px;color:var(--gray-400);">국토교통부 · ${date}</div>
+              </div>
+            </a>`;
+          }).join('') || '<div style="padding:12px;font-size:12px;color:var(--gray-400);">보도자료 없음</div>';
+      }
+    } catch(e2) {
+      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">연결 실패</div>';
+    }
   }
 }
 
