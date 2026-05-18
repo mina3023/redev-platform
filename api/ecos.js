@@ -45,28 +45,29 @@ export default async function handler(req, res) {
       const currentRate = parseFloat(rateItem?.DATA_VALUE || 2.75);
       const rateDate = rateItem?.TIME || endYM;
 
-      // 월별 히스토리: StatisticSearch로 기준금리 추이 조회
-      // 통계표 722Y001, 항목 0101000 (한국은행 기준금리)
+      // 월별 히스토리: StatisticSearch로 기준금리 추이 조회 (월별)
       let history = [];
       try {
-        const hUrl = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/36/722Y001/DD/${startYM}01/${endYM}31/0101000`;
+        const hUrl = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/24/722Y001/MM/${startYM}/${endYM}/0101000`;
         const hR = await fetch(hUrl);
         const hD = await hR.json();
         const hRows = hD?.StatisticSearch?.row || [];
+        history = hRows.slice(-12).map(r => ({
+          date: r.TIME,
+          value: parseFloat(r.DATA_VALUE || 0),
+        })).filter(h => h.value > 0);
+      } catch(e) {}
 
-        // 일별 데이터를 월별로 집계 (월 마지막 값 사용)
-        const monthMap = {};
-        hRows.forEach(row => {
-          const ym = row.TIME?.slice(0,6);
-          if (ym) monthMap[ym] = parseFloat(row.DATA_VALUE || 0);
+      // 히스토리 없으면 현재값으로 채우기
+      if(!history.length) {
+        history = Array.from({length:12},(_,i)=>{
+          const d = new Date(now);
+          d.setMonth(d.getMonth() - 11 + i);
+          return {
+            date: `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`,
+            value: currentRate,
+          };
         });
-        history = Object.entries(monthMap)
-          .sort((a,b) => a[0].localeCompare(b[0]))
-          .slice(-12)
-          .map(([date, value]) => ({ date, value }));
-      } catch(e) {
-        // 히스토리 실패해도 현재값은 표시
-        history = [{ date: rateDate, value: currentRate }];
       }
 
       results.rate = {
@@ -167,4 +168,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'ECOS API 호출 실패', detail: err.message });
   }
 }
-
