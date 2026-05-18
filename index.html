@@ -1330,51 +1330,58 @@ async function init(){await Promise.all([loadAll(),detectAlerts()]);buildGuChips
 
 async function loadAll(){
   try{
-    // Supabase 기본 limit=1000 → 페이지네이션으로 전체 가져오기
-    let all=[], offset=0, pageSize=1000;
-    while(true){
-      const chunk=await sbf('redev_timeline',
-        `select=gu_name,project_name,stage,period,stage_score&limit=${pageSize}&offset=${offset}&order=id`);
-      if(!Array.isArray(chunk)||chunk.length===0)break;
-      all=[...all,...chunk];
-      if(chunk.length<pageSize)break;
-      offset+=pageSize;
-    }
-    const d=all;
-    if(!d.length)return;
-    ALL=d;
-    const lm={};d.forEach(r=>{if(!lm[r.project_name]||r.period>lm[r.project_name].period)lm[r.project_name]=r;});
-    const zones=Object.values(lm);
-    const tot=zones.length;
-    document.getElementById('kpiTot').textContent=tot.toLocaleString();
-    document.getElementById('sbTot').textContent=tot.toLocaleString();
-    document.getElementById('kpiTotSub').textContent='총 '+d.length.toLocaleString()+'건';
-    const done=zones.filter(z=>z.stage_score===9).length;
-    const active=zones.filter(z=>z.stage_score>=3&&z.stage_score<=8).length;
-    document.getElementById('kpiDone').textContent=done.toLocaleString();
-    document.getElementById('kpiDoneR').textContent=Math.round(done/tot*100)+'%';
-    document.getElementById('kpiActive').textContent=active.toLocaleString();
-    for(let i=1;i<=9;i++)SD[i]=0;
-    zones.forEach(z=>{if(z.stage_score)SD[z.stage_score]++;});
-    zones.forEach(z=>{if(!DD[z.gu_name])DD[z.gu_name]=0;DD[z.gu_name]++;});
-    drawDistHBar();drawDonut();drawTrend(d);drawStageBar();drawStageTable();drawStageTbodyDB();
-  }catch(e){console.error(e);}
+    // dashboard_summary 뷰에서 집계 데이터만 가져오기 (훨씬 빠름)
+    const zones = await sbf('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period&limit=5000');
+    if(!Array.isArray(zones)||!zones.length) return;
+
+    ALL = zones.map(z=>({
+      gu_name: z.gu_name,
+      project_name: z.project_name,
+      stage: z.stage,
+      stage_score: z.stage_score,
+      period: z.last_period,
+    }));
+
+    const tot = zones.length;
+    document.getElementById('kpiTot').textContent = tot.toLocaleString();
+    document.getElementById('sbTot').textContent = tot.toLocaleString();
+    document.getElementById('kpiTotSub').textContent = '총 ' + tot.toLocaleString() + '개 구역';
+
+    const done   = zones.filter(z=>z.stage_score===9).length;
+    const active = zones.filter(z=>z.stage_score>=3&&z.stage_score<=8).length;
+    document.getElementById('kpiDone').textContent  = done.toLocaleString();
+    document.getElementById('kpiDoneR').textContent = Math.round(done/tot*100)+'%';
+    document.getElementById('kpiActive').textContent = active.toLocaleString();
+
+    for(let i=1;i<=9;i++) SD[i]=0;
+    zones.forEach(z=>{ if(z.stage_score) SD[z.stage_score]++; });
+    zones.forEach(z=>{ if(!DD[z.gu_name]) DD[z.gu_name]=0; DD[z.gu_name]++; });
+
+    drawDistHBar(); drawDonut(); drawStageBar(); drawStageTable(); drawStageTbodyDB();
+
+    // 시계열 트렌드는 별도 경량 쿼리
+    const trend = await sbf('redev_timeline',
+      'select=period,stage_score&limit=2000&order=period');
+    if(Array.isArray(trend)) drawTrend(trend);
+
+  }catch(e){ console.error('loadAll 오류:', e); }
 }
 
 async function detectAlerts(){
   try{
-    let all=[], offset=0, pageSize=1000;
+    // redev_timeline에서 최근 데이터만 샘플링해서 지연 감지
+    let all=[], offset=0;
     while(true){
       const chunk=await sbf('redev_timeline',
-        `select=gu_name,project_name,stage,period,stage_score&limit=${pageSize}&offset=${offset}&order=id`);
-      if(!Array.isArray(chunk)||chunk.length===0)break;
+        `select=gu_name,project_name,stage,period,stage_score&limit=1000&offset=${offset}&order=project_name,period`);
+      if(!Array.isArray(chunk)||!chunk.length) break;
       all=[...all,...chunk];
-      if(chunk.length<pageSize)break;
-      offset+=pageSize;
+      if(chunk.length<1000) break;
+      offset+=1000;
+      if(offset>=10000) break; // 최대 10,000건만 (속도)
     }
-    const d=all;
-    if(!d.length)return;
-    const zm={};d.forEach(r=>{if(!zm[r.project_name])zm[r.project_name]=[];zm[r.project_name].push(r);});
+    if(!all.length) return;
+    const zm={};all.forEach(r=>{if(!zm[r.project_name])zm[r.project_name]=[];zm[r.project_name].push(r);});
     const al=[];
     Object.entries(zm).forEach(([name,recs])=>{
       recs.sort((a,b)=>a.period>b.period?1:-1);
