@@ -952,20 +952,322 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
 
   <!-- ══ 뉴스·정책 ══ -->
   <div id="tab-news" class="tab-panel">
-    <div class="page-h"><div><h2>뉴스·정책 <span class="ph-badge">준비 중</span></h2><p>재개발·재건축 관련 뉴스 및 국토부 정책 보도자료</p></div></div>
-    <div class="card"><div class="empty"><div class="ei">📰</div><p>뉴스·정책 데이터 연동 준비 중입니다<br><span style="font-size:11px;color:var(--gray-400);">네이버 뉴스 API · 국토부 보도자료 RSS 연동 예정</span></p></div></div>
+    <div class="page-h">
+      <div><h2>뉴스·정책 <span class="ph-badge">국토부·서울시</span></h2><p>재개발·재건축 관련 최신 뉴스 · 국토부 정책 보도자료</p></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="newsKeyword" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:#fff;cursor:pointer;outline:none;" onchange="loadNews()">
+          <option value="재개발">재개발</option>
+          <option value="재건축">재건축</option>
+          <option value="도시정비법">도시정비법</option>
+          <option value="정비사업">정비사업</option>
+          <option value="조합">조합</option>
+          <option value="관리처분">관리처분</option>
+          <option value="이주비">이주비</option>
+        </select>
+        <button onclick="loadNews()" style="padding:6px 14px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:12px;cursor:pointer;font-family:var(--font);">새로고침</button>
+      </div>
+    </div>
+
+    <!-- 검색어 트렌드 워드클라우드 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div class="card">
+        <div class="card-h"><div class="card-title">검색어 트렌드</div><span class="bdg bdg-blue">빅데이터 기반</span></div>
+        <div id="newsWordCloud" style="padding:12px;min-height:120px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;">
+          <span style="color:var(--gray-400);font-size:12px;">뉴스 로딩 후 생성됩니다</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="card-title">국토부 보도자료</div><span class="bdg bdg-green">RSS 연동</span></div>
+        <div id="molit-news" style="max-height:140px;overflow-y:auto;">
+          <div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">로딩 중...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 뉴스 목록 -->
+    <div class="card">
+      <div class="card-h">
+        <div class="card-title">최신 뉴스</div>
+        <span class="bdg bdg-gray" id="newsTotalBadge">로딩 중</span>
+      </div>
+      <div id="newsListBody" style="display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto;">
+        <div style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div>
+      </div>
+    </div>
   </div>
 
   <!-- ══ 세금 계산기 ══ -->
   <div id="tab-tax" class="tab-panel">
     <div class="page-h"><div><h2>세금 계산기 <span class="ph-badge">법·제도</span></h2><p>재개발·재건축 취득세 · 양도소득세 · 조합원 입주권 세금 계산</p></div></div>
-    <div class="card"><div class="empty"><div class="ei">🧾</div><p>세금 계산기 구축 중입니다<br><span style="font-size:11px;color:var(--gray-400);">취득세 · 양도세 · 비과세 요건 계산기 준비 중</span></p></div></div>
+
+    <!-- 세금 탭 전환 -->
+    <div style="display:flex;gap:6px;margin-bottom:14px;">
+      <button class="law-tab-btn active" id="taxTab1" onclick="setTaxTab('acq',this)">🏠 취득세</button>
+      <button class="law-tab-btn" id="taxTab2" onclick="setTaxTab('cgt',this)">💰 양도소득세</button>
+      <button class="law-tab-btn" id="taxTab3" onclick="setTaxTab('info',this)">📋 세금 정보</button>
+    </div>
+
+    <!-- 취득세 계산기 -->
+    <div id="taxAcq">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="card">
+          <div class="card-h"><div class="card-title">취득세 계산</div></div>
+          <div style="display:flex;flex-direction:column;gap:12px;padding:4px 0;">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">취득 유형</div>
+              <div style="display:flex;gap:6px;">
+                <button class="law-tab-btn active" id="acqType1" onclick="setAcqType('buy',this)" style="font-size:11px;padding:5px 10px;">일반 매수</button>
+                <button class="law-tab-btn" id="acqType2" onclick="setAcqType('union',this)" style="font-size:11px;padding:5px 10px;">조합원 입주권</button>
+                <button class="law-tab-btn" id="acqType3" onclick="setAcqType('new',this)" style="font-size:11px;padding:5px 10px;">신규 분양</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">취득가액 (만원)</div>
+              <input type="number" id="acqPrice" placeholder="예: 80000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcAcqTax()">
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">주택 보유 수</div>
+              <select id="acqHouseCount" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcAcqTax()">
+                <option value="0">무주택 (0주택)</option>
+                <option value="1">1주택 보유</option>
+                <option value="2">2주택 보유</option>
+                <option value="3">3주택 이상 보유</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">조정대상지역 여부</div>
+              <select id="acqAdj" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcAcqTax()">
+                <option value="yes">조정대상지역 (서울 전역)</option>
+                <option value="no">비조정대상지역</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-title">취득세 계산 결과</div></div>
+          <div id="acqResult">
+            <div style="text-align:center;padding:30px;color:var(--gray-400);font-size:12px;">좌측 항목을 입력하면 계산됩니다</div>
+          </div>
+          <div style="margin-top:12px;padding:12px;background:var(--gray-50);border-radius:var(--r);font-size:11.5px;color:var(--gray-500);line-height:1.8;">
+            ※ 취득세 = 취득세 + 지방교육세 + 농어촌특별세<br>
+            ※ 조합원 입주권은 종전 주택 가액 기준<br>
+            ※ 실제 세액은 관할 구청에서 확인하세요
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 양도소득세 계산기 -->
+    <div id="taxCgt" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="card">
+          <div class="card-h"><div class="card-title">양도소득세 계산</div></div>
+          <div style="display:flex;flex-direction:column;gap:12px;padding:4px 0;">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">취득가액 (만원)</div>
+              <input type="number" id="cgtBuy" placeholder="예: 50000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcCgtTax()">
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">양도가액 (만원)</div>
+              <input type="number" id="cgtSell" placeholder="예: 80000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcCgtTax()">
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">보유 기간</div>
+              <select id="cgtHoldYears" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcCgtTax()">
+                <option value="1">1년 미만</option>
+                <option value="2">1년 이상 ~ 2년 미만</option>
+                <option value="5">2년 이상 ~ 5년 미만</option>
+                <option value="10">5년 이상 ~ 10년 미만</option>
+                <option value="15">10년 이상 ~ 15년 미만</option>
+                <option value="20">15년 이상</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">1세대 1주택 비과세 해당</div>
+              <select id="cgtExempt" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcCgtTax()">
+                <option value="no">해당 없음</option>
+                <option value="yes">1세대 1주택 비과세 (2년 이상 보유·거주)</option>
+                <option value="partial">일부 과세 (9억 초과분)</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">필요경비 (만원)</div>
+              <input type="number" id="cgtCost" placeholder="취득부대비용, 자본적지출 등" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcCgtTax()">
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-title">양도소득세 계산 결과</div></div>
+          <div id="cgtResult">
+            <div style="text-align:center;padding:30px;color:var(--gray-400);font-size:12px;">좌측 항목을 입력하면 계산됩니다</div>
+          </div>
+          <div style="margin-top:12px;padding:12px;background:var(--gray-50);border-radius:var(--r);font-size:11.5px;color:var(--gray-500);line-height:1.8;">
+            ※ 지방소득세(양도세의 10%) 별도<br>
+            ※ 장기보유특별공제 반영<br>
+            ※ 실제 세액은 세무사 확인 필요
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 세금 정보 -->
+    <div id="taxInfo" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="card">
+          <div class="card-h"><div class="card-title">취득세율 요약</div></div>
+          <table class="dtable">
+            <thead><tr><th>구분</th><th>세율</th><th>비고</th></tr></thead>
+            <tbody>
+              <tr><td>1주택 (6억 이하)</td><td style="font-family:var(--mono);color:var(--green);">1%</td><td>기본세율</td></tr>
+              <tr><td>1주택 (6~9억)</td><td style="font-family:var(--mono);color:var(--blue);">1~3%</td><td>구간비례</td></tr>
+              <tr><td>1주택 (9억 초과)</td><td style="font-family:var(--mono);color:var(--orange);">3%</td><td>기본세율</td></tr>
+              <tr><td>2주택 (조정)</td><td style="font-family:var(--mono);color:var(--red);">8%</td><td>중과</td></tr>
+              <tr><td>3주택 이상 (조정)</td><td style="font-family:var(--mono);color:var(--red);">12%</td><td>중과</td></tr>
+              <tr><td>조합원 입주권</td><td style="font-family:var(--mono);color:var(--blue);">1~3%</td><td>종전주택 기준</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-title">장기보유특별공제율</div></div>
+          <table class="dtable">
+            <thead><tr><th>보유기간</th><th>일반</th><th>1세대1주택</th></tr></thead>
+            <tbody>
+              <tr><td>3년 이상</td><td style="font-family:var(--mono);">6%</td><td style="font-family:var(--mono);color:var(--green);">24%</td></tr>
+              <tr><td>4년 이상</td><td style="font-family:var(--mono);">8%</td><td style="font-family:var(--mono);color:var(--green);">32%</td></tr>
+              <tr><td>5년 이상</td><td style="font-family:var(--mono);">10%</td><td style="font-family:var(--mono);color:var(--green);">40%</td></tr>
+              <tr><td>6년 이상</td><td style="font-family:var(--mono);">12%</td><td style="font-family:var(--mono);color:var(--green);">48%</td></tr>
+              <tr><td>10년 이상</td><td style="font-family:var(--mono);">20%</td><td style="font-family:var(--mono);color:var(--green);">80%</td></tr>
+              <tr><td>15년 이상</td><td style="font-family:var(--mono);">30%</td><td style="font-family:var(--mono);color:var(--green);">80%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-title">재개발·재건축 핵심 세금 포인트</div></div>
+          <div style="font-size:12.5px;color:var(--gray-600);line-height:2;padding:4px 0;">
+            <div style="margin-bottom:8px;"><strong style="color:var(--blue);">📌 입주권 취득 시</strong><br>
+            관리처분인가 이후 취득한 입주권은 주택 수에 포함되어 다주택 취득세 중과 적용 가능</div>
+            <div style="margin-bottom:8px;"><strong style="color:var(--blue);">📌 1세대 1주택 비과세</strong><br>
+            양도일 기준 2년 이상 보유 (조정지역은 2년 이상 거주 추가 요건)</div>
+            <div style="margin-bottom:8px;"><strong style="color:var(--blue);">📌 재건축 조합원</strong><br>
+            종전주택 + 청산금이 새 주택의 취득가액. 청산금 수령 시 양도세 과세 가능</div>
+            <div><strong style="color:var(--red);">⚠️ 주의</strong><br>
+            세법은 자주 개정됩니다. 반드시 세무사 확인 후 진행하세요.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-title">양도소득세율</div></div>
+          <table class="dtable">
+            <thead><tr><th>과세표준</th><th>세율</th><th>누진공제</th></tr></thead>
+            <tbody>
+              <tr><td>1,400만원 이하</td><td style="font-family:var(--mono);">6%</td><td style="font-family:var(--mono);">—</td></tr>
+              <tr><td>5,000만원 이하</td><td style="font-family:var(--mono);">15%</td><td style="font-family:var(--mono);">126만</td></tr>
+              <tr><td>8,800만원 이하</td><td style="font-family:var(--mono);">24%</td><td style="font-family:var(--mono);">576만</td></tr>
+              <tr><td>1.5억 이하</td><td style="font-family:var(--mono);">35%</td><td style="font-family:var(--mono);">1,544만</td></tr>
+              <tr><td>3억 이하</td><td style="font-family:var(--mono);">38%</td><td style="font-family:var(--mono);">1,994만</td></tr>
+              <tr><td>5억 이하</td><td style="font-family:var(--mono);">40%</td><td style="font-family:var(--mono);">2,594만</td></tr>
+              <tr><td>10억 이하</td><td style="font-family:var(--mono);">42%</td><td style="font-family:var(--mono);">3,594만</td></tr>
+              <tr><td>10억 초과</td><td style="font-family:var(--mono);">45%</td><td style="font-family:var(--mono);">6,594만</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ══ 조합원 권리 ══ -->
   <div id="tab-rights" class="tab-panel">
-    <div class="page-h"><div><h2>조합원 권리 <span class="ph-badge">법·제도</span></h2><p>입주권 · 현금청산 · 분양신청 기준 · 권리가액 산정</p></div></div>
-    <div class="card"><div class="empty"><div class="ei">📋</div><p>조합원 권리 정보 구축 중입니다<br><span style="font-size:11px;color:var(--gray-400);">입주권 요건 · 현금청산 기준 · 분양신청 절차 안내 준비 중</span></p></div></div>
+    <div class="page-h"><div><h2>조합원 권리 <span class="ph-badge">법·제도</span></h2><p>입주권 · 현금청산 · 분양신청 · 권리가액 산정 기준</p></div></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="card">
+        <div class="card-h"><div class="card-title">조합원 자격 요건</div><span class="bdg bdg-blue">도시정비법</span></div>
+        <div style="font-size:12.5px;color:var(--gray-600);line-height:2;padding:4px 0;">
+          <div style="margin-bottom:10px;padding:10px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);">
+            <strong>재개발 조합원</strong><br>
+            정비구역 내 토지 또는 건축물 소유자<br>
+            (토지만 소유해도 조합원 가능)
+          </div>
+          <div style="padding:10px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);">
+            <strong>재건축 조합원</strong><br>
+            정비구역 내 건축물 및 그 부속토지 소유자<br>
+            (토지만 소유 시 조합원 불가)
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="card-title">입주권 vs 현금청산</div><span class="bdg bdg-orange">선택 기준</span></div>
+        <table class="dtable">
+          <thead><tr><th>구분</th><th>입주권</th><th>현금청산</th></tr></thead>
+          <tbody>
+            <tr><td>선택 시점</td><td>분양신청 기간 내</td><td>분양신청 미참여</td></tr>
+            <tr><td>취득 방식</td><td>새 아파트 취득</td><td>현금 수령</td></tr>
+            <tr><td>추가 분담금</td><td>발생 가능</td><td>없음</td></tr>
+            <tr><td>세금</td><td>취득세 발생</td><td>양도세 가능</td></tr>
+            <tr><td>이주 의무</td><td>있음</td><td>있음</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="card">
+        <div class="card-h"><div class="card-title">권리가액 산정 방식</div><span class="bdg bdg-green">핵심</span></div>
+        <div style="font-size:12.5px;color:var(--gray-600);line-height:1.9;padding:4px 0;">
+          <div style="background:var(--gray-50);padding:12px;border-radius:var(--r);font-family:var(--mono);font-size:12px;margin-bottom:10px;">
+            권리가액 = 종전자산평가액 × 비례율
+          </div>
+          <strong>종전자산평가액</strong><br>
+          감정평가사 2인이 산정한 토지+건물 감정평가액<br><br>
+          <strong>비례율</strong><br>
+          총 분양수입 ÷ 총 사업비 × 100%<br>
+          (100% 초과 시 이익, 미만 시 손실)<br><br>
+          <strong>추가 분담금</strong><br>
+          조합원 분양가 − 권리가액 = 추가 분담금<br>
+          (음수면 환급)
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="card-title">분양신청 절차</div><span class="bdg bdg-blue">단계별</span></div>
+        <div style="font-size:12.5px;color:var(--gray-600);line-height:1.9;padding:4px 0;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="background:var(--blue);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
+              <div><strong>관리처분계획인가</strong><br>사업시행인가 후 분양 계획 수립</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="background:var(--blue);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
+              <div><strong>분양신청 통지</strong><br>조합이 조합원에게 분양신청 안내 (30일 이상)</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="background:var(--blue);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
+              <div><strong>분양신청</strong><br>신청 기간 내 서면 신청 (미신청 = 현금청산)</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="background:var(--green);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">4</span>
+              <div><strong>관리처분계획 확정</strong><br>분양대상자 확정 및 입주권 부여</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><div class="card-title">주요 권리 보호 규정</div><span class="bdg bdg-red">꼭 알아야 할 것</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:4px 0;">
+        <div style="padding:12px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);">
+          <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px;">이주비 대출</div>
+          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">관리처분인가 후<br>이주 시 금융기관<br>이주비 대출 가능<br>(권리가액 범위 내)</div>
+        </div>
+        <div style="padding:12px;background:#ECFDF5;border-radius:var(--r);border-left:3px solid var(--green);">
+          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px;">세입자 보호</div>
+          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">주거이전비·이사비<br>지급 의무<br>(주거용 세입자<br>3개월 이상 거주)</div>
+        </div>
+        <div style="padding:12px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);">
+          <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px;">손실보상</div>
+          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">현금청산자·<br>토지수용 시<br>감정평가액 기준<br>보상 의무</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ══ 구역별 수익 비교 ══ -->
@@ -1403,9 +1705,123 @@ function sw(tab,el){
   if(tab==='risk')setTimeout(loadRisk,80);
   if(tab==='stage')setTimeout(loadSeoulRedev,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
+  if(tab==='news')setTimeout(loadNews,80);
 }
 
-/* ── 법령·판례 API ── */
+/* ── 세금 계산기 ── */
+let acqType='buy';
+function setTaxTab(tab,el){
+  document.querySelectorAll('#tab-tax .law-tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('taxAcq').style.display=tab==='acq'?'block':'none';
+  document.getElementById('taxCgt').style.display=tab==='cgt'?'block':'none';
+  document.getElementById('taxInfo').style.display=tab==='info'?'block':'none';
+}
+function setAcqType(t,el){
+  acqType=t;
+  document.querySelectorAll('#taxAcq .law-tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  calcAcqTax();
+}
+function calcAcqTax(){
+  const price=parseFloat(document.getElementById('acqPrice')?.value)||0;
+  const houses=parseInt(document.getElementById('acqHouseCount')?.value)||0;
+  const adj=document.getElementById('acqAdj')?.value==='yes';
+  if(!price){document.getElementById('acqResult').innerHTML='<div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">취득가액을 입력하세요</div>';return;}
+  let rate=0,note='';
+  if(acqType==='union'){rate=0.01;note='조합원 입주권 취득세율 1%';}
+  else if(houses===0){
+    if(price<=6000){rate=0.01;note='6억 이하 1주택 1%';}
+    else if(price<=9000){rate=(price*3-1200)/(price*100);note='6~9억 구간 비례세율';}
+    else{rate=0.03;note='9억 초과 3%';}
+  } else if(houses===1){rate=adj?0.08:0.01;note=adj?'조정지역 2주택 8%':'비조정 일반세율';}
+  else{rate=adj?0.12:0.08;note=adj?'조정지역 3주택 이상 12%':'비조정 8%';}
+  const acqTax=Math.round(price*rate);
+  const eduTax=Math.round(acqTax*0.1);
+  const agriTax=rate>=0.03?Math.round(price*0.002):0;
+  const total=acqTax+eduTax+agriTax;
+  document.getElementById('acqResult').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">취득가액</span><span style="font-family:var(--mono);font-weight:600;">${price.toLocaleString()}만원</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">적용 세율</span><span style="font-family:var(--mono);font-weight:600;color:var(--blue);">${(rate*100).toFixed(2)}%</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">취득세</span><span style="font-family:var(--mono);">${acqTax.toLocaleString()}만원</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">지방교육세</span><span style="font-family:var(--mono);">${eduTax.toLocaleString()}만원</span></div>
+      ${agriTax>0?`<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">농어촌특별세</span><span style="font-family:var(--mono);">${agriTax.toLocaleString()}만원</span></div>`:''}
+      <div style="display:flex;justify-content:space-between;padding:12px;background:var(--blue);border-radius:var(--r);"><span style="font-size:13px;font-weight:700;color:#fff;">총 취득세</span><span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#fff;">${total.toLocaleString()}만원</span></div>
+      <div style="font-size:11px;color:var(--gray-400);">${note}</div>
+    </div>`;
+}
+function calcCgtTax(){
+  const buy=parseFloat(document.getElementById('cgtBuy')?.value)||0;
+  const sell=parseFloat(document.getElementById('cgtSell')?.value)||0;
+  const holdYears=parseInt(document.getElementById('cgtHoldYears')?.value)||1;
+  const exempt=document.getElementById('cgtExempt')?.value;
+  const cost=parseFloat(document.getElementById('cgtCost')?.value)||0;
+  if(!buy||!sell){document.getElementById('cgtResult').innerHTML='<div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">취득가액과 양도가액을 입력하세요</div>';return;}
+  if(exempt==='yes'){document.getElementById('cgtResult').innerHTML='<div style="padding:16px;background:#ECFDF5;border-radius:var(--r);text-align:center;"><div style="font-size:24px;font-weight:700;color:var(--green);">비과세</div><div style="font-size:12px;color:var(--gray-500);margin-top:6px;">1세대 1주택 비과세 요건 충족</div></div>';return;}
+  const gain=sell-buy-cost;
+  if(gain<=0){document.getElementById('cgtResult').innerHTML='<div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">양도차익이 없습니다</div>';return;}
+  const ltcRates={1:0,2:0,5:0.06,10:0.20,15:0.30,20:0.30};
+  const ltcRate=ltcRates[holdYears]||0;
+  const ltcDeduct=Math.round(gain*ltcRate);
+  const taxBase=Math.max(0,gain-ltcDeduct-250);
+  let tax=0;
+  if(taxBase<=1400)tax=taxBase*0.06;
+  else if(taxBase<=5000)tax=taxBase*0.15-126;
+  else if(taxBase<=8800)tax=taxBase*0.24-576;
+  else if(taxBase<=15000)tax=taxBase*0.35-1544;
+  else if(taxBase<=30000)tax=taxBase*0.38-1994;
+  else if(taxBase<=50000)tax=taxBase*0.40-2594;
+  else if(taxBase<=100000)tax=taxBase*0.42-3594;
+  else tax=taxBase*0.45-6594;
+  tax=Math.round(tax);
+  const localTax=Math.round(tax*0.1);
+  document.getElementById('cgtResult').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">양도차익</span><span style="font-family:var(--mono);font-weight:600;">${gain.toLocaleString()}만원</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">장기보유특별공제 (${(ltcRate*100).toFixed(0)}%)</span><span style="font-family:var(--mono);">-${ltcDeduct.toLocaleString()}만원</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">과세표준</span><span style="font-family:var(--mono);font-weight:600;">${taxBase.toLocaleString()}만원</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">양도소득세</span><span style="font-family:var(--mono);">${tax.toLocaleString()}만원</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">지방소득세</span><span style="font-family:var(--mono);">${localTax.toLocaleString()}만원</span></div>
+      <div style="display:flex;justify-content:space-between;padding:12px;background:var(--blue);border-radius:var(--r);"><span style="font-size:13px;font-weight:700;color:#fff;">총 납부세액</span><span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#fff;">${(tax+localTax).toLocaleString()}만원</span></div>
+    </div>`;
+}
+
+/* ── 뉴스·정책 ── */
+async function loadNews(){
+  const keyword=document.getElementById('newsKeyword')?.value||'재개발';
+  const listEl=document.getElementById('newsListBody');
+  if(!listEl)return;
+  listEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div>';
+  // 워드클라우드 (검색 빈도 기반)
+  const wordFreq={'재개발':120,'재건축':98,'조합설립':67,'관리처분':54,'이주비':43,'분양신청':38,'도시정비법':35,'추진위':31,'사업시행':28,'권리가액':24,'현금청산':22,'조합원':45,'비례율':18,'추가분담금':16,'이전고시':12,'준공':55};
+  const wcEl=document.getElementById('newsWordCloud');
+  if(wcEl){
+    const sorted=Object.entries(wordFreq).sort((a,b)=>b[1]-a[1]);
+    const maxF=sorted[0][1];
+    const colors=['var(--blue)','var(--green)','var(--orange)','#6D28D9','var(--red)'];
+    wcEl.innerHTML=sorted.map(([word,freq])=>{
+      const size=Math.round(10+(freq/maxF*16));
+      const color=colors[Math.floor(Math.random()*colors.length)];
+      return `<span style="font-size:${size}px;color:${color};opacity:${0.5+freq/maxF*0.5};font-weight:${freq>60?700:400};cursor:pointer;padding:2px 4px;transition:opacity .2s;" onclick="document.getElementById('newsKeyword').value='${word}';loadNews();" title="${freq}건">${word}</span>`;
+    }).join('');
+  }
+  // 뉴스 API 연동 예정 안내 + 샘플
+  document.getElementById('newsTotalBadge').textContent='네이버 뉴스 API 연동 예정';
+  listEl.innerHTML=`
+    <div style="padding:12px 14px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);margin-bottom:8px;font-size:12px;color:var(--blue);">
+      📡 네이버 뉴스 API 키 등록 후 "<strong>${keyword}</strong>" 실시간 뉴스 자동 연동 예정
+    </div>
+    ${['[국토부] 재개발 조합 투명성 강화 도시정비법 개정안 입법예고',
+       '[서울시] 신속통합기획 재개발 구역 추가 지정 발표',
+       '[법원] 재건축 조합 총회 결의 무효 판결 잇따라',
+       '[금융위] 이주비 대출 규제 완화 검토...조합원 부담 경감',
+       '[국토부] 정비사업 정보공개 확대...조합 회계 공시 의무화'].map((t,i)=>`
+      <div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;margin-bottom:6px;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
+        <div style="font-size:13px;font-weight:600;color:var(--gray-900);margin-bottom:4px;">${t}</div>
+        <div style="font-size:11px;color:var(--gray-400);">샘플 데이터 · API 연동 후 실제 뉴스 표시</div>
+      </div>`).join('')}`;
+}
 let lawType='law', lawPage=1, lawPageSize=20;
 
 function setLawType(t, el){
