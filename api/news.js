@@ -1,7 +1,8 @@
 /**
  * api/news.js
- * 네이버 뉴스 검색 API 프록시
- * GET /api/news?query=재개발&display=20&start=1
+ * 네이버 뉴스 검색 API + 국토부 보도자료 RSS 프록시
+ * GET /api/news?query=재개발&display=20
+ * GET /api/news?type=molit  → 국토부 보도자료
  */
 
 export default async function handler(req, res) {
@@ -9,18 +10,57 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  const { type = 'naver', query = '재개발', display = '20', start = '1', sort = 'date' } = req.query;
+
+  // ── 국토부 보도자료 RSS ──
+  if (type === 'molit') {
+    try {
+      // 국토부 보도자료 RSS 피드
+      const RSS_URLS = [
+        'https://www.molit.go.kr/portal/bbs/rsslist.do?bbsId=BBSMSTR_000000000227', // 보도자료
+        'https://www.molit.go.kr/portal/bbs/rsslist.do?bbsId=BBSMSTR_000000000159', // 공지사항
+      ];
+
+      const results = [];
+      for (const rssUrl of RSS_URLS) {
+        try {
+          const r = await fetch(rssUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/rss+xml, application/xml, text/xml' },
+            signal: AbortSignal.timeout(6000),
+          });
+          const xml = await r.text();
+
+          // XML 파싱 (정규식 기반)
+          const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
+          for (const match of items.slice(0, 10)) {
+            const block = match[1];
+            const get = (tag) => {
+              const m = block.match(new RegExp(`<${tag}[^>]*>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?<\/${tag}>`));
+              return m ? m[1].trim().replace(/<[^>]*>/g, '') : '';
+            };
+            results.push({
+              title:   get('title'),
+              link:    get('link') || get('guid'),
+              pubDate: get('pubDate') || get('dc:date'),
+              desc:    get('description').slice(0, 100),
+            });
+          }
+        } catch(e) { console.error('RSS fetch 오류:', e.message); }
+      }
+
+      return res.status(200).json({ success: true, type: 'molit', items: results.slice(0, 10) });
+
+    } catch (err) {
+      return res.status(500).json({ error: '국토부 RSS 호출 실패', detail: err.message });
+    }
+  }
+
+  // ── 네이버 뉴스 검색 ──
   const CLIENT_ID     = process.env.NAVER_CLIENT_ID;
   const CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
   if (!CLIENT_ID || !CLIENT_SECRET) {
     return res.status(500).json({ error: '네이버 API 키 미설정' });
   }
-
-  const {
-    query   = '재개발',
-    display = '20',
-    start   = '1',
-    sort    = 'date',   // date | sim
-  } = req.query;
 
   try {
     const url = `https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(query)}&display=${display}&start=${start}&sort=${sort}`;
@@ -33,12 +73,9 @@ export default async function handler(req, res) {
     });
 
     const data = await r.json();
-    if (!r.ok) {
-      return res.status(r.status).json({ error: data.errorMessage || 'API 오류', raw: data });
-    }
+    if (!r.ok) return res.status(r.status).json({ error: data.errorMessage || 'API 오류' });
 
-    // HTML 태그 제거 함수
-    const strip = (str = '') => str.replace(/<[^>]*>/g, '').replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+    const strip = (s = '') => s.replace(/<[^>]*>/g,'').replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>');
 
     const items = (data.items || []).map(item => ({
       title:       strip(item.title),
@@ -48,17 +85,9 @@ export default async function handler(req, res) {
       source:      extractSource(item.originallink || item.link),
     }));
 
-    return res.status(200).json({
-      success:    true,
-      total:      data.total,
-      display:    data.display,
-      start:      data.start,
-      query,
-      items,
-    });
+    return res.status(200).json({ success: true, total: data.total, query, items });
 
   } catch (err) {
-    console.error('네이버 뉴스 API 오류:', err);
     return res.status(500).json({ error: '뉴스 API 호출 실패', detail: err.message });
   }
 }
@@ -72,6 +101,7 @@ function extractSource(url = '') {
       'sedaily.com':'서울경제','edaily.co.kr':'이데일리','newsis.com':'뉴시스',
       'yonhapnews.co.kr':'연합뉴스','news1.kr':'뉴스1','yna.co.kr':'연합뉴스',
       'khan.co.kr':'경향신문','ohmynews.com':'오마이뉴스','moneytoday.co.kr':'머니투데이',
+      'molit.go.kr':'국토교통부',
     };
     return map[host] || host.split('.')[0];
   } catch { return '언론사'; }
