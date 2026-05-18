@@ -365,25 +365,16 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
     <div class="logo-mark">RD</div>
     <div class="logo-text">REDEV AI <span>재건축·재개발 플랫폼</span></div>
   </div>
-  <div class="gnb-div"></div>
-  <nav class="gnb-tabs">
-    <button class="gnb-tab active" data-tab="dashboard" onclick="sw('dashboard',this)">대시보드</button>
-    <button class="gnb-tab" data-tab="search" onclick="sw('search',this)">구역 검색</button>
-    <button class="gnb-tab" data-tab="alert" onclick="sw('alert',this)">지연 경보</button>
-    <button class="gnb-tab" data-tab="risk" onclick="sw('risk',this)">리스크</button>
-    <button class="gnb-tab" data-tab="stage" onclick="sw('stage',this)">단계 관리</button>
-    <button class="gnb-tab" data-tab="investor" onclick="sw('investor',this)">투자 분석</button>
-    <button class="gnb-tab" data-tab="trade" onclick="sw('trade',this)">실거래가</button>
-    <button class="gnb-tab" data-tab="legal" onclick="sw('legal',this)">법령·판례</button>
-    <button class="gnb-tab" data-tab="union" onclick="sw('union',this)">조합</button>
-  </nav>
-  <div class="gnb-right" style="position:relative;">
-    <div class="live-chip"><span class="live-dot"></span>LIVE</div>
+  <div style="flex:1;"></div>
+  <div class="gnb-right" style="position:relative;display:flex;align-items:center;gap:12px;">
     <div class="gnb-srch">
       <span style="color:rgba(255,255,255,.3);font-size:12px;">⌕</span>
       <input type="text" placeholder="구역명 검색..." id="gnbSrch" oninput="gnbQ(this.value)" onblur="setTimeout(()=>{document.getElementById('gnbDrop').style.display='none'},200)">
     </div>
     <div class="gnb-drop" id="gnbDrop"></div>
+    <div class="live-chip"><span class="live-dot"></span>LIVE</div>
+    <div style="background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.04em;">FREE</div>
+    <div style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;">👤</div>
   </div>
 </header>
 
@@ -391,33 +382,54 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="sb-proj">
-    <div class="sb-proj-lbl">서울시 정비사업</div>
-    <div class="sb-proj-name">2025년 12월 기준</div>
-    <div class="sb-proj-sub">25개 자치구 · 2,185구역</div>
+  <div class="sb-item active" data-tab="dashboard" onclick="sw('dashboard',this)" style="margin:8px 10px;padding:10px 12px;border-radius:var(--r);font-weight:700;font-size:13px;">
+    <span class="sb-icon">▦</span>대시보드
   </div>
+
+  <div class="sb-div"></div>
+
   <div class="sb-sec">
-    <div class="sb-sec-lbl">분석</div>
-    <div class="sb-item active" data-tab="dashboard" onclick="sw('dashboard',this)"><span class="sb-icon">▦</span>대시보드</div>
+    <div class="sb-sec-lbl">정비사업 현황</div>
     <div class="sb-item" data-tab="search" onclick="sw('search',this)"><span class="sb-icon">◎</span>구역 검색</div>
+    <div class="sb-item" data-tab="stage" onclick="sw('stage',this)"><span class="sb-icon">≡</span>단계 관리</div>
     <div class="sb-item" data-tab="alert" onclick="sw('alert',this)"><span class="sb-icon">△</span>지연 경보<span class="sb-badge" id="sbBadge">-</span></div>
-    <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">◈</span>리스크</div>
+  </div>
+
+  <div class="sb-div"></div>
+
+  <div class="sb-sec">
+    <div class="sb-sec-lbl">정보</div>
+    <div class="sb-item" data-tab="news" onclick="sw('news',this)"><span class="sb-icon">📰</span>뉴스·정책</div>
+    <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">📊</span>금융 지표</div>
     <div class="sb-item" data-tab="trade" onclick="sw('trade',this)"><span class="sb-icon">₩</span>실거래가</div>
   </div>
+
   <div class="sb-div"></div>
+
   <div class="sb-sec">
-    <div class="sb-sec-lbl">관리</div>
-    <div class="sb-item" data-tab="stage" onclick="sw('stage',this)"><span class="sb-icon">≡</span>단계 관리</div>
-    <div class="sb-item" data-tab="legal" onclick="sw('legal',this)"><span class="sb-icon">§</span>법령·판례</div>
+    <div class="sb-sec-lbl">법·제도</div>
+    <div class="sb-item" data-tab="legal" onclick="sw('legal',this)"><span class="sb-icon">⚖</span>법령·판례</div>
+    <div class="sb-item" data-tab="tax" onclick="sw('tax',this)"><span class="sb-icon">🧾</span>세금 계산기</div>
+    <div class="sb-item" data-tab="rights" onclick="sw('rights',this)"><span class="sb-icon">📋</span>조합원 권리</div>
   </div>
+
   <div class="sb-div"></div>
+
   <div class="sb-sec">
-    <div class="sb-sec-lbl">투자</div>
-    <div class="sb-item" data-tab="investor" onclick="sw('investor',this)"><span class="sb-icon">↗</span>투자 분석</div>
-    <div class="sb-item" data-tab="union" onclick="sw('union',this)"><span class="sb-icon">◻</span>조합</div>
+    <div class="sb-sec-lbl">투자 데이터</div>
+    <div class="sb-item" data-tab="investor" onclick="sw('investor',this)"><span class="sb-icon">💰</span>수익 계산기</div>
+    <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
+    <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
   </div>
+
+  <div class="sb-div"></div>
+
+  <div class="sb-sec">
+    <div class="sb-item" data-tab="prism" onclick="sw('prism',this)" style="background:rgba(27,79,216,.08);border:1px solid rgba(27,79,216,.2);border-radius:var(--r);margin:0 4px;"><span class="sb-icon">🏢</span>PRISM <span style="font-size:10px;color:var(--gray-400);margin-left:4px;">(B2B)</span></div>
+  </div>
+
   <div class="sb-bottom">
-    <div class="sb-stat"><span class="sb-stat-l">총 데이터</span><span class="sb-stat-v">20,531건</span></div>
+    <div class="sb-stat"><span class="sb-stat-l">총 데이터</span><span class="sb-stat-v">45,000건+</span></div>
     <div class="sb-stat"><span class="sb-stat-l">총 구역</span><span class="sb-stat-v" id="sbTot">—</span></div>
     <div class="sb-stat"><span class="sb-stat-l">기준일</span><span class="sb-stat-v">2025.12</span></div>
     <div class="sb-db"><span class="sb-db-dot"></span><span class="sb-db-txt">Supabase 연결됨</span></div>
@@ -587,7 +599,7 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
   <!-- ══ 리스크 ══ -->
   <div id="tab-risk" class="tab-panel">
     <div class="page-h">
-      <div><h2>리스크 분석 <span class="ph-badge">한국은행 ECOS</span></h2><p>사업 리스크 요인 종합 평가 (10점 만점) · 실시간 연동</p></div>
+      <div><h2>금융 지표 <span class="ph-badge">한국은행 ECOS</span></h2><p>기준금리 · 물가지수 · 사업 리스크 요인 종합 · 실시간 연동</p></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <span class="bdg bdg-green" id="riskUpdateTime">로딩 중...</span>
         <button onclick="loadRisk()" style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:11.5px;cursor:pointer;font-family:var(--font);">새로고침</button>
@@ -693,15 +705,11 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
   <!-- ══ 단계 관리 ══ -->
   <div id="tab-stage" class="tab-panel">
     <div class="page-h">
-      <div><h2>단계 관리</h2><p>정비사업 9단계 현황 · 서울시 실시간 데이터</p></div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <span class="bdg bdg-green" id="seoulApiStatus">Supabase 데이터</span>
-        <button onclick="loadSeoulRedev()" style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:11.5px;cursor:pointer;font-family:var(--font);">서울시 API 새로고침</button>
-      </div>
+      <div><h2>단계 관리</h2><p>정비사업 9단계 현황 · Supabase 실데이터</p></div>
     </div>
 
     <!-- 서울시 API 현황 카드 -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;" id="seoulKpiRow" style="display:none;">
+    <div style="display:none;" id="seoulKpiRow">
       <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">서울시 API 총 구역</div></div><div class="kpi-val c-blue" id="seoulTotal">—</div><div class="kpi-foot"><span class="kpi-sub">실시간 조회</span><span class="kpi-tag bdg-green">서울시</span></div></div>
       <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">재건축</div></div><div class="kpi-val c-green" id="seoulRecon">—</div><div class="kpi-foot"><span class="kpi-sub">사업 유형별</span></div></div>
       <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">재개발</div></div><div class="kpi-val c-orange" id="seoulRedev">—</div><div class="kpi-foot"><span class="kpi-sub">사업 유형별</span></div></div>
@@ -942,7 +950,65 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
     </div>
   </div>
 
-  <!-- ══ 조합 ══ -->
+  <!-- ══ 뉴스·정책 ══ -->
+  <div id="tab-news" class="tab-panel">
+    <div class="page-h"><div><h2>뉴스·정책 <span class="ph-badge">준비 중</span></h2><p>재개발·재건축 관련 뉴스 및 국토부 정책 보도자료</p></div></div>
+    <div class="card"><div class="empty"><div class="ei">📰</div><p>뉴스·정책 데이터 연동 준비 중입니다<br><span style="font-size:11px;color:var(--gray-400);">네이버 뉴스 API · 국토부 보도자료 RSS 연동 예정</span></p></div></div>
+  </div>
+
+  <!-- ══ 세금 계산기 ══ -->
+  <div id="tab-tax" class="tab-panel">
+    <div class="page-h"><div><h2>세금 계산기 <span class="ph-badge">법·제도</span></h2><p>재개발·재건축 취득세 · 양도소득세 · 조합원 입주권 세금 계산</p></div></div>
+    <div class="card"><div class="empty"><div class="ei">🧾</div><p>세금 계산기 구축 중입니다<br><span style="font-size:11px;color:var(--gray-400);">취득세 · 양도세 · 비과세 요건 계산기 준비 중</span></p></div></div>
+  </div>
+
+  <!-- ══ 조합원 권리 ══ -->
+  <div id="tab-rights" class="tab-panel">
+    <div class="page-h"><div><h2>조합원 권리 <span class="ph-badge">법·제도</span></h2><p>입주권 · 현금청산 · 분양신청 기준 · 권리가액 산정</p></div></div>
+    <div class="card"><div class="empty"><div class="ei">📋</div><p>조합원 권리 정보 구축 중입니다<br><span style="font-size:11px;color:var(--gray-400);">입주권 요건 · 현금청산 기준 · 분양신청 절차 안내 준비 중</span></p></div></div>
+  </div>
+
+  <!-- ══ 구역별 수익 비교 ══ -->
+  <div id="tab-compare" class="tab-panel">
+    <div class="page-h"><div><h2>구역별 수익 비교 <span class="ph-badge">투자 데이터</span></h2><p>관심 구역 나란히 비교 · 실거래가 자동 연동</p></div></div>
+    <div class="card"><div class="empty"><div class="ei">📊</div><p>구역별 수익 비교 기능 준비 중입니다<br><span style="font-size:11px;color:var(--gray-400);">최대 3개 구역 동시 비교 · Standard 이상 제공 예정</span></p></div></div>
+  </div>
+
+  <!-- ══ 시세 추이 ══ -->
+  <div id="tab-trend" class="tab-panel">
+    <div class="page-h"><div><h2>시세 추이 <span class="ph-badge">투자 데이터</span></h2><p>관심 구역 실거래가 변화 추이 · 단계별 시세 영향 분석</p></div></div>
+    <div class="card"><div class="empty"><div class="ei">📈</div><p>시세 추이 기능 준비 중입니다<br><span style="font-size:11px;color:var(--gray-400);">구역별 실거래가 시계열 차트 준비 중</span></p></div></div>
+  </div>
+
+  <!-- ══ PRISM (B2B) ══ -->
+  <div id="tab-prism" class="tab-panel">
+    <div class="page-h"><div><h2>PRISM <span class="ph-badge" style="background:var(--blue);color:#fff;">B2B</span></h2><p>Project Risk & Information System for Management · 추진위·조합 맞춤형 대시보드</p></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="card" style="border:2px solid var(--blue-mid);">
+        <div class="card-h"><div class="card-title">PRISM이란?</div></div>
+        <div style="padding:8px 0;font-size:13px;color:var(--gray-600);line-height:1.9;">
+          재개발·재건축 <strong>추진위원회 · 조합</strong>을 위한<br>
+          맞춤형 사업 관리 대시보드입니다.<br><br>
+          • 단계별 사업 일정 관리<br>
+          • 조합원 현황 관리<br>
+          • 사업비 집행 현황<br>
+          • AI 기반 리스크 보고서<br>
+          • 공시 자동화 지원
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="card-title">도입 문의</div></div>
+        <div style="padding:8px 0;font-size:13px;color:var(--gray-600);line-height:1.9;">
+          PRISM은 <strong>B2B 별도 계약</strong>으로 제공됩니다.<br><br>
+          추진위·조합의 규모와 단계에 맞춰<br>
+          맞춤형 대시보드를 구축해 드립니다.<br><br>
+          <span style="color:var(--blue);font-weight:600;">📧 문의: admin@redev.ai</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 조합 (구버전 유지) ══ -->
   <div id="tab-union" class="tab-panel">
     <div class="page-h"><div><h2>조합 관리</h2></div></div>
     <div class="card"><div class="empty"><div class="ei">◻</div><p>조합 관리 시스템 구축 예정입니다</p></div></div>
@@ -1328,7 +1394,8 @@ async function sendAI(){
 /* TAB SWITCH */
 function sw(tab,el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
+  const tabEl=document.getElementById('tab-'+tab);
+  if(tabEl)tabEl.classList.add('active');
   document.querySelectorAll('.gnb-tab,.sb-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll(`[data-tab="${tab}"]`).forEach(n=>n.classList.add('active'));
   if(tab==='investor')setTimeout(calcSim,80);
