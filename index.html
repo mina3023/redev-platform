@@ -342,6 +342,19 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
 .dtable tr:last-child td{border-bottom:none;}
 .dtable tr:hover td{background:var(--blue-light);}
 .dtable td:first-child{font-weight:600;color:var(--gray-900);}
+.law-tab-btn{padding:6px 13px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:#fff;color:var(--gray-600);border-radius:var(--r);cursor:pointer;transition:all .12s;font-family:var(--font);}
+.law-tab-btn:hover{border-color:var(--blue);color:var(--blue);}
+.law-tab-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.law-item{padding:11px 13px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .12s;}
+.law-item:hover,.law-item.sel{background:var(--blue-light);border-color:var(--blue-mid);}
+.law-item-name{font-size:12.5px;font-weight:600;color:var(--gray-900);margin-bottom:4px;line-height:1.4;}
+.law-item-meta{font-size:11px;color:var(--gray-400);display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.law-mtag{background:var(--gray-100);padding:1px 6px;border-radius:3px;font-size:10.5px;color:var(--gray-600);}
+.law-detail-lbl{font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px;}
+.law-detail-val{font-size:13px;color:var(--gray-700);line-height:1.7;margin-bottom:14px;}
+.law-detail-box{background:var(--gray-50);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:12px;color:var(--gray-700);line-height:1.9;margin-bottom:14px;}
+.pg-btn{padding:3px 9px;border:1px solid var(--border);border-radius:4px;font-size:11.5px;cursor:pointer;background:#fff;color:var(--gray-600);font-family:var(--font);}
+.pg-btn:hover,.pg-btn.on{background:var(--blue);border-color:var(--blue);color:#fff;}
 </style>
 </head>
 <body>
@@ -721,8 +734,77 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
 
   <!-- ══ 법령·판례 ══ -->
   <div id="tab-legal" class="tab-panel">
-    <div class="page-h"><div><h2>법령·판례</h2></div></div>
-    <div class="card"><div class="empty"><div class="ei">§</div><p>법령·판례 데이터베이스 구축 예정입니다</p></div></div>
+    <div class="page-h">
+      <div>
+        <h2>법령·판례 <span class="ph-badge">국가법령정보</span></h2>
+        <p>도시정비법 주요 조문 · 재개발·재건축 관련 판례 · 국가법령정보 공동활용 Open API</p>
+      </div>
+    </div>
+
+    <!-- 검색 바 -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;gap:10px;align-items:center;">
+        <!-- 검색 유형 탭 -->
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button class="law-tab-btn active" data-ltype="law" onclick="setLawType('law',this)">📜 법령</button>
+          <button class="law-tab-btn" data-ltype="prec" onclick="setLawType('prec',this)">⚖️ 판례</button>
+          <button class="law-tab-btn" data-ltype="admrul" onclick="setLawType('admrul',this)">📋 행정규칙</button>
+        </div>
+        <input type="text" id="lawQuery" class="zone-inp"
+          style="flex:1;padding:9px 14px;font-size:13.5px;"
+          placeholder="검색어 입력... (예: 도시정비법, 재개발 조합, 관리처분계획)"
+          value="도시및주거환경정비법"
+          onkeydown="if(event.key==='Enter')searchLaw()">
+        <button onclick="searchLaw()"
+          style="padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-family:var(--font);font-weight:600;white-space:nowrap;">
+          검색
+        </button>
+      </div>
+
+      <!-- 빠른 검색 태그 -->
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;">
+        <span style="font-size:11px;color:var(--gray-400);margin-right:4px;align-self:center;">빠른검색:</span>
+        <span class="chip" onclick="quickLawSearch('도시및주거환경정비법')">도시정비법</span>
+        <span class="chip" onclick="quickLawSearch('재개발')">재개발</span>
+        <span class="chip" onclick="quickLawSearch('재건축')">재건축</span>
+        <span class="chip" onclick="quickLawSearch('조합설립')">조합설립</span>
+        <span class="chip" onclick="quickLawSearch('관리처분계획')">관리처분</span>
+        <span class="chip" onclick="quickLawSearch('분양신청')">분양신청</span>
+        <span class="chip" onclick="quickLawSearch('이주대책')">이주대책</span>
+        <span class="chip" onclick="quickLawSearch('사업시행인가')">사업시행인가</span>
+      </div>
+    </div>
+
+    <!-- 결과 영역 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+
+      <!-- 결과 목록 -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title" id="lawResultTitle">검색 결과</div>
+          <span class="bdg bdg-blue" id="lawResultCount">—</span>
+        </div>
+        <div id="lawResultList" style="display:flex;flex-direction:column;gap:6px;max-height:580px;overflow-y:auto;">
+          <div class="empty"><div class="ei">⚖️</div><p>검색어를 입력하고 검색하세요</p></div>
+        </div>
+        <!-- 페이지네이션 -->
+        <div id="lawPagination" style="display:none;justify-content:center;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);"></div>
+      </div>
+
+      <!-- 상세 보기 -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title" id="lawDetailTitle">상세 정보</div>
+          <a id="lawDetailLink" href="#" target="_blank" style="display:none;">
+            <span class="bdg bdg-green">법령정보 바로가기 ↗</span>
+          </a>
+        </div>
+        <div id="lawDetailBody" style="max-height:580px;overflow-y:auto;">
+          <div class="empty"><div class="ei">📜</div><p>목록에서 항목을 선택하면 상세 정보가 표시됩니다</p></div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <!-- ══ 투자 분석 ══ -->
@@ -1183,6 +1265,191 @@ function sw(tab,el){
   if(tab==='trade')setTimeout(loadTrade,80);
   if(tab==='risk')setTimeout(loadRisk,80);
   if(tab==='stage')setTimeout(loadSeoulRedev,80);
+  if(tab==='legal')setTimeout(()=>searchLaw(),80);
+}
+
+/* ── 법령·판례 API ── */
+let lawType='law', lawPage=1, lawPageSize=20;
+
+function setLawType(t, el){
+  lawType=t; lawPage=1;
+  document.querySelectorAll('.law-tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const q = lawType==='prec'?'재개발 조합':lawType==='admrul'?'도시정비':'도시및주거환경정비법';
+  document.getElementById('lawQuery').value=q;
+}
+
+function quickLawSearch(q){
+  document.getElementById('lawQuery').value=q;
+  lawPage=1;
+  searchLaw();
+}
+
+async function searchLaw(){
+  const query=document.getElementById('lawQuery').value.trim();
+  if(!query)return;
+  const listEl=document.getElementById('lawResultList');
+  const titleEl=document.getElementById('lawResultTitle');
+  const countEl=document.getElementById('lawResultCount');
+  listEl.innerHTML=`<div style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>검색 중...</div>`;
+  countEl.textContent='검색 중';
+
+  try{
+    const res=await fetch(`/api/law?type=${lawType}&query=${encodeURIComponent(query)}&page=${lawPage}`);
+    const data=await res.json();
+
+    if(!data.success){
+      listEl.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>${data.error||'API 오류'}</p></div>`;
+      return;
+    }
+
+    const items=data.items||[];
+    const total=data.total||0;
+    const typeLabel=lawType==='law'?'법령':lawType==='prec'?'판례':'행정규칙';
+    titleEl.textContent=`${typeLabel} 검색 결과`;
+    countEl.textContent=`총 ${total.toLocaleString()}건`;
+
+    if(!items.length){
+      listEl.innerHTML=`<div class="empty"><div class="ei">🔎</div><p>검색 결과가 없습니다</p></div>`;
+      return;
+    }
+
+    if(lawType==='law'){
+      listEl.innerHTML=items.map((item,i)=>`
+        <div class="law-item" id="law-${i}" onclick="showLawDetail(${i}, ${JSON.stringify(item).replace(/"/g,'&quot;')})">
+          <div class="law-item-name">${item.name}</div>
+          <div class="law-item-meta">
+            <span class="law-mtag">${item.type||'법령'}</span>
+            <span class="law-mtag">${item.ministry||''}</span>
+            ${item.effDate?`<span style="color:var(--gray-400);">시행 ${item.effDate.replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')}</span>`:''}
+          </div>
+        </div>`).join('');
+    } else if(lawType==='prec'){
+      listEl.innerHTML=items.map((item,i)=>`
+        <div class="law-item" id="law-${i}" onclick="showPrecDetail(${i}, ${JSON.stringify(item).replace(/"/g,'&quot;')})">
+          <div class="law-item-name">${item.name}
+            ${item.verdict?`<span class="pg-btn" style="font-size:10px;padding:1px 6px;margin-left:5px;">${item.verdict}</span>`:''}
+          </div>
+          <div class="law-item-meta">
+            <span class="law-mtag">${item.court||''}</span>
+            <span class="law-mtag">${item.caseNum||''}</span>
+            ${item.judgeDate?`<span style="color:var(--gray-400);">${item.judgeDate.replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')} 선고</span>`:''}
+          </div>
+        </div>`).join('');
+    } else {
+      listEl.innerHTML=items.map((item,i)=>`
+        <div class="law-item" id="law-${i}" onclick="showAdmDetail(${i}, ${JSON.stringify(item).replace(/"/g,'&quot;')})">
+          <div class="law-item-name">${item.name}</div>
+          <div class="law-item-meta">
+            <span class="law-mtag">${item.type||''}</span>
+            <span class="law-mtag">${item.ministry||''}</span>
+            ${item.effDate?`<span style="color:var(--gray-400);">시행 ${item.effDate.replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')}</span>`:''}
+          </div>
+        </div>`).join('');
+    }
+
+    // 페이지네이션
+    const totalPages=Math.ceil(total/lawPageSize);
+    const pgEl=document.getElementById('lawPagination');
+    if(totalPages>1){
+      pgEl.style.display='flex';
+      const start=Math.max(1,lawPage-2), end=Math.min(totalPages,lawPage+2);
+      let pgHtml=lawPage>1?`<button class="pg-btn" onclick="goLawPage(${lawPage-1})">◀</button>`:'';
+      for(let p=start;p<=end;p++){
+        pgHtml+=`<button class="pg-btn ${p===lawPage?'on':''}" onclick="goLawPage(${p})">${p}</button>`;
+      }
+      pgHtml+=lawPage<totalPages?`<button class="pg-btn" onclick="goLawPage(${lawPage+1})">▶</button>`:'';
+      pgEl.innerHTML=pgHtml;
+    } else {
+      pgEl.style.display='none';
+    }
+
+    // 첫 번째 항목 자동 선택
+    if(items.length>0){
+      if(lawType==='law') showLawDetail(0, items[0]);
+      else if(lawType==='prec') showPrecDetail(0, items[0]);
+      else showAdmDetail(0, items[0]);
+    }
+
+  }catch(e){
+    console.error(e);
+    listEl.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>API 호출 오류 — Vercel 배포 환경에서 사용해 주세요</p></div>`;
+  }
+}
+
+function goLawPage(p){ lawPage=p; searchLaw(); }
+
+function showLawDetail(idx, item){
+  document.querySelectorAll('.law-item').forEach(el=>el.classList.remove('sel'));
+  const el=document.getElementById('law-'+idx);if(el)el.classList.add('sel');
+  document.getElementById('lawDetailTitle').textContent=item.name||'법령 상세';
+  const linkEl=document.getElementById('lawDetailLink');
+  linkEl.href=item.lawLink||'#';
+  linkEl.style.display='block';
+  document.getElementById('lawDetailBody').innerHTML=`
+    <div class="law-detail-lbl">법령 기본정보</div>
+    <div class="law-detail-box">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">법령 구분</div><div style="font-weight:600;">${item.type||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">소관 부처</div><div style="font-weight:600;">${item.ministry||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">공포 일자</div><div style="font-weight:600;">${(item.pubDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">시행 일자</div><div style="font-weight:600;">${(item.effDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div>
+      </div>
+    </div>
+    <div class="law-detail-lbl">법령 활용 안내</div>
+    <div class="law-detail-val" style="font-size:12.5px;color:var(--gray-500);line-height:1.8;">
+      재건축·재개발 사업과 관련된 주요 법령입니다.<br>
+      상세 조문은 <strong>법령정보 바로가기</strong>를 통해 국가법령정보센터에서 확인하세요.<br><br>
+      <span style="color:var(--blue);font-weight:600;">📌 주요 관련 조문</span><br>
+      • 제2조 (정의) — 정비구역, 정비사업의 정의<br>
+      • 제16조 (조합설립추진위원회) — 추진위 구성<br>
+      • 제35조 (조합의 설립인가) — 조합설립 요건<br>
+      • 제50조 (사업시행계획인가) — 사업시행인가 절차<br>
+      • 제74조 (관리처분계획인가) — 관리처분 기준<br>
+      • 제86조 (이전고시) — 준공 후 처리
+    </div>`;
+}
+
+function showPrecDetail(idx, item){
+  document.querySelectorAll('.law-item').forEach(el=>el.classList.remove('sel'));
+  const el=document.getElementById('law-'+idx);if(el)el.classList.add('sel');
+  document.getElementById('lawDetailTitle').textContent=item.name||'판례 상세';
+  const linkEl=document.getElementById('lawDetailLink');
+  linkEl.href=item.link||'#';
+  linkEl.style.display='block';
+  document.getElementById('lawDetailBody').innerHTML=`
+    <div class="law-detail-lbl">판례 기본정보</div>
+    <div class="law-detail-box">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">법원</div><div style="font-weight:600;">${item.court||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">사건번호</div><div style="font-weight:600;">${item.caseNum||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">사건종류</div><div style="font-weight:600;">${item.caseType||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">선고일자</div><div style="font-weight:600;">${(item.judgeDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">판결유형</div><div style="font-weight:600;color:var(--blue);">${item.verdict||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">선고구분</div><div style="font-weight:600;">${item.judgeType||'—'}</div></div>
+      </div>
+    </div>
+    <div class="law-detail-lbl">판례 요약</div>
+    <div class="law-detail-val" style="font-size:12.5px;color:var(--gray-500);line-height:1.8;">
+      판례 전문은 <strong>법령정보 바로가기</strong>를 통해 국가법령정보센터에서 확인하세요.
+    </div>`;
+}
+
+function showAdmDetail(idx, item){
+  document.querySelectorAll('.law-item').forEach(el=>el.classList.remove('sel'));
+  const el=document.getElementById('law-'+idx);if(el)el.classList.add('sel');
+  document.getElementById('lawDetailTitle').textContent=item.name||'행정규칙 상세';
+  document.getElementById('lawDetailLink').style.display='none';
+  document.getElementById('lawDetailBody').innerHTML=`
+    <div class="law-detail-lbl">행정규칙 기본정보</div>
+    <div class="law-detail-box">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">종류</div><div style="font-weight:600;">${item.type||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">소관부처</div><div style="font-weight:600;">${item.ministry||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">발령일자</div><div style="font-weight:600;">${(item.pubDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">시행일자</div><div style="font-weight:600;">${(item.effDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div>
+      </div>
+    </div>`;
 }
 
 /* ── 서울시 정비사업 API ── */
