@@ -1839,69 +1839,31 @@ async function loadMolitNews(){
   const el = document.getElementById('molit-news');
   if(!el) return;
   el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);"><span class="spinner"></span>로딩 중...</div>';
-
-  const RSS_URLS = [
-    'https://www.korea.kr/rss/dept_mltm.xml',       // 국토교통부 전용
-    'https://www.korea.kr/rss/pressrelease.xml',    // 전체 보도자료 fallback
-  ];
-
-  for(const rssUrl of RSS_URLS){
-    try {
-      const r = await fetch(rssUrl, {signal: AbortSignal.timeout(6000)});
-      if(!r.ok) continue;
-      const xml = await r.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(xml, 'application/xml');
-      let items = [...doc.querySelectorAll('item')];
-
-      // pressrelease.xml 사용 시 국토교통부 항목만 필터
-      if(rssUrl.includes('pressrelease')){
-        items = items.filter(item => {
-          const text = item.textContent || '';
-          return text.includes('국토교통부') || text.includes('국토부');
-        });
-      }
-
-      items = items.slice(0, 8);
-      if(!items.length) continue;
-
-      el.innerHTML = items.map(item => {
-        const title   = item.querySelector('title')?.textContent?.trim() || '';
-        const link    = item.querySelector('link')?.textContent?.trim() ||
-                        item.querySelector('guid')?.textContent?.trim() || '#';
-        const pubDate = item.querySelector('pubDate')?.textContent?.trim() || '';
-        const date    = pubDate ? new Date(pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}) : '';
-        return `<a href="${link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
-          <div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
-            <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${title}</div>
-            <div style="font-size:10.5px;color:var(--gray-400);">국토교통부 · ${date}</div>
-          </div>
-        </a>`;
-      }).join('');
-      return; // 성공하면 종료
-
-    } catch(e) {
-      continue; // 실패하면 다음 URL 시도
-    }
-  }
-
-  // 모두 실패 시 네이버 뉴스 fallback
   try {
-    const res  = await fetch('/api/news?query=국토교통부+재개발+재건축&display=8&sort=date');
+    // 네이버 뉴스에서 국토교통부 공식 보도자료 검색
+    const res  = await fetch('/api/news?query=국토교통부+보도자료&display=10&sort=date');
     const data = await res.json();
-    if(data.success && data.items?.length){
-      el.innerHTML = data.items.slice(0,6).map(item => {
-        const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}) : '';
-        return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
-          <div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
-            <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title}</div>
-            <div style="font-size:10.5px;color:var(--gray-400);">${item.source} · ${date}</div>
-          </div>
-        </a>`;
-      }).join('');
-    } else {
-      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">보도자료 로딩 실패</div>';
+    if(!data.success || !data.items?.length){
+      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">보도자료 없음</div>';
+      return;
     }
+    // korea.kr 출처 우선, 없으면 전체 표시
+    const filtered = data.items.filter(i =>
+      i.link?.includes('korea.kr') ||
+      i.link?.includes('molit.go.kr') ||
+      i.title?.includes('[국토교통부]') ||
+      i.title?.includes('[국토부]')
+    );
+    const items = (filtered.length ? filtered : data.items).slice(0, 8);
+    el.innerHTML = items.map(item => {
+      const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}) : '';
+      return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
+          <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title}</div>
+          <div style="font-size:10.5px;color:var(--gray-400);">${item.source} · ${date}</div>
+        </div>
+      </a>`;
+    }).join('');
   } catch(e) {
     el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">연결 실패</div>';
   }
@@ -2179,16 +2141,16 @@ let seoulCH = {};
 
 async function loadSeoulRedev() {
   const statusEl = document.getElementById('seoulApiStatus');
-  statusEl.textContent = '서울시 API 로딩 중...';
-  statusEl.className = 'bdg bdg-gray';
+  if(statusEl) statusEl.textContent = '서울시 API 로딩 중...';
+  if(statusEl) statusEl.className = 'bdg bdg-gray';
 
   try {
     const res = await fetch('/api/seoul-redev?page=1&size=1000');
     const data = await res.json();
 
     if (!data.success) {
-      statusEl.textContent = 'API 오류: ' + (data.error || '알 수 없음');
-      statusEl.className = 'bdg bdg-red';
+      if(statusEl) statusEl.textContent = 'API 오류: ' + (data.error || '알 수 없음');
+      if(statusEl) statusEl.className = 'bdg bdg-red';
       return;
     }
 
