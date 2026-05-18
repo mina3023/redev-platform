@@ -629,25 +629,25 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
     <!-- 섹션2: 글로벌 지표 -->
     <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🌐 글로벌 지표 <span style="font-weight:400;font-size:10px;color:var(--gray-300);">· 연동 준비 중</span></div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
-      <div class="kpi-card" style="border:1px dashed var(--border);">
+      <div class="kpi-card" style="border:1px solid var(--border);">
         <div class="kpi-top"><div class="kpi-lbl">미국 10년물 국채금리</div><span class="kpi-icon">🇺🇸</span></div>
-        <div class="kpi-val" style="color:var(--gray-300);font-size:20px;">준비 중</div>
-        <div class="kpi-foot"><span class="kpi-sub">FRED API 연동 예정</span></div>
+        <div class="kpi-val" style="color:var(--blue);font-size:22px;" id="usTreasury">로딩 중</div>
+        <div class="kpi-foot"><span class="kpi-sub">국내 금리 선행지표</span></div>
       </div>
-      <div class="kpi-card" style="border:1px dashed var(--border);">
+      <div class="kpi-card" style="border:1px solid var(--border);">
         <div class="kpi-top"><div class="kpi-lbl">WTI 유가</div><span class="kpi-icon">🛢</span></div>
-        <div class="kpi-val" style="color:var(--gray-300);font-size:20px;">준비 중</div>
-        <div class="kpi-foot"><span class="kpi-sub">EIA API 연동 예정</span></div>
+        <div class="kpi-val" style="color:var(--orange);font-size:22px;" id="wtiPrice">로딩 중</div>
+        <div class="kpi-foot"><span class="kpi-sub">공사비 간접 영향</span></div>
       </div>
-      <div class="kpi-card" style="border:1px dashed var(--border);">
+      <div class="kpi-card" style="border:1px solid var(--border);">
         <div class="kpi-top"><div class="kpi-lbl">USD/KRW 환율</div><span class="kpi-icon">💱</span></div>
-        <div class="kpi-val" style="color:var(--gray-300);font-size:20px;">준비 중</div>
-        <div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS 연동 예정</span></div>
+        <div class="kpi-val" style="color:var(--green);font-size:22px;" id="usdKrw">로딩 중</div>
+        <div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS</span></div>
       </div>
-      <div class="kpi-card" style="border:1px dashed var(--border);">
+      <div class="kpi-card" style="border:1px solid var(--border);">
         <div class="kpi-top"><div class="kpi-lbl">건설공사비지수</div><span class="kpi-icon">🏗</span></div>
-        <div class="kpi-val" style="color:var(--gray-300);font-size:20px;">준비 중</div>
-        <div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS 연동 예정</span></div>
+        <div class="kpi-val" style="color:var(--red);font-size:22px;" id="constIdx">로딩 중</div>
+        <div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS</span></div>
       </div>
     </div>
 
@@ -863,18 +863,21 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
           <option value="11740">강동구</option>
         </select>
         <select id="tradeYmd" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;color:var(--gray-700);background:#fff;cursor:pointer;outline:none;" onchange="loadTrade()">
-          <option value="202503" selected>2025년 3월</option>
+          <option value="202603" selected>2026년 3월</option>
+          <option value="202602">2026년 2월</option>
+          <option value="202601">2026년 1월</option>
+          <option value="202512">2025년 12월</option>
+          <option value="202511">2025년 11월</option>
+          <option value="202510">2025년 10월</option>
+          <option value="202509">2025년 9월</option>
+          <option value="202508">2025년 8월</option>
+          <option value="202507">2025년 7월</option>
+          <option value="202506">2025년 6월</option>
+          <option value="202505">2025년 5월</option>
+          <option value="202504">2025년 4월</option>
+          <option value="202503">2025년 3월</option>
           <option value="202502">2025년 2월</option>
           <option value="202501">2025년 1월</option>
-          <option value="202412">2024년 12월</option>
-          <option value="202411">2024년 11월</option>
-          <option value="202410">2024년 10월</option>
-          <option value="202409">2024년 9월</option>
-          <option value="202408">2024년 8월</option>
-          <option value="202407">2024년 7월</option>
-          <option value="202406">2024년 6월</option>
-          <option value="202405">2024년 5월</option>
-          <option value="202404">2024년 4월</option>
         </select>
       </div>
     </div>
@@ -1789,10 +1792,11 @@ async function loadMolitNews(){
   const el = document.getElementById('molit-news');
   if(!el) return;
   try {
-    const res  = await fetch('/api/news?type=molit');
+    // 네이버 뉴스에서 "국토교통부 재개발" 검색
+    const res  = await fetch('/api/news?query=국토교통부+정비사업&display=8&sort=date');
     const data = await res.json();
     if(!data.success || !data.items?.length){
-      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">국토부 보도자료 로딩 실패</div>';
+      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">국토부 뉴스 로딩 실패</div>';
       return;
     }
     el.innerHTML = data.items.map(item => {
@@ -1800,12 +1804,12 @@ async function loadMolitNews(){
       return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
         <div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
           <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title||'제목 없음'}</div>
-          <div style="font-size:10.5px;color:var(--gray-400);">국토교통부 · ${date}</div>
+          <div style="font-size:10.5px;color:var(--gray-400);">${item.source} · ${date}</div>
         </div>
       </a>`;
     }).join('');
   } catch(e) {
-    el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">국토부 RSS 연결 실패</div>';
+    el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">뉴스 연결 실패</div>';
   }
 }
 
@@ -2184,9 +2188,129 @@ async function loadRisk(){
   const timeEl = document.getElementById('riskUpdateTime');
   if(timeEl) timeEl.textContent='로딩 중...';
   try{
-    const res=await fetch('/api/ecos?type=all');
-    const data=await res.json();
-    if(!data.success)throw new Error('API 오류');
+    // ECOS + 글로벌 지표 병렬 호출
+    const [ecosRes, globalRes] = await Promise.all([
+      fetch('/api/ecos?type=all'),
+      fetch('/api/global-indicators'),
+    ]);
+    const data   = await ecosRes.json();
+    const global = await globalRes.json();
+
+    if(!data.success) throw new Error('ECOS API 오류');
+
+    const rate = data.rate;
+    const ppi  = data.ppi;
+
+    // ── 기준금리 KPI
+    const rateCurrent = rate.current;
+    const rateChange  = Math.round((rateCurrent - rate.prev) * 100) / 100;
+    const ecosRateEl  = document.getElementById('ecosRate');
+    if(ecosRateEl) ecosRateEl.textContent = rateCurrent.toFixed(2) + '%';
+    const ecosRateDateEl = document.getElementById('ecosRateDate');
+    if(ecosRateDateEl) ecosRateDateEl.textContent = rate.date.replace(/(\d{4})(\d{2})/, '$1년 $2월');
+    const rateTag = document.getElementById('ecosRateTag');
+    if(rateTag){
+      rateTag.textContent = rateChange >= 0 ? '▲' + rateChange.toFixed(2) : '▼' + Math.abs(rateChange).toFixed(2);
+      rateTag.className = 'kpi-tag ' + (rateChange >= 0 ? 't-dn' : 't-up');
+    }
+
+    // ── PPI KPI
+    const ecosPpiEl = document.getElementById('ecosPpi');
+    if(ecosPpiEl) ecosPpiEl.textContent = ppi.current.toFixed(1);
+    const ecosPpiDateEl = document.getElementById('ecosPpiDate');
+    if(ecosPpiDateEl) ecosPpiDateEl.textContent = ppi.date.replace(/(\d{4})(\d{2})/, '$1년 $2월') + ' 기준';
+    const ppiTag = document.getElementById('ecosPpiTag');
+    if(ppiTag){
+      ppiTag.textContent = (ppi.yoy >= 0 ? 'YoY +' : 'YoY ') + ppi.yoy.toFixed(1) + '%';
+      ppiTag.className = 'kpi-tag ' + (ppi.yoy >= 0 ? 't-dn' : 't-up');
+    }
+
+    // ── 사업 지연 비율
+    const delayRate = ALERTS.length > 0
+      ? Math.round(ALERTS.filter(a=>a.stuck>=6).length / Math.max(Object.values(SD).reduce((a,b)=>a+b,0), 1) * 100 * 10) / 10
+      : 0;
+    const ecosDelayEl = document.getElementById('ecosDelay');
+    if(ecosDelayEl) ecosDelayEl.textContent = delayRate + '%';
+
+    // ── 글로벌 지표 업데이트
+    if(global.success){
+      // USD/KRW
+      const usdKrwEl = document.getElementById('usdKrw');
+      if(usdKrwEl && global.usdkrw?.current > 0){
+        usdKrwEl.textContent = global.usdkrw.current.toLocaleString() + '원';
+        usdKrwEl.style.color = 'var(--green)';
+        usdKrwEl.style.fontSize = '22px';
+      }
+      // 건설공사비지수
+      const constEl = document.getElementById('constIdx');
+      if(constEl && global.constIdx?.current > 0){
+        constEl.textContent = global.constIdx.current.toFixed(1);
+        constEl.style.color = 'var(--red)';
+        constEl.style.fontSize = '22px';
+      }
+      // 미국 국채금리
+      const usTEl = document.getElementById('usTreasury');
+      if(usTEl && global.usTreasury?.current > 0){
+        usTEl.textContent = global.usTreasury.current.toFixed(2) + '%';
+        usTEl.style.color = 'var(--blue)';
+        usTEl.style.fontSize = '22px';
+      }
+      // WTI
+      const wtiEl = document.getElementById('wtiPrice');
+      if(wtiEl && global.wti?.current > 0){
+        wtiEl.textContent = '$' + global.wti.current.toFixed(1);
+        wtiEl.style.color = 'var(--orange)';
+        wtiEl.style.fontSize = '22px';
+      }
+    }
+
+    // ── 업데이트 시간
+    const now = new Date();
+    if(timeEl) timeEl.textContent =
+      `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} 업데이트`;
+
+    // ── 기준금리 차트
+    const rateChartEl = document.getElementById('rateChart');
+    if(rateChartEl && rate.history?.length > 1){
+      const rateLabels = rate.history.map(h => h.date.replace(/(\d{4})(\d{2})/, '$2월'));
+      const rateVals   = rate.history.map(h => h.value);
+      if(riskCH.rate) riskCH.rate.destroy();
+      riskCH.rate = new Chart(rateChartEl, {type:'line',
+        data:{labels:rateLabels, datasets:[{data:rateVals, borderColor:'#1B4FD8',
+          backgroundColor:'rgba(27,79,216,.06)', borderWidth:2.5, fill:true,
+          tension:.3, pointRadius:3, pointBackgroundColor:'#1B4FD8'}]},
+        options:{...OPTS, scales:{
+          x:{grid:{display:false}, ticks:{color:'#9CA3AF', font:{size:10}}},
+          y:{grid:{color:'#F3F4F6'}, ticks:{color:'#9CA3AF', font:{size:11}},
+            suggestedMin:Math.min(...rateVals)-0.5, suggestedMax:Math.max(...rateVals)+0.5}
+        }, plugins:{...OPTS.plugins, tooltip:{...OPTS.plugins.tooltip,
+          callbacks:{label:c=>`기준금리: ${c.raw}%`}}}}
+      });
+    }
+
+    // ── PPI 차트
+    const ppiChartEl = document.getElementById('ppiChart');
+    if(ppiChartEl && ppi.history?.length > 1){
+      const ppiLabels = ppi.history.map(h => h.date.replace(/(\d{4})(\d{2})/, '$2월'));
+      const ppiVals   = ppi.history.map(h => h.value);
+      if(riskCH.ppi) riskCH.ppi.destroy();
+      riskCH.ppi = new Chart(ppiChartEl, {type:'line',
+        data:{labels:ppiLabels, datasets:[{data:ppiVals, borderColor:'#D97706',
+          backgroundColor:'rgba(217,119,6,.06)', borderWidth:2.5, fill:true,
+          tension:.3, pointRadius:3, pointBackgroundColor:'#D97706'}]},
+        options:{...OPTS, scales:{
+          x:{grid:{display:false}, ticks:{color:'#9CA3AF', font:{size:10}}},
+          y:{grid:{color:'#F3F4F6'}, ticks:{color:'#9CA3AF', font:{size:11}}}
+        }, plugins:{...OPTS.plugins, tooltip:{...OPTS.plugins.tooltip,
+          callbacks:{label:c=>`PPI: ${c.raw}`}}}}
+      });
+    }
+
+  }catch(e){
+    console.error('경제지표 오류:', e);
+    if(timeEl) timeEl.textContent = 'API 오류';
+  }
+}
 
     const rate=data.rate;
     const ppi=data.ppi;
