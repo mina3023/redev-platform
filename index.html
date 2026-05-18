@@ -967,7 +967,7 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
         </div>
       </div>
       <div class="card">
-        <div class="card-h"><div class="card-title">국토부 보도자료</div><span class="bdg bdg-green">RSS 연동</span></div>
+        <div class="card-h"><div class="card-title">국토부 보도자료</div><span class="bdg bdg-green">네이버뉴스 연동</span></div>
         <div id="molit-news" style="max-height:140px;overflow-y:auto;">
           <div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">로딩 중...</div>
         </div>
@@ -2159,7 +2159,8 @@ async function loadSeoulRedev() {
 
     // KPI 업데이트
     document.getElementById('seoulTotal').textContent = data.totalCount.toLocaleString();
-    document.getElementById('seoulKpiRow').style.display = 'grid';
+    const kpiRowEl = document.getElementById('seoulKpiRow');
+    if(kpiRowEl) kpiRowEl.style.display = 'grid';
 
     // 사업 유형별 집계
     const typeMap = {};
@@ -2227,13 +2228,13 @@ async function loadSeoulRedev() {
       }
     });
 
-    statusEl.textContent = `서울시 API · ${data.totalCount.toLocaleString()}건`;
-    statusEl.className = 'bdg bdg-blue';
+    if(statusEl) statusEl.textContent = `서울시 API · ${data.totalCount.toLocaleString()}건`;
+    if(statusEl) statusEl.className = 'bdg bdg-blue';
 
   } catch(e) {
     console.error('서울시 API 오류:', e);
-    statusEl.textContent = 'API 연결 실패';
-    statusEl.className = 'bdg bdg-red';
+    if(statusEl) statusEl.textContent = 'API 연결 실패';
+    if(statusEl) statusEl.className = 'bdg bdg-red';
   }
 }
 
