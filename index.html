@@ -1788,39 +1788,72 @@ function calcCgtTax(){
 }
 
 /* ── 뉴스·정책 ── */
+let newsKeywordFreq = {};
+
 async function loadNews(){
-  const keyword=document.getElementById('newsKeyword')?.value||'재개발';
-  const listEl=document.getElementById('newsListBody');
-  if(!listEl)return;
-  listEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div>';
-  // 워드클라우드 (검색 빈도 기반)
-  const wordFreq={'재개발':120,'재건축':98,'조합설립':67,'관리처분':54,'이주비':43,'분양신청':38,'도시정비법':35,'추진위':31,'사업시행':28,'권리가액':24,'현금청산':22,'조합원':45,'비례율':18,'추가분담금':16,'이전고시':12,'준공':55};
-  const wcEl=document.getElementById('newsWordCloud');
-  if(wcEl){
-    const sorted=Object.entries(wordFreq).sort((a,b)=>b[1]-a[1]);
-    const maxF=sorted[0][1];
-    const colors=['var(--blue)','var(--green)','var(--orange)','#6D28D9','var(--red)'];
-    wcEl.innerHTML=sorted.map(([word,freq])=>{
-      const size=Math.round(10+(freq/maxF*16));
-      const color=colors[Math.floor(Math.random()*colors.length)];
-      return `<span style="font-size:${size}px;color:${color};opacity:${0.5+freq/maxF*0.5};font-weight:${freq>60?700:400};cursor:pointer;padding:2px 4px;transition:opacity .2s;" onclick="document.getElementById('newsKeyword').value='${word}';loadNews();" title="${freq}건">${word}</span>`;
+  const keyword = document.getElementById('newsKeyword')?.value || '재개발';
+  const listEl  = document.getElementById('newsListBody');
+  if(!listEl) return;
+  listEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div>';
+
+  try {
+    const res  = await fetch(`/api/news?query=${encodeURIComponent(keyword)}&display=20&sort=date`);
+    const data = await res.json();
+
+    if(!data.success || !data.items?.length) {
+      listEl.innerHTML = '<div class="empty"><div class="ei">📰</div><p>검색 결과가 없습니다</p></div>';
+      return;
+    }
+
+    // 키워드 빈도 집계 (워드클라우드용)
+    const stopWords = new Set(['있다','없다','했다','한다','됩니다','위해','대한','통해','관련','이번','지난','올해','최근','계획','예정','발표','제공','진행','추진']);
+    data.items.forEach(item => {
+      const words = (item.title + ' ' + item.description).split(/[\s,\.·\[\]""''!?]+/);
+      words.forEach(w => {
+        w = w.replace(/[^\uAC00-\uD7A3a-zA-Z0-9]/g,'');
+        if(w.length >= 2 && !stopWords.has(w)) {
+          newsKeywordFreq[w] = (newsKeywordFreq[w] || 0) + 1;
+        }
+      });
+    });
+
+    // 워드클라우드 업데이트
+    const wcEl = document.getElementById('newsWordCloud');
+    if(wcEl) {
+      const sorted = Object.entries(newsKeywordFreq).sort((a,b)=>b[1]-a[1]).slice(0,24);
+      const maxF = sorted[0]?.[1] || 1;
+      const colors = ['var(--blue)','var(--green)','var(--orange)','#6D28D9','var(--red)','#0891B2'];
+      wcEl.innerHTML = sorted.map(([word,freq]) => {
+        const size  = Math.round(10 + (freq/maxF)*18);
+        const color = colors[Math.floor(Math.random()*colors.length)];
+        return `<span style="font-size:${size}px;color:${color};opacity:${0.5+freq/maxF*0.5};font-weight:${freq>5?700:400};cursor:pointer;padding:2px 4px;" onclick="document.getElementById('newsKeyword').value='${word}';loadNews();" title="${freq}건">${word}</span>`;
+      }).join('');
+    }
+
+    // 뉴스 목록 렌더
+    document.getElementById('newsTotalBadge').textContent = `총 ${data.total?.toLocaleString()}건`;
+    listEl.innerHTML = data.items.map(item => {
+      const date = new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
+        <div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .12s;margin-bottom:6px;" onmouseover="this.style.background='var(--blue-light)';this.style.borderColor='var(--blue-mid)'" onmouseout="this.style.background='#fff';this.style.borderColor='var(--border)'">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:var(--gray-900);margin-bottom:4px;line-height:1.5;">${item.title}</div>
+              <div style="font-size:11.5px;color:var(--gray-500);line-height:1.6;">${item.description?.slice(0,80)}...</div>
+            </div>
+            <div style="flex-shrink:0;text-align:right;">
+              <span class="law-mtag">${item.source}</span>
+              <div style="font-size:10.5px;color:var(--gray-400);margin-top:4px;">${date}</div>
+            </div>
+          </div>
+        </div>
+      </a>`;
     }).join('');
+
+  } catch(e) {
+    console.error('뉴스 오류:', e);
+    listEl.innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>뉴스 로딩 오류</p></div>';
   }
-  // 뉴스 API 연동 예정 안내 + 샘플
-  document.getElementById('newsTotalBadge').textContent='네이버 뉴스 API 연동 예정';
-  listEl.innerHTML=`
-    <div style="padding:12px 14px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);margin-bottom:8px;font-size:12px;color:var(--blue);">
-      📡 네이버 뉴스 API 키 등록 후 "<strong>${keyword}</strong>" 실시간 뉴스 자동 연동 예정
-    </div>
-    ${['[국토부] 재개발 조합 투명성 강화 도시정비법 개정안 입법예고',
-       '[서울시] 신속통합기획 재개발 구역 추가 지정 발표',
-       '[법원] 재건축 조합 총회 결의 무효 판결 잇따라',
-       '[금융위] 이주비 대출 규제 완화 검토...조합원 부담 경감',
-       '[국토부] 정비사업 정보공개 확대...조합 회계 공시 의무화'].map((t,i)=>`
-      <div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;margin-bottom:6px;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
-        <div style="font-size:13px;font-weight:600;color:var(--gray-900);margin-bottom:4px;">${t}</div>
-        <div style="font-size:11px;color:var(--gray-400);">샘플 데이터 · API 연동 후 실제 뉴스 표시</div>
-      </div>`).join('')}`;
 }
 let lawType='law', lawPage=1, lawPageSize=20;
 
