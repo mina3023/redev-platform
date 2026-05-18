@@ -15,10 +15,15 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'API 키가 설정되지 않았습니다.' });
   }
 
+  // 기본값: 2개월 전 (신고 지연 감안)
+  const now = new Date();
+  now.setMonth(now.getMonth() - 2);
+  const defaultYmd = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}`;
+
   const {
-    lawdCd = '11',      // 지역코드 (11=서울 전체, 11110=종로구 등)
-    dealYmd = '202412', // 계약년월 YYYYMM
-    numOfRows = '50',
+    lawdCd = '11650',  // 서초구
+    dealYmd = defaultYmd,
+    numOfRows = '100',
     pageNo = '1',
   } = req.query;
 
