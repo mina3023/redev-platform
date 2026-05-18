@@ -1694,6 +1694,7 @@ function sw(tab,el){
   if(tab==='stage')setTimeout(loadSeoulRedev,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
   if(tab==='news')setTimeout(loadNews,80);
+  if(tab==='tax')setTimeout(()=>{document.getElementById('taxAcq').style.display='block';},80);
 }
 
 /* ── 세금 계산기 ── */
@@ -2174,7 +2175,8 @@ async function loadSeoulRedev() {
 let riskCH={};
 
 async function loadRisk(){
-  document.getElementById('riskUpdateTime').textContent='로딩 중...';
+  const timeEl = document.getElementById('riskUpdateTime');
+  if(timeEl) timeEl.textContent='로딩 중...';
   try{
     const res=await fetch('/api/ecos?type=all');
     const data=await res.json();
@@ -2182,94 +2184,83 @@ async function loadRisk(){
 
     const rate=data.rate;
     const ppi=data.ppi;
-    const scores=data.riskScores;
 
     // ── 기준금리 KPI
     const rateCurrent=rate.current;
     const rateChange=Math.round((rateCurrent-rate.prev)*100)/100;
-    document.getElementById('ecosRate').textContent=rateCurrent.toFixed(2)+'%';
-    document.getElementById('ecosRateDate').textContent=rate.date.replace(/(\d{4})(\d{2})/,'$1년 $2월');
+    const ecosRateEl=document.getElementById('ecosRate');
+    if(ecosRateEl) ecosRateEl.textContent=rateCurrent.toFixed(2)+'%';
+    const ecosRateDateEl=document.getElementById('ecosRateDate');
+    if(ecosRateDateEl) ecosRateDateEl.textContent=rate.date.replace(/(\d{4})(\d{2})/,'$1년 $2월');
     const rateTag=document.getElementById('ecosRateTag');
-    rateTag.textContent=rateChange>=0?'▲'+rateChange.toFixed(2):'▼'+Math.abs(rateChange).toFixed(2);
-    rateTag.className='kpi-tag '+(rateChange>=0?'t-dn':'t-up');
+    if(rateTag){
+      rateTag.textContent=rateChange>=0?'▲'+rateChange.toFixed(2):'▼'+Math.abs(rateChange).toFixed(2);
+      rateTag.className='kpi-tag '+(rateChange>=0?'t-dn':'t-up');
+    }
 
     // ── PPI KPI
-    document.getElementById('ecosPpi').textContent=ppi.current.toFixed(1);
-    document.getElementById('ecosPpiDate').textContent=ppi.date.replace(/(\d{4})(\d{2})/,'$1년 $2월')+' 기준';
+    const ecosPpiEl=document.getElementById('ecosPpi');
+    if(ecosPpiEl) ecosPpiEl.textContent=ppi.current.toFixed(1);
+    const ecosPpiDateEl=document.getElementById('ecosPpiDate');
+    if(ecosPpiDateEl) ecosPpiDateEl.textContent=ppi.date.replace(/(\d{4})(\d{2})/,'$1년 $2월')+' 기준';
     const ppiTag=document.getElementById('ecosPpiTag');
-    ppiTag.textContent=(ppi.yoy>=0?'YoY +':'YoY ')+ppi.yoy.toFixed(1)+'%';
-    ppiTag.className='kpi-tag '+(ppi.yoy>=0?'t-dn':'t-up');
+    if(ppiTag){
+      ppiTag.textContent=(ppi.yoy>=0?'YoY +':'YoY ')+ppi.yoy.toFixed(1)+'%';
+      ppiTag.className='kpi-tag '+(ppi.yoy>=0?'t-dn':'t-up');
+    }
 
-    // ── 사업 지연 리스크 (redev_timeline 기반)
-    const delayRate=ALERTS.length>0&&ALL.length>0
+    // ── 사업 지연 비율
+    const delayRate=ALERTS.length>0
       ?Math.round(ALERTS.filter(a=>a.stuck>=6).length/Math.max(Object.values(SD).reduce((a,b)=>a+b,0),1)*100*10)/10
       :0;
-    const delayScore=Math.min(10,Math.round(delayRate*0.5+2)*10)/10;
-    document.getElementById('ecosDelay').textContent=delayRate+'%';
-    document.getElementById('rscore-delay').textContent=delayScore.toFixed(1);
-    document.getElementById('rdesc-delay').textContent=
-      `고위험 지연 구역 ${ALERTS.filter(a=>a.stuck>=6).length}개 · 전체 대비 ${delayRate}%`;
-    document.getElementById('rbar-delay').style.width=`${delayScore*10}%`;
-    document.getElementById('rscore-delay').style.color=delayScore>=7?'var(--red)':delayScore>=5?'var(--orange)':'#B45309';
-
-    // ── 금리 리스크 점수
-    const rateScore=scores.rate;
-    document.getElementById('rscore-rate').textContent=rateScore.toFixed(1);
-    document.getElementById('rdesc-rate').textContent=
-      `한국은행 기준금리 ${rateCurrent.toFixed(2)}% · ${rateChange<0?'인하 추세':'동결/인상 추세'}`;
-    document.getElementById('rbar-rate').style.width=`${rateScore*10}%`;
-    document.getElementById('rscore-rate').style.color=rateScore>=7?'var(--red)':rateScore>=5?'var(--orange)':'var(--green)';
-
-    // ── 공사비(PPI) 리스크 점수
-    const ppiScore=scores.ppi;
-    document.getElementById('rscore-ppi').textContent=ppiScore.toFixed(1);
-    document.getElementById('rdesc-ppi').textContent=
-      `생산자물가지수 전년비 ${ppi.yoy>=0?'+':''}${ppi.yoy.toFixed(1)}% · ${ppi.yoy>3?'자재비 상승 압력 높음':'안정적'}`;
-    document.getElementById('rbar-ppi').style.width=`${ppiScore*10}%`;
-    document.getElementById('rscore-ppi').style.color=ppiScore>=7?'var(--red)':ppiScore>=5?'var(--orange)':'#B45309';
-
-    // ── 시장 수요 리스크 (실거래 데이터로 추정)
-    const marketScore=5.5;
-    document.getElementById('rscore-market').textContent=marketScore.toFixed(1);
-    document.getElementById('rdesc-market').textContent='서초구 2024.12 평균 '+
-      (document.getElementById('tradeAvg')?.textContent||'—')+'만원';
-    document.getElementById('rbar-market').style.width=`${marketScore*10}%`;
+    const ecosDelayEl=document.getElementById('ecosDelay');
+    if(ecosDelayEl) ecosDelayEl.textContent=delayRate+'%';
 
     // ── 업데이트 시간
     const now=new Date();
-    document.getElementById('riskUpdateTime').textContent=
+    if(timeEl) timeEl.textContent=
       `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} 업데이트`;
 
     // ── 기준금리 차트
-    const rateLabels=rate.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월'));
-    const rateVals=rate.history.map(h=>h.value);
-    if(riskCH.rate)riskCH.rate.destroy();
-    riskCH.rate=new Chart(document.getElementById('rateChart'),{type:'line',
-      data:{labels:rateLabels,datasets:[{data:rateVals,borderColor:'#1B4FD8',backgroundColor:'rgba(27,79,216,.06)',
-        borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#1B4FD8'}]},
-      options:{...OPTS,scales:{
-        x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
-        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}},
-          suggestedMin:Math.min(...rateVals)-0.5,suggestedMax:Math.max(...rateVals)+0.5}
-      },plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`기준금리: ${c.raw}%`}}}}
-    });
+    const rateChartEl=document.getElementById('rateChart');
+    if(rateChartEl && rate.history?.length){
+      const rateLabels=rate.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월'));
+      const rateVals=rate.history.map(h=>h.value);
+      if(riskCH.rate) riskCH.rate.destroy();
+      riskCH.rate=new Chart(rateChartEl,{type:'line',
+        data:{labels:rateLabels,datasets:[{data:rateVals,borderColor:'#1B4FD8',
+          backgroundColor:'rgba(27,79,216,.06)',borderWidth:2.5,fill:true,
+          tension:.3,pointRadius:3,pointBackgroundColor:'#1B4FD8'}]},
+        options:{...OPTS,scales:{
+          x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
+          y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}},
+            suggestedMin:Math.min(...rateVals)-0.5,suggestedMax:Math.max(...rateVals)+0.5}
+        },plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,
+          callbacks:{label:c=>`기준금리: ${c.raw}%`}}}}
+      });
+    }
 
     // ── PPI 차트
-    const ppiLabels=ppi.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월'));
-    const ppiVals=ppi.history.map(h=>h.value);
-    if(riskCH.ppi)riskCH.ppi.destroy();
-    riskCH.ppi=new Chart(document.getElementById('ppiChart'),{type:'line',
-      data:{labels:ppiLabels,datasets:[{data:ppiVals,borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.06)',
-        borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#D97706'}]},
-      options:{...OPTS,scales:{
-        x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
-        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}
-      },plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`PPI: ${c.raw}`}}}}
-    });
+    const ppiChartEl=document.getElementById('ppiChart');
+    if(ppiChartEl && ppi.history?.length){
+      const ppiLabels=ppi.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월'));
+      const ppiVals=ppi.history.map(h=>h.value);
+      if(riskCH.ppi) riskCH.ppi.destroy();
+      riskCH.ppi=new Chart(ppiChartEl,{type:'line',
+        data:{labels:ppiLabels,datasets:[{data:ppiVals,borderColor:'#D97706',
+          backgroundColor:'rgba(217,119,6,.06)',borderWidth:2.5,fill:true,
+          tension:.3,pointRadius:3,pointBackgroundColor:'#D97706'}]},
+        options:{...OPTS,scales:{
+          x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
+          y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}
+        },plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,
+          callbacks:{label:c=>`PPI: ${c.raw}`}}}}
+      });
+    }
 
   }catch(e){
-    console.error('리스크 데이터 오류:',e);
-    document.getElementById('riskUpdateTime').textContent='API 오류 — Vercel 배포 환경에서 사용해 주세요';
+    console.error('경제지표 오류:',e);
+    if(timeEl) timeEl.textContent='API 오류';
   }
 }
 
