@@ -1331,7 +1331,14 @@ const OPTS={
 };
 
 async function sbf(t,q=''){
-  const r=await fetch(`${SB}/rest/v1/${t}?${q}`,{headers:{apikey:SK,Authorization:`Bearer ${SK}`}});
+  const r=await fetch(`${SB}/rest/v1/${t}?${q}`,{
+    headers:{
+      apikey:SK,
+      Authorization:`Bearer ${SK}`,
+      'Range-Unit':'items',
+      'Range':'0-4999',
+    }
+  });
   return r.json();
 }
 
@@ -1557,6 +1564,12 @@ function setGu(gu,el){
 
 async function searchZ(q){
   const el=document.getElementById('srList');
+
+  // 새 검색 시 이전 결과 초기화
+  document.getElementById('tlCard').style.display='none';
+  document.getElementById('aiMsgs').innerHTML='<div class="ai-msg bot">구역을 선택하면 사업 현황, 단계 이력, 지연 여부, 투자 시사점을 분석합니다.</div>';
+  curZ=null;
+
   if(!q.trim()){
     el.innerHTML='<div class="empty"><div class="ei">◎</div><p>구역명을 입력하면 결과가 표시됩니다</p></div>';
     return;
@@ -1610,16 +1623,41 @@ async function selZ(name){
   document.getElementById('tlTitle').textContent=name;
   document.getElementById('tlMeta').textContent=recs[0].gu_name;
   document.getElementById('tlBadge').textContent=recs.length+'기간';
+
+  // 실제 데이터 범위로 동적 기간 생성 (빈 기간 제거)
+  const firstPeriod=recs[0].period;
+  const lastPeriod=recs[recs.length-1].period;
+  const [fy,fq]=firstPeriod.split('-').map(Number);
+  const [ly,lq]=lastPeriod.split('-').map(Number);
+
+  // 첫 기간부터 마지막 기간까지만 표시
+  const dynPeriods=[];
+  for(let y=fy;y<=ly;y++){
+    for(const q of ['03','06','09','12']){
+      const pStr=`${y}-${String(q).padStart(2,'0')}`;
+      if(y===fy && Number(q)<fq) continue;
+      if(y===ly && Number(q)>lq) break;
+      dynPeriods.push(pStr);
+    }
+  }
+
   const pm={};recs.forEach(r=>pm[r.period]=r.stage_score);
-  const cols='130px '+PERIODS.map(()=>'1fr').join(' ');
+  const cols='130px '+dynPeriods.map(()=>'1fr').join(' ');
+
   document.getElementById('tlGrid').innerHTML=
-    `<div class="tl-hrow" style="display:grid;grid-template-columns:${cols};">
+    `<div class="tl-hrow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;">
       <div class="tl-nm" style="font-size:9.5px;color:var(--gray-400);padding:5px 10px;">기간</div>
-      ${PERIODS.map(p=>`<div class="tl-cell" style="padding:5px 0;"><div class="tl-plbl">${p.slice(2).replace('-','Q')}</div></div>`).join('')}
+      ${dynPeriods.map(p=>`<div class="tl-cell" style="padding:5px 0;"><div class="tl-plbl">${p.slice(2).replace('-','Q')}</div></div>`).join('')}
     </div>
-    <div class="tl-drow" style="display:grid;grid-template-columns:${cols};">
+    <div class="tl-drow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;">
       <div class="tl-nm">${name.length>14?name.slice(0,14)+'…':name}</div>
-      ${PERIODS.map(p=>{const sc=pm[p];return sc?`<div class="tl-cell"><div class="tl-dot" style="background:${SC[sc]};border-color:${SC[sc]};" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`:`<div class="tl-cell"><div class="tl-mt"></div></div>`;}).join('')}
+      ${dynPeriods.map(p=>{
+        const sc=pm[p];
+        const color=SC[sc]||'transparent';
+        return sc
+          ?`<div class="tl-cell"><div class="tl-dot" style="background:${color};border-color:${color};opacity:1;" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`
+          :`<div class="tl-cell"><div class="tl-mt"></div></div>`;
+      }).join('')}
     </div>`;
 
   const ctx=recs.slice(-5).map(r=>`${r.period}: ${r.stage}(${r.stage_score}단계)`).join(', ');
@@ -1791,25 +1829,25 @@ let newsKeywordFreq = {};
 async function loadMolitNews(){
   const el = document.getElementById('molit-news');
   if(!el) return;
+  el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);"><span class="spinner"></span>로딩 중...</div>';
   try {
-    // 네이버 뉴스에서 "국토교통부 재개발" 검색
-    const res  = await fetch('/api/news?query=국토교통부+정비사업&display=8&sort=date');
+    const res  = await fetch('/api/news?type=molit');
     const data = await res.json();
     if(!data.success || !data.items?.length){
-      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">국토부 뉴스 로딩 실패</div>';
+      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">보도자료 로딩 실패</div>';
       return;
     }
     el.innerHTML = data.items.map(item => {
       const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}) : '';
       return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
         <div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
-          <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title||'제목 없음'}</div>
-          <div style="font-size:10.5px;color:var(--gray-400);">${item.source} · ${date}</div>
+          <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title}</div>
+          <div style="font-size:10.5px;color:var(--gray-400);">국토교통부 · ${date}</div>
         </div>
       </a>`;
     }).join('');
   } catch(e) {
-    el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">뉴스 연결 실패</div>';
+    el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">연결 실패</div>';
   }
 }
 
