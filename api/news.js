@@ -17,8 +17,8 @@ export default async function handler(req, res) {
     try {
       // 국토부 보도자료 RSS 피드
       const RSS_URLS = [
-        'https://www.molit.go.kr/portal/bbs/rsslist.do?bbsId=BBSMSTR_000000000227', // 보도자료
-        'https://www.molit.go.kr/portal/bbs/rsslist.do?bbsId=BBSMSTR_000000000159', // 공지사항
+        'https://www.molit.go.kr/USR/NEWS/m_71/dtl.jsp?lcmspage=1&id=95080952', // 보도자료
+        'https://www.molit.go.kr/portal/bbs/rsslist.do?bbsId=BBSMSTR_000000000227',
       ];
 
       const results = [];
