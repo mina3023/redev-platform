@@ -981,8 +981,19 @@ async function init(){await Promise.all([loadAll(),detectAlerts()]);buildGuChips
 
 async function loadAll(){
   try{
-    const d=await sbf('redev_timeline','select=gu_name,project_name,stage,period,stage_score&limit=50000');
-    if(!Array.isArray(d))return;ALL=d;
+    // Supabase 기본 limit=1000 → 페이지네이션으로 전체 가져오기
+    let all=[], offset=0, pageSize=1000;
+    while(true){
+      const chunk=await sbf('redev_timeline',
+        `select=gu_name,project_name,stage,period,stage_score&limit=${pageSize}&offset=${offset}&order=id`);
+      if(!Array.isArray(chunk)||chunk.length===0)break;
+      all=[...all,...chunk];
+      if(chunk.length<pageSize)break;
+      offset+=pageSize;
+    }
+    const d=all;
+    if(!d.length)return;
+    ALL=d;
     const lm={};d.forEach(r=>{if(!lm[r.project_name]||r.period>lm[r.project_name].period)lm[r.project_name]=r;});
     const zones=Object.values(lm);
     const tot=zones.length;
@@ -1003,8 +1014,17 @@ async function loadAll(){
 
 async function detectAlerts(){
   try{
-    const d=await sbf('redev_timeline','select=gu_name,project_name,stage,period,stage_score&limit=50000');
-    if(!Array.isArray(d))return;
+    let all=[], offset=0, pageSize=1000;
+    while(true){
+      const chunk=await sbf('redev_timeline',
+        `select=gu_name,project_name,stage,period,stage_score&limit=${pageSize}&offset=${offset}&order=id`);
+      if(!Array.isArray(chunk)||chunk.length===0)break;
+      all=[...all,...chunk];
+      if(chunk.length<pageSize)break;
+      offset+=pageSize;
+    }
+    const d=all;
+    if(!d.length)return;
     const zm={};d.forEach(r=>{if(!zm[r.project_name])zm[r.project_name]=[];zm[r.project_name].push(r);});
     const al=[];
     Object.entries(zm).forEach(([name,recs])=>{
