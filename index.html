@@ -1294,17 +1294,27 @@ async function searchLaw(){
   listEl.innerHTML=`<div style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>검색 중...</div>`;
   countEl.textContent='검색 중';
 
-  try{
-    const res=await fetch(`/api/law?type=${lawType}&query=${encodeURIComponent(query)}&page=${lawPage}`);
-    const data=await res.json();
+  const OC='recondev2024';
+  const BASE='https://www.law.go.kr/DRF';
+  const targetMap={law:'LawSearch',prec:'PrecSearch',admrul:'AdmrulSearch'};
+  const itemKeyMap={law:'law',prec:'prec',admrul:'admrul'};
 
-    if(!data.success){
-      listEl.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>${data.error||'API 오류'}</p></div>`;
+  try{
+    const url=`${BASE}/lawSearch.do?OC=${OC}&target=${lawType}&type=JSON&display=20&page=${lawPage}&query=${encodeURIComponent(query)}`;
+    const r=await fetch(url);
+    const text=await r.text();
+    let d;
+    try{ d=JSON.parse(text); }catch(e){
+      listEl.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>응답 파싱 오류</p></div>`;
       return;
     }
 
-    const items=data.items||[];
-    const total=data.total||0;
+    const rootKey=targetMap[lawType];
+    const itemKey=itemKeyMap[lawType];
+    const rawItems=d?.[rootKey]?.[itemKey]||[];
+    const total=parseInt(d?.[rootKey]?.totalCnt||0);
+    const items=Array.isArray(rawItems)?rawItems:[rawItems].filter(Boolean);
+
     const typeLabel=lawType==='law'?'법령':lawType==='prec'?'판례':'행정규칙';
     titleEl.textContent=`${typeLabel} 검색 결과`;
     countEl.textContent=`총 ${total.toLocaleString()}건`;
@@ -1316,64 +1326,70 @@ async function searchLaw(){
 
     if(lawType==='law'){
       listEl.innerHTML=items.map((item,i)=>`
-        <div class="law-item" id="law-${i}" onclick="showLawDetail(${i}, ${JSON.stringify(item).replace(/"/g,'&quot;')})">
-          <div class="law-item-name">${item.name}</div>
+        <div class="law-item" id="law-${i}" onclick="showLawDetail(${i},${JSON.stringify(item).replace(/"/g,'&quot;')})">
+          <div class="law-item-name">${item['법령명한글']||''}</div>
           <div class="law-item-meta">
-            <span class="law-mtag">${item.type||'법령'}</span>
-            <span class="law-mtag">${item.ministry||''}</span>
-            ${item.effDate?`<span style="color:var(--gray-400);">시행 ${item.effDate.replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')}</span>`:''}
+            <span class="law-mtag">${item['법령구분명']||'법령'}</span>
+            <span class="law-mtag">${item['소관부처명']||''}</span>
+            ${item['시행일자']?`<span style="color:var(--gray-400);">시행 ${(item['시행일자']||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')}</span>`:''}
           </div>
         </div>`).join('');
     } else if(lawType==='prec'){
       listEl.innerHTML=items.map((item,i)=>`
-        <div class="law-item" id="law-${i}" onclick="showPrecDetail(${i}, ${JSON.stringify(item).replace(/"/g,'&quot;')})">
-          <div class="law-item-name">${item.name}
-            ${item.verdict?`<span class="pg-btn" style="font-size:10px;padding:1px 6px;margin-left:5px;">${item.verdict}</span>`:''}
-          </div>
+        <div class="law-item" id="law-${i}" onclick="showPrecDetail(${i},${JSON.stringify(item).replace(/"/g,'&quot;')})">
+          <div class="law-item-name">${item['사건명']||''}</div>
           <div class="law-item-meta">
-            <span class="law-mtag">${item.court||''}</span>
-            <span class="law-mtag">${item.caseNum||''}</span>
-            ${item.judgeDate?`<span style="color:var(--gray-400);">${item.judgeDate.replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')} 선고</span>`:''}
+            <span class="law-mtag">${item['법원명']||''}</span>
+            <span class="law-mtag">${item['사건번호']||''}</span>
+            ${item['선고일자']?`<span style="color:var(--gray-400);">${(item['선고일자']||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')} 선고</span>`:''}
           </div>
         </div>`).join('');
     } else {
       listEl.innerHTML=items.map((item,i)=>`
-        <div class="law-item" id="law-${i}" onclick="showAdmDetail(${i}, ${JSON.stringify(item).replace(/"/g,'&quot;')})">
-          <div class="law-item-name">${item.name}</div>
+        <div class="law-item" id="law-${i}" onclick="showAdmDetail(${i},${JSON.stringify(item).replace(/"/g,'&quot;')})">
+          <div class="law-item-name">${item['행정규칙명']||''}</div>
           <div class="law-item-meta">
-            <span class="law-mtag">${item.type||''}</span>
-            <span class="law-mtag">${item.ministry||''}</span>
-            ${item.effDate?`<span style="color:var(--gray-400);">시행 ${item.effDate.replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')}</span>`:''}
+            <span class="law-mtag">${item['행정규칙종류명']||''}</span>
+            <span class="law-mtag">${item['소관부처명']||''}</span>
           </div>
         </div>`).join('');
     }
 
     // 페이지네이션
-    const totalPages=Math.ceil(total/lawPageSize);
+    const totalPages=Math.ceil(total/20);
     const pgEl=document.getElementById('lawPagination');
     if(totalPages>1){
       pgEl.style.display='flex';
-      const start=Math.max(1,lawPage-2), end=Math.min(totalPages,lawPage+2);
+      const start=Math.max(1,lawPage-2),end=Math.min(totalPages,lawPage+2);
       let pgHtml=lawPage>1?`<button class="pg-btn" onclick="goLawPage(${lawPage-1})">◀</button>`:'';
-      for(let p=start;p<=end;p++){
-        pgHtml+=`<button class="pg-btn ${p===lawPage?'on':''}" onclick="goLawPage(${p})">${p}</button>`;
-      }
+      for(let p=start;p<=end;p++) pgHtml+=`<button class="pg-btn ${p===lawPage?'on':''}" onclick="goLawPage(${p})">${p}</button>`;
       pgHtml+=lawPage<totalPages?`<button class="pg-btn" onclick="goLawPage(${lawPage+1})">▶</button>`:'';
       pgEl.innerHTML=pgHtml;
-    } else {
-      pgEl.style.display='none';
-    }
+    } else { pgEl.style.display='none'; }
 
-    // 첫 번째 항목 자동 선택
+    // 첫 항목 자동 선택
     if(items.length>0){
-      if(lawType==='law') showLawDetail(0, items[0]);
-      else if(lawType==='prec') showPrecDetail(0, items[0]);
-      else showAdmDetail(0, items[0]);
+      const first=items[0];
+      if(lawType==='law') showLawDetail(0,{
+        name:first['법령명한글'],type:first['법령구분명'],ministry:first['소관부처명'],
+        pubDate:first['공포일자'],effDate:first['시행일자'],
+        lawLink:`https://www.law.go.kr/법령/${encodeURIComponent(first['법령명한글']||'')}`
+      });
+      else if(lawType==='prec') showPrecDetail(0,{
+        name:first['사건명'],caseNum:first['사건번호'],court:first['법원명'],
+        judgeDate:first['선고일자'],judgeType:first['선고'],
+        caseType:first['사건종류명'],verdict:first['판결유형'],
+        link:`https://www.law.go.kr/판례/${first['판례일련번호']||''}`
+      });
+      else showAdmDetail(0,{
+        name:first['행정규칙명'],type:first['행정규칙종류명'],
+        ministry:first['소관부처명'],pubDate:first['발령일자'],effDate:first['시행일자']
+      });
     }
 
   }catch(e){
-    console.error(e);
-    listEl.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>API 호출 오류 — Vercel 배포 환경에서 사용해 주세요</p></div>`;
+    console.error('법령 검색 오류:',e);
+    listEl.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>검색 오류: ${e.message}</p></div>`;
   }
 }
 
