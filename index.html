@@ -1173,30 +1173,74 @@ function renderAlertsFull(al){
 
 /* ZONE SEARCH */
 function buildGuChips(){
-  const gus=[...new Set(ALL.map(d=>d.gu_name))].sort();
-  document.getElementById('guChips').innerHTML=`<span class="chip active" onclick="setGu('all',this)">전체</span>`+gus.map(g=>`<span class="chip" onclick="setGu('${g}',this)">${g}</span>`).join('');
+  // 구 필터는 고정 목록 사용 (전체 데이터 로드 불필요)
+  const gus=['강남구','강동구','강북구','강서구','관악구','광진구','구로구','금천구',
+    '노원구','도봉구','동대문구','동작구','마포구','서대문구','서초구','성동구',
+    '성북구','송파구','양천구','영등포구','용산구','은평구','종로구','중구','중랑구'];
+  document.getElementById('guChips').innerHTML=
+    `<span class="chip active" onclick="setGu('all',this)">전체</span>`+
+    gus.map(g=>`<span class="chip" onclick="setGu('${g}',this)">${g}</span>`).join('');
 }
-function setGu(gu,el){selGu=gu;document.querySelectorAll('#guChips .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');const v=document.getElementById('zoneInp').value;if(v)searchZ(v);}
-function searchZ(q){
+
+function setGu(gu,el){
+  selGu=gu;
+  document.querySelectorAll('#guChips .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const v=document.getElementById('zoneInp').value;
+  if(v)searchZ(v);
+}
+
+async function searchZ(q){
   const el=document.getElementById('srList');
-  if(!q.trim()){el.innerHTML='<div class="empty"><div class="ei">◎</div><p>구역명을 입력하면 결과가 표시됩니다</p></div>';return;}
-  const lm={};ALL.forEach(r=>{if(!lm[r.project_name]||r.period>lm[r.project_name].period)lm[r.project_name]=r;});
-  const res=Object.values(lm).filter(r=>(r.project_name.includes(q)||r.gu_name.includes(q))&&(selGu==='all'||r.gu_name===selGu)).slice(0,30);
-  if(!res.length){el.innerHTML='<div class="empty"><div class="ei">◎</div><p>검색 결과 없음</p></div>';return;}
-  el.innerHTML=res.map(r=>`<div class="sr-row" id="sr-${encodeURIComponent(r.project_name)}" onclick="selZ('${r.project_name.replace(/'/g,"\\'")}')">
-    <div class="sr-gu">${r.gu_name.replace('구','')}</div>
-    <div class="sr-name">${r.project_name}</div>
-    <span class="sr-pill sc${r.stage_score}">${r.stage||'?'}</span>
-    <div class="sr-sc">${r.stage_score}단계</div>
-  </div>`).join('');
-  if(res.length===1)selZ(res[0].project_name);
+  if(!q.trim()){
+    el.innerHTML='<div class="empty"><div class="ei">◎</div><p>구역명을 입력하면 결과가 표시됩니다</p></div>';
+    return;
+  }
+  el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--gray-400);"><span class="spinner"></span>검색 중...</div>`;
+
+  try{
+    // Supabase에서 직접 검색 (ilike 필터)
+    let query=`select=gu_name,project_name,stage,period,stage_score&project_name=ilike.*${encodeURIComponent(q)}*&limit=50&order=project_name`;
+    if(selGu!=='all') query+=`&gu_name=eq.${encodeURIComponent(selGu)}`;
+
+    const res=await sbf('redev_timeline', query);
+    if(!Array.isArray(res)||!res.length){
+      el.innerHTML='<div class="empty"><div class="ei">◎</div><p>검색 결과 없음</p></div>';
+      return;
+    }
+
+    // 구역별 최신 단계만 추출
+    const lm={};
+    res.forEach(r=>{
+      if(!lm[r.project_name]||r.period>lm[r.project_name].period)lm[r.project_name]=r;
+    });
+    const results=Object.values(lm);
+
+    el.innerHTML=results.map(r=>`
+      <div class="sr-row" id="sr-${encodeURIComponent(r.project_name)}" onclick="selZ('${r.project_name.replace(/'/g,"\\'")}')">
+        <div class="sr-gu">${r.gu_name.replace('구','')}</div>
+        <div class="sr-name">${r.project_name}</div>
+        <span class="sr-pill sc${r.stage_score}">${r.stage||'?'}</span>
+        <div class="sr-sc">${r.stage_score}단계</div>
+      </div>`).join('');
+
+    if(results.length===1)selZ(results[0].project_name);
+
+  }catch(e){
+    console.error(e);
+    el.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>검색 오류: ${e.message}</p></div>`;
+  }
 }
-function selZ(name){
+async function selZ(name){
   curZ=name;
   document.querySelectorAll('.sr-row').forEach(r=>r.classList.remove('sel'));
   const el=document.getElementById('sr-'+encodeURIComponent(name));if(el)el.classList.add('sel');
-  const recs=ALL.filter(r=>r.project_name===name).sort((a,b)=>a.period>b.period?1:-1);
-  if(!recs.length)return;
+
+  // Supabase에서 해당 구역 전체 이력 조회
+  const recs=await sbf('redev_timeline',
+    `select=gu_name,project_name,stage,period,stage_score&project_name=eq.${encodeURIComponent(name)}&order=period`);
+  if(!Array.isArray(recs)||!recs.length)return;
+
   document.getElementById('tlCard').style.display='block';
   document.getElementById('tlTitle').textContent=name;
   document.getElementById('tlMeta').textContent=recs[0].gu_name;
@@ -1212,8 +1256,14 @@ function selZ(name){
       <div class="tl-nm">${name.length>14?name.slice(0,14)+'…':name}</div>
       ${PERIODS.map(p=>{const sc=pm[p];return sc?`<div class="tl-cell"><div class="tl-dot" style="background:${SC[sc]};border-color:${SC[sc]};" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`:`<div class="tl-cell"><div class="tl-mt"></div></div>`;}).join('')}
     </div>`;
+
   const ctx=recs.slice(-5).map(r=>`${r.period}: ${r.stage}(${r.stage_score}단계)`).join(', ');
   document.getElementById('aiMsgs').innerHTML=`<div class="ai-msg bot"><strong>[${name}]</strong> 최근 이력: ${ctx}<br><br>이 구역에 대해 질문하거나 분석을 요청하세요.</div>`;
+
+  // ALL 배열에 없으면 추가 (AI 분석용)
+  if(!ALL.find(r=>r.project_name===name)){
+    ALL=[...ALL,...recs];
+  }
 }
 function jumpZ(name){sw('search',document.querySelector('[data-tab="search"]'));document.getElementById('zoneInp').value=name;searchZ(name);}
 
