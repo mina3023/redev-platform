@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>REDEV AI — 재건축·재개발 플랫폼</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -47,6 +48,27 @@ input{font-family:var(--font);}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:2px;}
 
+/* ── AUTH MODAL ── */
+.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.auth-modal{background:#fff;border-radius:12px;padding:32px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.2);position:relative;}
+.auth-modal h2{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.auth-modal p{font-size:12px;color:var(--gray-400);margin-bottom:24px;}
+.auth-inp{width:100%;padding:10px 14px;border:1.5px solid var(--gray-300);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;margin-bottom:10px;box-sizing:border-box;transition:border-color .2s;}
+.auth-inp:focus{border-color:var(--blue);}
+.auth-btn{width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:background .15s;}
+.auth-btn:hover{background:var(--navy);}
+.auth-btn:disabled{opacity:.6;cursor:not-allowed;}
+.auth-toggle{text-align:center;margin-top:14px;font-size:12px;color:var(--gray-400);}
+.auth-toggle span{color:var(--blue);cursor:pointer;font-weight:600;}
+.auth-toggle span:hover{text-decoration:underline;}
+.auth-err{font-size:11.5px;margin-bottom:8px;padding:8px 10px;border-radius:4px;display:none;}
+.auth-close{position:absolute;top:14px;right:16px;font-size:18px;cursor:pointer;color:var(--gray-400);background:none;border:none;}
+.tier-chip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.04em;cursor:pointer;border:none;}
+.tier-free{background:rgba(255,255,255,.12);color:#fff;}
+.tier-std{background:rgba(59,130,246,.3);color:#93C5FD;}
+.tier-pre{background:rgba(139,92,246,.3);color:#C4B5FD;}
+.tier-b2b{background:rgba(16,185,129,.3);color:#6EE7B7;}
+
 /* ── GNB ── */
 .gnb{
   height:46px;background:var(--navy);
@@ -59,10 +81,6 @@ input{font-family:var(--font);}
 .logo-text{font-size:13.5px;font-weight:600;color:#fff;letter-spacing:-.01em;white-space:nowrap;}
 .logo-text span{color:rgba(255,255,255,.35);font-weight:400;font-size:11px;margin-left:5px;}
 .gnb-div{width:1px;height:18px;background:rgba(255,255,255,.1);}
-.gnb-tabs{display:flex;align-items:center;gap:1px;}
-.gnb-tab{padding:5px 12px;font-size:12px;font-weight:500;color:rgba(255,255,255,.5);background:none;border:none;border-radius:5px;cursor:pointer;transition:all .14s;white-space:nowrap;}
-.gnb-tab:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.06);}
-.gnb-tab.active{color:#fff;background:rgba(255,255,255,.1);}
 .gnb-right{display:flex;align-items:center;gap:8px;margin-left:auto;}
 .live-chip{display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:#34D399;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);padding:3px 9px;border-radius:20px;}
 .live-dot{width:5px;height:5px;background:#34D399;border-radius:50%;animation:blink 1.8s infinite;}
@@ -83,10 +101,6 @@ input{font-family:var(--font);}
 
 /* ── SIDEBAR ── */
 .sidebar{width:190px;min-width:190px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
-.sb-proj{padding:14px 14px 10px;border-bottom:1px solid var(--gray-100);}
-.sb-proj-lbl{font-size:9.5px;font-weight:600;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
-.sb-proj-name{font-size:12.5px;font-weight:600;color:var(--navy);}
-.sb-proj-sub{font-size:11px;color:var(--gray-400);margin-top:2px;}
 .sb-sec{padding:10px 0 4px;}
 .sb-sec-lbl{font-size:9.5px;font-weight:600;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;padding:0 14px 5px;}
 .sb-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12.5px;font-weight:500;color:var(--gray-600);cursor:pointer;transition:all .12s;border-left:2px solid transparent;}
@@ -106,23 +120,13 @@ input{font-family:var(--font);}
 
 /* ── CONTENT ── */
 .content{flex:1;overflow-y:auto;padding:14px;}
-
-/* ── TAB PANELS ── */
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
 
-/* ══════════════════════════════════════
-   TABLEAU DASHBOARD LAYOUT
-══════════════════════════════════════ */
+/* ── KPI CARDS ── */
 .db-wrap{display:flex;flex-direction:column;gap:10px;height:calc(100vh - 46px - 28px);}
-
-/* Row 1: KPI 4개 */
 .db-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex-shrink:0;}
-.kpi-card{
-  background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);
-  padding:13px 16px;display:flex;flex-direction:column;justify-content:space-between;
-  transition:box-shadow .18s;position:relative;overflow:hidden;
-}
+.kpi-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:13px 16px;display:flex;flex-direction:column;justify-content:space-between;transition:box-shadow .18s;position:relative;overflow:hidden;}
 .kpi-card:hover{box-shadow:var(--sh2);}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
 .kpi-card.vc-blue::before{background:var(--blue);}
@@ -144,13 +148,9 @@ input{font-family:var(--font);}
 .t-dn{background:var(--red-bg);color:var(--red);}
 .t-neu{background:var(--gray-100);color:var(--gray-400);}
 
-/* Row 2: 큰 영역 3컬럼 */
+/* ── CHART CARDS ── */
 .db-row2{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:10px;flex:1;min-height:0;}
-
-/* Row 3: 하단 2컬럼 */
 .db-row3{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1;min-height:0;}
-
-/* ── CHART CARD ── */
 .cc{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);display:flex;flex-direction:column;overflow:hidden;}
 .cc-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid var(--gray-100);flex-shrink:0;}
 .cc-title{font-size:12px;font-weight:600;color:var(--gray-700);display:flex;align-items:center;gap:6px;}
@@ -160,7 +160,7 @@ input{font-family:var(--font);}
 .cc-body canvas{flex:1;}
 .cw{position:relative;width:100%;flex:1;min-height:0;}
 
-/* ── BADGE ── */
+/* ── BADGES ── */
 .bdg{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:.02em;}
 .bdg-blue{background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-mid);}
 .bdg-green{background:var(--green-bg);color:var(--green);border:1px solid #A7F3D0;}
@@ -168,7 +168,7 @@ input{font-family:var(--font);}
 .bdg-orange{background:var(--orange-bg);color:var(--orange);border:1px solid #FDE68A;}
 .bdg-gray{background:var(--gray-100);color:var(--gray-400);border:1px solid var(--gray-200);}
 
-/* ── DIST LIST (사이드 바 목록) ── */
+/* ── DIST LIST ── */
 .dist-list{display:flex;flex-direction:column;gap:5px;overflow-y:auto;}
 .dist-row{display:flex;align-items:center;gap:8px;}
 .d-rk{font-size:10.5px;font-weight:700;color:var(--gray-300);width:14px;text-align:center;font-family:var(--mono);}
@@ -183,15 +183,9 @@ input{font-family:var(--font);}
 .sl-i{display:flex;align-items:center;gap:3px;font-size:10.5px;color:var(--gray-600);background:var(--gray-50);padding:2px 6px;border-radius:3px;border:1px solid var(--gray-100);}
 .sl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 
-/* ── ALERT LIST (compact) ── */
+/* ── ALERT LIST ── */
 .al-list{display:flex;flex-direction:column;gap:5px;overflow-y:auto;flex:1;}
-.al-row{
-  display:flex;align-items:center;gap:10px;
-  padding:7px 10px;border-radius:var(--r);
-  border:1px solid var(--border);background:#fff;
-  border-left:3px solid;cursor:pointer;
-  transition:box-shadow .12s;
-}
+.al-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--r);border:1px solid var(--border);background:#fff;border-left:3px solid;cursor:pointer;transition:box-shadow .12s;}
 .al-row:hover{box-shadow:var(--sh);}
 .al-row.h{border-left-color:var(--red);}
 .al-row.m{border-left-color:var(--orange);}
@@ -205,7 +199,7 @@ input{font-family:var(--font);}
 .al-num.l{color:#B45309;}
 .al-unit{font-size:9.5px;color:var(--gray-400);width:26px;flex-shrink:0;}
 
-/* ── STAGE TABLE (compact) ── */
+/* ── STAGE TABLE ── */
 .stg-tbl{width:100%;border-collapse:collapse;font-size:11.5px;}
 .stg-tbl th{padding:6px 10px;font-size:10px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;text-align:left;background:var(--gray-50);border-bottom:1px solid var(--border);white-space:nowrap;}
 .stg-tbl td{padding:7px 10px;border-bottom:1px solid var(--gray-100);color:var(--gray-600);vertical-align:middle;}
@@ -227,14 +221,11 @@ input{font-family:var(--font);}
 .sc8{background:#FFE4E6;color:#9F1239;}
 .sc9{background:#D1FAE5;color:#065F46;}
 
-/* ══════════════════════════════════════
-   OTHER TABS (search, alert, risk, etc)
-══════════════════════════════════════ */
+/* ── OTHER TABS ── */
 .page-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
 .page-h h2{font-size:17px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:8px;}
 .page-h p{font-size:11.5px;color:var(--gray-400);margin-top:3px;}
 .ph-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--blue);color:#fff;}
-
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 .g31{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px;}
 .card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;}
@@ -242,8 +233,6 @@ input{font-family:var(--font);}
 .card-title{font-size:12.5px;font-weight:600;color:var(--gray-700);display:flex;align-items:center;gap:6px;}
 .card-title::before{content:'';display:block;width:2.5px;height:13px;border-radius:2px;background:var(--blue);}
 .cw2{position:relative;width:100%;}
-
-/* search */
 .zone-inp{width:100%;padding:11px 14px;font-size:13.5px;color:var(--gray-900);background:#fff;border:1.5px solid var(--gray-300);border-radius:var(--r);outline:none;transition:border-color .2s;}
 .zone-inp:focus{border-color:var(--blue);}
 .zone-inp::placeholder{color:var(--gray-300);}
@@ -257,8 +246,6 @@ input{font-family:var(--font);}
 .sr-name{font-size:12.5px;font-weight:500;color:var(--gray-900);flex:1;}
 .sr-pill{font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;}
 .sr-sc{font-size:11px;font-weight:700;color:var(--gray-400);width:30px;text-align:right;font-family:var(--mono);}
-
-/* timeline */
 .tl-outer{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r);}
 .tl-hrow{background:var(--gray-50);border-bottom:1px solid var(--gray-200);}
 .tl-drow{border-bottom:1px solid var(--gray-100);}
@@ -270,8 +257,6 @@ input{font-family:var(--font);}
 .tl-dot{width:11px;height:11px;border-radius:50%;border:1.5px solid transparent;transition:transform .12s;cursor:pointer;}
 .tl-dot:hover{transform:scale(1.5);z-index:5;position:relative;}
 .tl-mt{width:5px;height:5px;border-radius:50%;background:var(--gray-200);}
-
-/* alert full */
 .al-full{display:flex;flex-direction:column;gap:6px;}
 .al-full-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);background:#fff;border-left:3px solid;cursor:pointer;transition:box-shadow .12s;}
 .al-full-row:hover{box-shadow:var(--sh);}
@@ -285,17 +270,6 @@ input{font-family:var(--font);}
 .al-full-num.m{color:var(--orange);}
 .al-full-num.l{color:#B45309;}
 .al-full-unit{font-size:10px;color:var(--gray-400);}
-
-/* risk */
-.risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
-.risk-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;}
-.risk-score{font-size:38px;font-weight:700;font-family:var(--mono);line-height:1;letter-spacing:-.03em;}
-.risk-lbl{font-size:12.5px;font-weight:600;color:var(--gray-700);margin:4px 0 6px;}
-.risk-desc{font-size:11px;color:var(--gray-400);line-height:1.7;}
-.risk-bw{background:var(--gray-100);height:4px;border-radius:2px;margin-top:10px;overflow:hidden;}
-.risk-bf{height:100%;border-radius:2px;}
-
-/* investor */
 .sim-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .sldr-g{margin-bottom:13px;}
 .sldr-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
@@ -312,8 +286,6 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
 .res-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .res-item-lbl{font-size:10px;opacity:.5;margin-bottom:2px;}
 .res-item-val{font-size:18px;font-weight:700;font-family:var(--mono);}
-
-/* AI */
 .ai-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;}
 .ai-head{background:var(--navy);padding:10px 16px;display:flex;align-items:center;gap:9px;}
 .ai-av{width:26px;height:26px;border-radius:6px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;font-family:var(--mono);flex-shrink:0;}
@@ -328,7 +300,6 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
 .ai-inp:focus{border-color:var(--blue);}
 .ai-send{background:var(--blue);border:none;color:#fff;width:34px;height:34px;border-radius:var(--r);font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0;}
 .ai-send:hover{background:var(--navy);}
-
 .empty{text-align:center;padding:40px 20px;color:var(--gray-400);}
 .empty .ei{font-size:28px;margin-bottom:8px;opacity:.4;}
 .empty p{font-size:12.5px;}
@@ -373,8 +344,23 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
     </div>
     <div class="gnb-drop" id="gnbDrop"></div>
     <div class="live-chip"><span class="live-dot"></span>LIVE</div>
-    <div style="background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.04em;">FREE</div>
-    <div style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;">👤</div>
+    <!-- 등급 칩 -->
+    <button id="tierChip" class="tier-chip tier-free" onclick="openAuth()">FREE</button>
+    <!-- 유저 아바타 + 드롭다운 -->
+    <div id="userAvatar" style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;position:relative;" onclick="toggleUserMenu()">
+      <span id="avatarIcon">👤</span>
+      <div id="userMenu" style="display:none;position:absolute;top:38px;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh2);width:190px;z-index:300;overflow:hidden;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--gray-100);">
+          <div style="font-size:11px;font-weight:600;color:var(--gray-700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="menuEmail">—</div>
+          <div style="font-size:10px;color:var(--gray-400);margin-top:2px;" id="menuTier">로그인이 필요합니다</div>
+        </div>
+        <div style="padding:4px 0;">
+          <div onclick="openUpgrade()" style="padding:8px 14px;font-size:12px;color:var(--blue);cursor:pointer;font-weight:600;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">⬆ 플랜 업그레이드</div>
+          <div id="menuLogout" onclick="signOut()" style="padding:8px 14px;font-size:12px;color:var(--red);cursor:pointer;display:none;" onmouseover="this.style.background='var(--red-bg)'" onmouseout="this.style.background='#fff'">로그아웃</div>
+          <div id="menuLogin" onclick="closeUserMenu2();openAuth();" style="padding:8px 14px;font-size:12px;color:var(--blue);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">로그인 / 회원가입</div>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -385,49 +371,38 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
   <div class="sb-item active" data-tab="dashboard" onclick="sw('dashboard',this)" style="margin:8px 10px;padding:10px 12px;border-radius:var(--r);font-weight:700;font-size:13px;">
     <span class="sb-icon">▦</span>대시보드
   </div>
-
   <div class="sb-div"></div>
-
   <div class="sb-sec">
     <div class="sb-sec-lbl">정비사업 현황</div>
     <div class="sb-item" data-tab="search" onclick="sw('search',this)"><span class="sb-icon">◎</span>구역 검색</div>
     <div class="sb-item" data-tab="stage" onclick="sw('stage',this)"><span class="sb-icon">≡</span>단계 관리</div>
     <div class="sb-item" data-tab="alert" onclick="sw('alert',this)"><span class="sb-icon">△</span>지연 경보<span class="sb-badge" id="sbBadge">-</span></div>
   </div>
-
   <div class="sb-div"></div>
-
   <div class="sb-sec">
     <div class="sb-sec-lbl">정보</div>
     <div class="sb-item" data-tab="news" onclick="sw('news',this)"><span class="sb-icon">📰</span>뉴스·정책</div>
     <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">📊</span>경제 지표</div>
     <div class="sb-item" data-tab="trade" onclick="sw('trade',this)"><span class="sb-icon">₩</span>실거래가</div>
   </div>
-
   <div class="sb-div"></div>
-
   <div class="sb-sec">
     <div class="sb-sec-lbl">법·제도</div>
     <div class="sb-item" data-tab="legal" onclick="sw('legal',this)"><span class="sb-icon">⚖</span>법령·판례</div>
     <div class="sb-item" data-tab="tax" onclick="sw('tax',this)"><span class="sb-icon">🧾</span>세금 계산기</div>
     <div class="sb-item" data-tab="rights" onclick="sw('rights',this)"><span class="sb-icon">📋</span>조합원 권리</div>
   </div>
-
   <div class="sb-div"></div>
-
   <div class="sb-sec">
     <div class="sb-sec-lbl">투자 데이터</div>
     <div class="sb-item" data-tab="investor" onclick="sw('investor',this)"><span class="sb-icon">💰</span>수익 계산기</div>
     <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
     <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
   </div>
-
   <div class="sb-div"></div>
-
   <div class="sb-sec">
     <div class="sb-item" data-tab="prism" onclick="sw('prism',this)" style="background:rgba(27,79,216,.08);border:1px solid rgba(27,79,216,.2);border-radius:var(--r);margin:0 4px;"><span class="sb-icon">🏢</span>PRISM <span style="font-size:10px;color:var(--gray-400);margin-left:4px;">(B2B)</span></div>
   </div>
-
   <div class="sb-bottom">
     <div class="sb-stat"><span class="sb-stat-l">총 데이터</span><span class="sb-stat-v">45,000건+</span></div>
     <div class="sb-stat"><span class="sb-stat-l">총 구역</span><span class="sb-stat-v" id="sbTot">—</span></div>
@@ -439,11 +414,9 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
 <!-- CONTENT -->
 <div class="content">
 
-  <!-- ══ DASHBOARD (Tableau 스타일 올인원) ══ -->
+  <!-- ══ DASHBOARD ══ -->
   <div id="tab-dashboard" class="tab-panel active">
     <div class="db-wrap">
-
-      <!-- Row 1: KPI -->
       <div class="db-kpi-row">
         <div class="kpi-card vc-blue">
           <div class="kpi-top"><div class="kpi-lbl">총 정비구역</div><span class="kpi-icon">🏙</span></div>
@@ -466,56 +439,24 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
           <div class="kpi-foot"><span class="kpi-sub">6기간+ 정체</span><span class="kpi-tag t-dn">즉시 점검</span></div>
         </div>
       </div>
-
-      <!-- Row 2: 3컬럼 -->
       <div class="db-row2">
-        <!-- 구별 활성도 (가로 바) -->
         <div class="cc">
-          <div class="cc-head">
-            <div class="cc-title"><span class="cc-bar"></span>구별 활성도</div>
-            <span class="bdg bdg-green">실데이터</span>
-          </div>
-          <div class="cc-body" style="overflow-y:auto;">
-            <div class="dist-list" id="distHBar">
-              <div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div>
-            </div>
-          </div>
+          <div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">실데이터</span></div>
+          <div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div>
         </div>
-
-        <!-- 단계별 도넛 -->
         <div class="cc">
-          <div class="cc-head">
-            <div class="cc-title"><span class="cc-bar"></span>단계별 분포</div>
-            <span class="bdg bdg-blue">전체</span>
-          </div>
-          <div class="cc-body">
-            <div class="cw"><canvas id="stageDonut" role="img" aria-label="단계별 분포">로딩 중</canvas></div>
-            <div class="stage-leg" id="stageLeg"></div>
-          </div>
+          <div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 분포</div><span class="bdg bdg-blue">전체</span></div>
+          <div class="cc-body"><div class="cw"><canvas id="stageDonut"></canvas></div><div class="stage-leg" id="stageLeg"></div></div>
         </div>
-
-        <!-- 시계열 추이 -->
         <div class="cc">
-          <div class="cc-head">
-            <div class="cc-title"><span class="cc-bar"></span>시계열 추이</div>
-            <span class="bdg bdg-gray">2017~2025</span>
-          </div>
-          <div class="cc-body">
-            <div class="cw"><canvas id="trendChart" role="img" aria-label="시계열 추이">로딩 중</canvas></div>
-          </div>
+          <div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>시계열 추이</div><span class="bdg bdg-gray">2017~2025</span></div>
+          <div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div>
         </div>
       </div>
-
-      <!-- Row 3: 2컬럼 -->
       <div class="db-row3">
-        <!-- 지연 경보 리스트 -->
         <div class="cc">
-          <div class="cc-head">
-            <div class="cc-title"><span class="cc-bar" style="background:var(--red);"></span>지연 경보 현황</div>
-            <span class="bdg bdg-red" id="alertCountBadge">로딩 중</span>
-          </div>
+          <div class="cc-head"><div class="cc-title"><span class="cc-bar" style="background:var(--red);"></span>지연 경보 현황</div><span class="bdg bdg-red" id="alertCountBadge">로딩 중</span></div>
           <div class="cc-body" style="overflow-y:auto;padding:8px 12px;">
-            <!-- 컬럼 헤더 -->
             <div style="display:flex;align-items:center;gap:10px;padding:0 2px 6px;border-bottom:1px solid var(--gray-100);margin-bottom:5px;">
               <span style="font-size:9.5px;font-weight:600;color:var(--gray-400);flex:1;">구역명</span>
               <span style="font-size:9.5px;font-weight:600;color:var(--gray-400);width:36px;">자치구</span>
@@ -523,30 +464,20 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
               <span style="font-size:9.5px;font-weight:600;color:var(--gray-400);width:24px;text-align:right;">기간</span>
               <span style="width:26px;"></span>
             </div>
-            <div class="al-list" id="alertListDB">
-              <div style="color:var(--gray-400);padding:20px;text-align:center;font-size:12px;"><span class="spinner"></span>로딩 중...</div>
-            </div>
+            <div class="al-list" id="alertListDB"><div style="color:var(--gray-400);padding:20px;text-align:center;font-size:12px;"><span class="spinner"></span>로딩 중...</div></div>
           </div>
         </div>
-
-        <!-- 단계별 현황 테이블 -->
         <div class="cc">
-          <div class="cc-head">
-            <div class="cc-title"><span class="cc-bar"></span>단계별 현황</div>
-            <span class="bdg bdg-blue">실데이터</span>
-          </div>
+          <div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 현황</div><span class="bdg bdg-blue">실데이터</span></div>
           <div class="cc-body" style="padding:0;overflow-y:auto;">
             <table class="stg-tbl">
               <thead><tr><th>단계</th><th>단계명</th><th>구역 수</th><th>비율</th><th>진행률</th></tr></thead>
-              <tbody id="stageTbodyDB">
-                <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--gray-400);"><span class="spinner"></span>로딩 중...</td></tr>
-              </tbody>
+              <tbody id="stageTbodyDB"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--gray-400);"><span class="spinner"></span>로딩 중...</td></tr></tbody>
             </table>
           </div>
         </div>
       </div>
-
-    </div><!-- /db-wrap -->
+    </div>
   </div>
 
   <!-- ══ 구역 검색 ══ -->
@@ -589,14 +520,14 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
       <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">전체 감지</div></div><div class="kpi-val c-blue" id="aTot">—</div><div class="kpi-foot"><span class="kpi-sub">경보 대상 합계</span><span class="kpi-tag t-neu">집계</span></div></div>
     </div>
     <div class="g31" style="margin-bottom:14px;">
-      <div class="card"><div class="card-h"><div class="card-title">구별 지연 분포</div><span class="bdg bdg-red">실데이터</span></div><div class="cw2" style="height:200px;"><canvas id="alertDistChart" role="img" aria-label="구별 지연 분포">로딩 중</canvas></div></div>
-      <div class="card"><div class="card-h"><div class="card-title">단계별 지연</div></div><div class="cw2" style="height:200px;"><canvas id="alertStageChart" role="img" aria-label="단계별 지연">로딩 중</canvas></div></div>
+      <div class="card"><div class="card-h"><div class="card-title">구별 지연 분포</div><span class="bdg bdg-red">실데이터</span></div><div class="cw2" style="height:200px;"><canvas id="alertDistChart"></canvas></div></div>
+      <div class="card"><div class="card-h"><div class="card-title">단계별 지연</div></div><div class="cw2" style="height:200px;"><canvas id="alertStageChart"></canvas></div></div>
     </div>
     <div class="sec-lbl">지연 구역 목록</div>
     <div class="al-full" id="alertListFull"><div style="color:var(--gray-400);padding:20px;text-align:center;"><span class="spinner"></span>로딩 중...</div></div>
   </div>
 
-  <!-- ══ 리스크 ══ -->
+  <!-- ══ 경제 지표 ══ -->
   <div id="tab-risk" class="tab-panel">
     <div class="page-h">
       <div><h2>경제 지표 <span class="ph-badge">한국은행 ECOS</span></h2><p>기준금리 · 글로벌 지표 · 재개발 투자 판단 참고 데이터</p></div>
@@ -605,114 +536,40 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
         <button onclick="loadRisk()" style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:11.5px;cursor:pointer;font-family:var(--font);">새로고침</button>
       </div>
     </div>
-
-    <!-- 섹션1: 기준금리 -->
     <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🏦 기준금리</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
-      <div class="kpi-card vc-blue">
-        <div class="kpi-top"><div class="kpi-lbl">한국은행 기준금리</div><span class="kpi-icon">%</span></div>
-        <div class="kpi-val c-blue" id="ecosRate">—</div>
-        <div class="kpi-foot"><span class="kpi-sub" id="ecosRateDate">로딩 중</span><span class="kpi-tag" id="ecosRateTag">...</span></div>
-      </div>
-      <div class="kpi-card vc-orange">
-        <div class="kpi-top"><div class="kpi-lbl">생산자물가지수 (PPI)</div><span class="kpi-icon">↑</span></div>
-        <div class="kpi-val c-orange" id="ecosPpi">—</div>
-        <div class="kpi-foot"><span class="kpi-sub" id="ecosPpiDate">로딩 중</span><span class="kpi-tag" id="ecosPpiTag">...</span></div>
-      </div>
-      <div class="kpi-card vc-red">
-        <div class="kpi-top"><div class="kpi-lbl">사업 지연 구역 비율</div><span class="kpi-icon">⚠</span></div>
-        <div class="kpi-val c-red" id="ecosDelay">—</div>
-        <div class="kpi-foot"><span class="kpi-sub">redev_timeline 기반</span><span class="kpi-tag t-dn">실데이터</span></div>
-      </div>
+      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">한국은행 기준금리</div><span class="kpi-icon">%</span></div><div class="kpi-val c-blue" id="ecosRate">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosRateDate">로딩 중</span><span class="kpi-tag" id="ecosRateTag">...</span></div></div>
+      <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">생산자물가지수 (PPI)</div><span class="kpi-icon">↑</span></div><div class="kpi-val c-orange" id="ecosPpi">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosPpiDate">로딩 중</span><span class="kpi-tag" id="ecosPpiTag">...</span></div></div>
+      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">사업 지연 구역 비율</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="ecosDelay">—</div><div class="kpi-foot"><span class="kpi-sub">redev_timeline 기반</span><span class="kpi-tag t-dn">실데이터</span></div></div>
     </div>
-
-    <!-- 섹션2: 글로벌 지표 -->
-    <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🌐 글로벌 지표 <span style="font-weight:400;font-size:10px;color:var(--gray-300);">· 연동 준비 중</span></div>
+    <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🌐 글로벌 지표</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
-      <div class="kpi-card" style="border:1px solid var(--border);">
-        <div class="kpi-top"><div class="kpi-lbl">미국 10년물 국채금리</div><span class="kpi-icon">🇺🇸</span></div>
-        <div class="kpi-val" style="color:var(--blue);font-size:22px;" id="usTreasury">로딩 중</div>
-        <div class="kpi-foot"><span class="kpi-sub">국내 금리 선행지표</span></div>
-      </div>
-      <div class="kpi-card" style="border:1px solid var(--border);">
-        <div class="kpi-top"><div class="kpi-lbl">WTI 유가</div><span class="kpi-icon">🛢</span></div>
-        <div class="kpi-val" style="color:var(--orange);font-size:22px;" id="wtiPrice">로딩 중</div>
-        <div class="kpi-foot"><span class="kpi-sub">공사비 간접 영향</span></div>
-      </div>
-      <div class="kpi-card" style="border:1px solid var(--border);">
-        <div class="kpi-top"><div class="kpi-lbl">USD/KRW 환율</div><span class="kpi-icon">💱</span></div>
-        <div class="kpi-val" style="color:var(--green);font-size:22px;" id="usdKrw">로딩 중</div>
-        <div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS</span></div>
-      </div>
-      <div class="kpi-card" style="border:1px solid var(--border);">
-        <div class="kpi-top"><div class="kpi-lbl">건설공사비지수</div><span class="kpi-icon">🏗</span></div>
-        <div class="kpi-val" style="color:var(--red);font-size:22px;" id="constIdx">로딩 중</div>
-        <div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS</span></div>
-      </div>
+      <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">미국 10년물 국채금리</div><span class="kpi-icon">🇺🇸</span></div><div class="kpi-val" style="color:var(--blue);font-size:22px;" id="usTreasury">로딩 중</div><div class="kpi-foot"><span class="kpi-sub">국내 금리 선행지표</span></div></div>
+      <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">WTI 유가</div><span class="kpi-icon">🛢</span></div><div class="kpi-val" style="color:var(--orange);font-size:22px;" id="wtiPrice">로딩 중</div><div class="kpi-foot"><span class="kpi-sub">공사비 간접 영향</span></div></div>
+      <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">USD/KRW 환율</div><span class="kpi-icon">💱</span></div><div class="kpi-val" style="color:var(--green);font-size:22px;" id="usdKrw">로딩 중</div><div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS</span></div></div>
+      <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">건설공사비지수</div><span class="kpi-icon">🏗</span></div><div class="kpi-val" style="color:var(--red);font-size:22px;" id="constIdx">로딩 중</div><div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS</span></div></div>
     </div>
-
-    <!-- 차트 2개 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <div class="card">
-        <div class="card-h"><div class="card-title">기준금리 추이 (최근 12개월)</div><span class="bdg bdg-blue">한국은행 ECOS</span></div>
-        <div class="cw2" style="height:190px;"><canvas id="rateChart" role="img" aria-label="기준금리 추이">로딩 중</canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-h"><div class="card-title">생산자물가지수 추이 (최근 12개월)</div><span class="bdg bdg-orange">한국은행 ECOS</span></div>
-        <div class="cw2" style="height:190px;"><canvas id="ppiChart" role="img" aria-label="PPI 추이">로딩 중</canvas></div>
-      </div>
+      <div class="card"><div class="card-h"><div class="card-title">기준금리 추이 (최근 12개월)</div><span class="bdg bdg-blue">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="rateChart"></canvas></div></div>
+      <div class="card"><div class="card-h"><div class="card-title">생산자물가지수 추이 (최근 12개월)</div><span class="bdg bdg-orange">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
     </div>
-
-    <!-- 투자 판단 가이드 -->
     <div class="card">
       <div class="card-h"><div class="card-title">재개발·재건축 투자 판단 참고</div><span class="bdg bdg-gray">데이터 인프라</span></div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:4px 0;">
-        <div style="padding:12px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);">
-          <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px;">금리 방향성</div>
-          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">기준금리 인하 → 이주비 대출금리 하락 → 사업 진행 속도 개선<br>미국 국채금리는 국내 금리 선행지표</div>
-        </div>
-        <div style="padding:12px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);">
-          <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px;">공사비 영향</div>
-          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">WTI·PPI 상승 시 철근·시멘트 가격 상승 → 추가 분담금 증가 가능</div>
-        </div>
-        <div style="padding:12px;background:#ECFDF5;border-radius:var(--r);border-left:3px solid var(--green);">
-          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px;">환율 영향</div>
-          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">원화 약세(환율 상승) → 수입 원자재 비용 증가 → 공사비 상승 → 사업성 악화</div>
-        </div>
+        <div style="padding:12px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);"><div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px;">금리 방향성</div><div style="font-size:12px;color:var(--gray-600);line-height:1.8;">기준금리 인하 → 이주비 대출금리 하락 → 사업 진행 속도 개선</div></div>
+        <div style="padding:12px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);"><div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px;">공사비 영향</div><div style="font-size:12px;color:var(--gray-600);line-height:1.8;">WTI·PPI 상승 시 철근·시멘트 가격 상승 → 추가 분담금 증가 가능</div></div>
+        <div style="padding:12px;background:#ECFDF5;border-radius:var(--r);border-left:3px solid var(--green);"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px;">환율 영향</div><div style="font-size:12px;color:var(--gray-600);line-height:1.8;">원화 약세 → 수입 원자재 비용 증가 → 공사비 상승 → 사업성 악화</div></div>
       </div>
     </div>
   </div>
 
   <!-- ══ 단계 관리 ══ -->
   <div id="tab-stage" class="tab-panel">
-    <div class="page-h">
-      <div><h2>단계 관리</h2><p>정비사업 9단계 현황 · Supabase 실데이터</p></div>
-    </div>
-
-    <!-- 서울시 API 현황 카드 -->
-    <div style="display:none;" id="seoulKpiRow">
-      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">서울시 API 총 구역</div></div><div class="kpi-val c-blue" id="seoulTotal">—</div><div class="kpi-foot"><span class="kpi-sub">실시간 조회</span><span class="kpi-tag bdg-green">서울시</span></div></div>
-      <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">재건축</div></div><div class="kpi-val c-green" id="seoulRecon">—</div><div class="kpi-foot"><span class="kpi-sub">사업 유형별</span></div></div>
-      <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">재개발</div></div><div class="kpi-val c-orange" id="seoulRedev">—</div><div class="kpi-foot"><span class="kpi-sub">사업 유형별</span></div></div>
-      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">도시환경정비</div></div><div class="kpi-val c-red" id="seoulUrban">—</div><div class="kpi-foot"><span class="kpi-sub">사업 유형별</span></div></div>
-    </div>
-
+    <div class="page-h"><div><h2>단계 관리</h2><p>정비사업 9단계 현황 · Supabase 실데이터</p></div></div>
     <div class="card" style="margin-bottom:12px;">
       <div class="card-h"><div class="card-title">단계별 구역 수</div><span class="bdg bdg-green">실데이터</span></div>
-      <div class="cw2" style="height:220px;"><canvas id="stageBarchart" role="img" aria-label="단계별 구역 수">로딩 중</canvas></div>
+      <div class="cw2" style="height:220px;"><canvas id="stageBarchart"></canvas></div>
     </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;" id="seoulChartRow">
-      <div class="card" id="seoulGuCard" style="display:none;">
-        <div class="card-h"><div class="card-title">서울시 API — 구별 현황</div><span class="bdg bdg-blue">실시간</span></div>
-        <div class="cw2" style="height:200px;"><canvas id="seoulGuChart" role="img" aria-label="구별 현황">로딩 중</canvas></div>
-      </div>
-      <div class="card" id="seoulStageCard" style="display:none;">
-        <div class="card-h"><div class="card-title">서울시 API — 단계별 현황</div><span class="bdg bdg-blue">실시간</span></div>
-        <div class="cw2" style="height:200px;"><canvas id="seoulStageChart" role="img" aria-label="단계별 현황">로딩 중</canvas></div>
-      </div>
-    </div>
-
     <div class="card"><div class="card-h"><div class="card-title">단계별 상세 현황 (Supabase)</div></div>
       <table class="dtable">
         <thead><tr><th>단계</th><th>단계명</th><th>구역 수</th><th>비율</th><th>진행률</th></tr></thead>
@@ -723,34 +580,17 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
 
   <!-- ══ 법령·판례 ══ -->
   <div id="tab-legal" class="tab-panel">
-    <div class="page-h">
-      <div>
-        <h2>법령·판례 <span class="ph-badge">국가법령정보</span></h2>
-        <p>도시정비법 주요 조문 · 재개발·재건축 관련 판례 · 국가법령정보 공동활용 Open API</p>
-      </div>
-    </div>
-
-    <!-- 검색 바 -->
+    <div class="page-h"><div><h2>법령·판례 <span class="ph-badge">국가법령정보</span></h2><p>도시정비법 주요 조문 · 재개발·재건축 관련 판례</p></div></div>
     <div class="card" style="margin-bottom:14px;">
       <div style="display:flex;gap:10px;align-items:center;">
-        <!-- 검색 유형 탭 -->
         <div style="display:flex;gap:4px;flex-shrink:0;">
           <button class="law-tab-btn active" data-ltype="law" onclick="setLawType('law',this)">📜 법령</button>
           <button class="law-tab-btn" data-ltype="prec" onclick="setLawType('prec',this)">⚖️ 판례</button>
           <button class="law-tab-btn" data-ltype="admrul" onclick="setLawType('admrul',this)">📋 행정규칙</button>
         </div>
-        <input type="text" id="lawQuery" class="zone-inp"
-          style="flex:1;padding:9px 14px;font-size:13.5px;"
-          placeholder="검색어 입력... (예: 도시정비법, 재개발 조합, 관리처분계획)"
-          value="도시및주거환경정비법"
-          onkeydown="if(event.key==='Enter')searchLaw()">
-        <button onclick="searchLaw()"
-          style="padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-family:var(--font);font-weight:600;white-space:nowrap;">
-          검색
-        </button>
+        <input type="text" id="lawQuery" class="zone-inp" style="flex:1;padding:9px 14px;font-size:13.5px;" placeholder="검색어 입력..." value="도시및주거환경정비법" onkeydown="if(event.key==='Enter')searchLaw()">
+        <button onclick="searchLaw()" style="padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-family:var(--font);font-weight:600;white-space:nowrap;">검색</button>
       </div>
-
-      <!-- 빠른 검색 태그 -->
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;">
         <span style="font-size:11px;color:var(--gray-400);margin-right:4px;align-self:center;">빠른검색:</span>
         <span class="chip" onclick="quickLawSearch('도시및주거환경정비법')">도시정비법</span>
@@ -760,39 +600,18 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
         <span class="chip" onclick="quickLawSearch('관리처분계획')">관리처분</span>
         <span class="chip" onclick="quickLawSearch('분양신청')">분양신청</span>
         <span class="chip" onclick="quickLawSearch('이주대책')">이주대책</span>
-        <span class="chip" onclick="quickLawSearch('사업시행인가')">사업시행인가</span>
       </div>
     </div>
-
-    <!-- 결과 영역 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-
-      <!-- 결과 목록 -->
       <div class="card">
-        <div class="card-h">
-          <div class="card-title" id="lawResultTitle">검색 결과</div>
-          <span class="bdg bdg-blue" id="lawResultCount">—</span>
-        </div>
-        <div id="lawResultList" style="display:flex;flex-direction:column;gap:6px;max-height:580px;overflow-y:auto;">
-          <div class="empty"><div class="ei">⚖️</div><p>검색어를 입력하고 검색하세요</p></div>
-        </div>
-        <!-- 페이지네이션 -->
+        <div class="card-h"><div class="card-title" id="lawResultTitle">검색 결과</div><span class="bdg bdg-blue" id="lawResultCount">—</span></div>
+        <div id="lawResultList" style="display:flex;flex-direction:column;gap:6px;max-height:580px;overflow-y:auto;"><div class="empty"><div class="ei">⚖️</div><p>검색어를 입력하고 검색하세요</p></div></div>
         <div id="lawPagination" style="display:none;justify-content:center;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);"></div>
       </div>
-
-      <!-- 상세 보기 -->
       <div class="card">
-        <div class="card-h">
-          <div class="card-title" id="lawDetailTitle">상세 정보</div>
-          <a id="lawDetailLink" href="#" target="_blank" style="display:none;">
-            <span class="bdg bdg-green">법령정보 바로가기 ↗</span>
-          </a>
-        </div>
-        <div id="lawDetailBody" style="max-height:580px;overflow-y:auto;">
-          <div class="empty"><div class="ei">📜</div><p>목록에서 항목을 선택하면 상세 정보가 표시됩니다</p></div>
-        </div>
+        <div class="card-h"><div class="card-title" id="lawDetailTitle">상세 정보</div><a id="lawDetailLink" href="#" target="_blank" style="display:none;"><span class="bdg bdg-green">법령정보 바로가기 ↗</span></a></div>
+        <div id="lawDetailBody" style="max-height:580px;overflow-y:auto;"><div class="empty"><div class="ei">📜</div><p>목록에서 항목을 선택하세요</p></div></div>
       </div>
-
     </div>
   </div>
 
@@ -809,7 +628,7 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
           <div class="sldr-g"><div class="sldr-top"><span class="sldr-lbl">권리가액 비율 (%)</span><span class="sldr-val" id="vRatio">70</span></div><input type="range" min="40" max="100" step="1" value="70" id="sRatio" oninput="calcSim()"></div>
           <div class="sldr-g"><div class="sldr-top"><span class="sldr-lbl">추가 분담금 (만원)</span><span class="sldr-val" id="vExtra">3,000</span></div><input type="range" min="0" max="20000" step="500" value="3000" id="sExtra" oninput="calcSim()"></div>
         </div>
-        <div class="card"><div class="card-h"><div class="card-title">수익 구성</div></div><div class="cw2" style="height:160px;"><canvas id="simChart" role="img" aria-label="수익 구성">차트</canvas></div></div>
+        <div class="card"><div class="card-h"><div class="card-title">수익 구성</div></div><div class="cw2" style="height:160px;"><canvas id="simChart"></canvas></div></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:12px;">
         <div class="res-panel">
@@ -842,99 +661,32 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
   <!-- ══ 실거래가 ══ -->
   <div id="tab-trade" class="tab-panel">
     <div class="page-h">
-      <div>
-        <h2>아파트 실거래가 <span class="ph-badge">국토교통부</span></h2>
-        <p>서울시 아파트 매매 실거래 자료 · 국토교통부 실거래가 공개시스템</p>
-      </div>
+      <div><h2>아파트 실거래가 <span class="ph-badge">국토교통부</span></h2><p>서울시 아파트 매매 실거래 자료 · 국토교통부 실거래가 공개시스템</p></div>
       <div style="display:flex;gap:8px;align-items:center;">
         <select id="tradeGu" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;color:var(--gray-700);background:#fff;cursor:pointer;outline:none;" onchange="loadTrade()">
-          <option value="11110">종로구</option><option value="11140">중구</option>
-          <option value="11170">용산구</option><option value="11200">성동구</option>
-          <option value="11215">광진구</option><option value="11230">동대문구</option>
-          <option value="11260">중랑구</option><option value="11290">성북구</option>
-          <option value="11305">강북구</option><option value="11320">도봉구</option>
-          <option value="11350">노원구</option><option value="11380">은평구</option>
-          <option value="11410">서대문구</option><option value="11440">마포구</option>
-          <option value="11470">양천구</option><option value="11500">강서구</option>
-          <option value="11530">구로구</option><option value="11545">금천구</option>
-          <option value="11560">영등포구</option><option value="11590">동작구</option>
-          <option value="11620">관악구</option><option value="11650" selected>서초구</option>
-          <option value="11680">강남구</option><option value="11710">송파구</option>
-          <option value="11740">강동구</option>
+          <option value="11110">종로구</option><option value="11140">중구</option><option value="11170">용산구</option><option value="11200">성동구</option><option value="11215">광진구</option><option value="11230">동대문구</option><option value="11260">중랑구</option><option value="11290">성북구</option><option value="11305">강북구</option><option value="11320">도봉구</option><option value="11350">노원구</option><option value="11380">은평구</option><option value="11410">서대문구</option><option value="11440">마포구</option><option value="11470">양천구</option><option value="11500">강서구</option><option value="11530">구로구</option><option value="11545">금천구</option><option value="11560">영등포구</option><option value="11590">동작구</option><option value="11620">관악구</option><option value="11650" selected>서초구</option><option value="11680">강남구</option><option value="11710">송파구</option><option value="11740">강동구</option>
         </select>
         <select id="tradeYmd" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;color:var(--gray-700);background:#fff;cursor:pointer;outline:none;" onchange="loadTrade()">
-          <option value="202603" selected>2026년 3월</option>
-          <option value="202602">2026년 2월</option>
-          <option value="202601">2026년 1월</option>
-          <option value="202512">2025년 12월</option>
-          <option value="202511">2025년 11월</option>
-          <option value="202510">2025년 10월</option>
-          <option value="202509">2025년 9월</option>
-          <option value="202508">2025년 8월</option>
-          <option value="202507">2025년 7월</option>
-          <option value="202506">2025년 6월</option>
-          <option value="202505">2025년 5월</option>
-          <option value="202504">2025년 4월</option>
-          <option value="202503">2025년 3월</option>
-          <option value="202502">2025년 2월</option>
-          <option value="202501">2025년 1월</option>
+          <option value="202603">2026년 3월</option><option value="202602">2026년 2월</option><option value="202601">2026년 1월</option><option value="202512">2025년 12월</option><option value="202511">2025년 11월</option><option value="202510">2025년 10월</option><option value="202509">2025년 9월</option><option value="202508">2025년 8월</option><option value="202507">2025년 7월</option><option value="202506">2025년 6월</option><option value="202505">2025년 5월</option><option value="202504">2025년 4월</option><option value="202503">2025년 3월</option><option value="202502">2025년 2월</option><option value="202501" selected>2025년 1월</option>
         </select>
       </div>
     </div>
-
-    <!-- 실거래 KPI -->
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
-      <div class="kpi-card vc-blue">
-        <div class="kpi-top"><div class="kpi-lbl">총 거래 건수</div><span class="kpi-icon">📋</span></div>
-        <div class="kpi-val c-blue" id="tradeCount">—</div>
-        <div class="kpi-foot"><span class="kpi-sub">해당 월 신고 건수</span></div>
-      </div>
-      <div class="kpi-card vc-green">
-        <div class="kpi-top"><div class="kpi-lbl">평균 거래금액</div><span class="kpi-icon">₩</span></div>
-        <div class="kpi-val c-green" style="font-size:22px;" id="tradeAvg">—</div>
-        <div class="kpi-foot"><span class="kpi-sub">만원</span></div>
-      </div>
-      <div class="kpi-card vc-orange">
-        <div class="kpi-top"><div class="kpi-lbl">최고 거래금액</div><span class="kpi-icon">↑</span></div>
-        <div class="kpi-val c-orange" style="font-size:22px;" id="tradeMax">—</div>
-        <div class="kpi-foot"><span class="kpi-sub">만원</span></div>
-      </div>
-      <div class="kpi-card vc-red">
-        <div class="kpi-top"><div class="kpi-lbl">평당 평균가</div><span class="kpi-icon">㎡</span></div>
-        <div class="kpi-val c-red" style="font-size:22px;" id="tradePyeong">—</div>
-        <div class="kpi-foot"><span class="kpi-sub">만원/평</span></div>
-      </div>
+      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">총 거래 건수</div><span class="kpi-icon">📋</span></div><div class="kpi-val c-blue" id="tradeCount">—</div><div class="kpi-foot"><span class="kpi-sub">해당 월 신고 건수</span></div></div>
+      <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">평균 거래금액</div><span class="kpi-icon">₩</span></div><div class="kpi-val c-green" style="font-size:22px;" id="tradeAvg">—</div><div class="kpi-foot"><span class="kpi-sub">만원</span></div></div>
+      <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">최고 거래금액</div><span class="kpi-icon">↑</span></div><div class="kpi-val c-orange" style="font-size:22px;" id="tradeMax">—</div><div class="kpi-foot"><span class="kpi-sub">만원</span></div></div>
+      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">평당 평균가</div><span class="kpi-icon">㎡</span></div><div class="kpi-val c-red" style="font-size:22px;" id="tradePyeong">—</div><div class="kpi-foot"><span class="kpi-sub">만원/평</span></div></div>
     </div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-      <div class="card">
-        <div class="card-h"><div class="card-title">금액대별 분포</div><span class="bdg bdg-blue" id="tradeDistBadge"></span></div>
-        <div class="cw2" style="height:200px;"><canvas id="tradeDistChart">로딩 중</canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-h"><div class="card-title">단지별 거래 TOP 10</div></div>
-        <div class="cw2" style="height:200px;"><canvas id="tradeAptChart">로딩 중</canvas></div>
-      </div>
+      <div class="card"><div class="card-h"><div class="card-title">금액대별 분포</div><span class="bdg bdg-blue" id="tradeDistBadge"></span></div><div class="cw2" style="height:200px;"><canvas id="tradeDistChart"></canvas></div></div>
+      <div class="card"><div class="card-h"><div class="card-title">단지별 거래 TOP 10</div></div><div class="cw2" style="height:200px;"><canvas id="tradeAptChart"></canvas></div></div>
     </div>
-
     <div class="card">
-      <div class="card-h">
-        <div class="card-title">실거래 목록</div>
-        <span class="bdg bdg-green" id="tradeTotalBadge">로딩 중</span>
-      </div>
+      <div class="card-h"><div class="card-title">실거래 목록</div><span class="bdg bdg-green" id="tradeTotalBadge">로딩 중</span></div>
       <div style="overflow-x:auto;">
         <table class="dtable" style="min-width:720px;">
-          <thead>
-            <tr>
-              <th>아파트명</th><th>법정동</th><th>전용면적(㎡)</th>
-              <th>층</th><th>계약일</th>
-              <th style="text-align:right;">거래금액(만원)</th>
-              <th style="text-align:right;">평당가(만원)</th>
-            </tr>
-          </thead>
-          <tbody id="tradeTableBody">
-            <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>구 · 기간을 선택하면 데이터가 로딩됩니다</td></tr>
-          </tbody>
+          <thead><tr><th>아파트명</th><th>법정동</th><th>전용면적(㎡)</th><th>층</th><th>계약일</th><th style="text-align:right;">거래금액(만원)</th><th style="text-align:right;">평당가(만원)</th></tr></thead>
+          <tbody id="tradeTableBody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>구 · 기간을 선택하면 데이터가 로딩됩니다</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -943,223 +695,65 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
   <!-- ══ 뉴스·정책 ══ -->
   <div id="tab-news" class="tab-panel">
     <div class="page-h">
-      <div><h2>뉴스·정책 <span class="ph-badge">국토부·서울시</span></h2><p>재개발·재건축 관련 최신 뉴스 · 국토부 정책 보도자료</p></div>
+      <div><h2>뉴스·정책 <span class="ph-badge">국토부·서울시</span></h2><p>재개발·재건축 관련 최신 뉴스</p></div>
       <div style="display:flex;gap:8px;align-items:center;">
         <select id="newsKeyword" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:#fff;cursor:pointer;outline:none;" onchange="loadNews()">
-          <option value="재개발">재개발</option>
-          <option value="재건축">재건축</option>
-          <option value="도시정비법">도시정비법</option>
-          <option value="정비사업">정비사업</option>
-          <option value="조합">조합</option>
-          <option value="관리처분">관리처분</option>
-          <option value="이주비">이주비</option>
+          <option value="재개발">재개발</option><option value="재건축">재건축</option><option value="도시정비법">도시정비법</option><option value="정비사업">정비사업</option><option value="조합">조합</option><option value="관리처분">관리처분</option><option value="이주비">이주비</option>
         </select>
         <button onclick="loadNews()" style="padding:6px 14px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:12px;cursor:pointer;font-family:var(--font);">새로고침</button>
       </div>
     </div>
-
-    <!-- 검색어 트렌드 워드클라우드 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-      <div class="card">
-        <div class="card-h"><div class="card-title">검색어 트렌드</div><span class="bdg bdg-blue">빅데이터 기반</span></div>
-        <div id="newsWordCloud" style="padding:12px;min-height:120px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;">
-          <span style="color:var(--gray-400);font-size:12px;">뉴스 로딩 후 생성됩니다</span>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-h"><div class="card-title">국토부 보도자료</div><span class="bdg bdg-green">네이버뉴스 연동</span></div>
-        <div id="molit-news" style="max-height:140px;overflow-y:auto;">
-          <div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">로딩 중...</div>
-        </div>
-      </div>
+      <div class="card"><div class="card-h"><div class="card-title">검색어 트렌드</div><span class="bdg bdg-blue">빅데이터 기반</span></div><div id="newsWordCloud" style="padding:12px;min-height:120px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;"><span style="color:var(--gray-400);font-size:12px;">뉴스 로딩 후 생성됩니다</span></div></div>
+      <div class="card"><div class="card-h"><div class="card-title">국토부 보도자료</div><span class="bdg bdg-green">네이버뉴스 연동</span></div><div id="molit-news" style="max-height:140px;overflow-y:auto;"><div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">로딩 중...</div></div></div>
     </div>
-
-    <!-- 뉴스 목록 -->
     <div class="card">
-      <div class="card-h">
-        <div class="card-title">최신 뉴스</div>
-        <span class="bdg bdg-gray" id="newsTotalBadge">로딩 중</span>
-      </div>
-      <div id="newsListBody" style="display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto;">
-        <div style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div>
-      </div>
+      <div class="card-h"><div class="card-title">최신 뉴스</div><span class="bdg bdg-gray" id="newsTotalBadge">로딩 중</span></div>
+      <div id="newsListBody" style="display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto;"><div style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div></div>
     </div>
   </div>
 
   <!-- ══ 세금 계산기 ══ -->
   <div id="tab-tax" class="tab-panel">
-    <div class="page-h"><div><h2>세금 계산기 <span class="ph-badge">법·제도</span></h2><p>재개발·재건축 취득세 · 양도소득세 · 조합원 입주권 세금 계산</p></div></div>
-
-    <!-- 세금 탭 전환 -->
+    <div class="page-h"><div><h2>세금 계산기 <span class="ph-badge">법·제도</span></h2><p>재개발·재건축 취득세 · 양도소득세 계산</p></div></div>
     <div style="display:flex;gap:6px;margin-bottom:14px;">
-      <button class="law-tab-btn active" id="taxTab1" onclick="setTaxTab('acq',this)">🏠 취득세</button>
-      <button class="law-tab-btn" id="taxTab2" onclick="setTaxTab('cgt',this)">💰 양도소득세</button>
-      <button class="law-tab-btn" id="taxTab3" onclick="setTaxTab('info',this)">📋 세금 정보</button>
+      <button class="law-tab-btn active" onclick="setTaxTab('acq',this)">🏠 취득세</button>
+      <button class="law-tab-btn" onclick="setTaxTab('cgt',this)">💰 양도소득세</button>
+      <button class="law-tab-btn" onclick="setTaxTab('info',this)">📋 세금 정보</button>
     </div>
-
-    <!-- 취득세 계산기 -->
     <div id="taxAcq">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
         <div class="card">
           <div class="card-h"><div class="card-title">취득세 계산</div></div>
           <div style="display:flex;flex-direction:column;gap:12px;padding:4px 0;">
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">취득 유형</div>
-              <div style="display:flex;gap:6px;">
-                <button class="law-tab-btn active" id="acqType1" onclick="setAcqType('buy',this)" style="font-size:11px;padding:5px 10px;">일반 매수</button>
-                <button class="law-tab-btn" id="acqType2" onclick="setAcqType('union',this)" style="font-size:11px;padding:5px 10px;">조합원 입주권</button>
-                <button class="law-tab-btn" id="acqType3" onclick="setAcqType('new',this)" style="font-size:11px;padding:5px 10px;">신규 분양</button>
-              </div>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">취득가액 (만원)</div>
-              <input type="number" id="acqPrice" placeholder="예: 80000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcAcqTax()">
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">주택 보유 수</div>
-              <select id="acqHouseCount" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcAcqTax()">
-                <option value="0">무주택 (0주택)</option>
-                <option value="1">1주택 보유</option>
-                <option value="2">2주택 보유</option>
-                <option value="3">3주택 이상 보유</option>
-              </select>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">조정대상지역 여부</div>
-              <select id="acqAdj" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcAcqTax()">
-                <option value="yes">조정대상지역 (서울 전역)</option>
-                <option value="no">비조정대상지역</option>
-              </select>
-            </div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">취득 유형</div><div style="display:flex;gap:6px;"><button class="law-tab-btn active" onclick="setAcqType('buy',this)" style="font-size:11px;padding:5px 10px;">일반 매수</button><button class="law-tab-btn" onclick="setAcqType('union',this)" style="font-size:11px;padding:5px 10px;">조합원 입주권</button><button class="law-tab-btn" onclick="setAcqType('new',this)" style="font-size:11px;padding:5px 10px;">신규 분양</button></div></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">취득가액 (만원)</div><input type="number" id="acqPrice" placeholder="예: 80000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcAcqTax()"></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">주택 보유 수</div><select id="acqHouseCount" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcAcqTax()"><option value="0">무주택 (0주택)</option><option value="1">1주택 보유</option><option value="2">2주택 보유</option><option value="3">3주택 이상 보유</option></select></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">조정대상지역 여부</div><select id="acqAdj" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcAcqTax()"><option value="yes">조정대상지역 (서울 전역)</option><option value="no">비조정대상지역</option></select></div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-h"><div class="card-title">취득세 계산 결과</div></div>
-          <div id="acqResult">
-            <div style="text-align:center;padding:30px;color:var(--gray-400);font-size:12px;">좌측 항목을 입력하면 계산됩니다</div>
-          </div>
-          <div style="margin-top:12px;padding:12px;background:var(--gray-50);border-radius:var(--r);font-size:11.5px;color:var(--gray-500);line-height:1.8;">
-            ※ 취득세 = 취득세 + 지방교육세 + 농어촌특별세<br>
-            ※ 조합원 입주권은 종전 주택 가액 기준<br>
-            ※ 실제 세액은 관할 구청에서 확인하세요
-          </div>
-        </div>
+        <div class="card"><div class="card-h"><div class="card-title">취득세 계산 결과</div></div><div id="acqResult"><div style="text-align:center;padding:30px;color:var(--gray-400);font-size:12px;">좌측 항목을 입력하면 계산됩니다</div></div><div style="margin-top:12px;padding:12px;background:var(--gray-50);border-radius:var(--r);font-size:11.5px;color:var(--gray-500);line-height:1.8;">※ 취득세 = 취득세 + 지방교육세 + 농어촌특별세<br>※ 실제 세액은 관할 구청에서 확인하세요</div></div>
       </div>
     </div>
-
-    <!-- 양도소득세 계산기 -->
     <div id="taxCgt" style="display:none;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
         <div class="card">
           <div class="card-h"><div class="card-title">양도소득세 계산</div></div>
           <div style="display:flex;flex-direction:column;gap:12px;padding:4px 0;">
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">취득가액 (만원)</div>
-              <input type="number" id="cgtBuy" placeholder="예: 50000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcCgtTax()">
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">양도가액 (만원)</div>
-              <input type="number" id="cgtSell" placeholder="예: 80000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcCgtTax()">
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">보유 기간</div>
-              <select id="cgtHoldYears" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcCgtTax()">
-                <option value="1">1년 미만</option>
-                <option value="2">1년 이상 ~ 2년 미만</option>
-                <option value="5">2년 이상 ~ 5년 미만</option>
-                <option value="10">5년 이상 ~ 10년 미만</option>
-                <option value="15">10년 이상 ~ 15년 미만</option>
-                <option value="20">15년 이상</option>
-              </select>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">1세대 1주택 비과세 해당</div>
-              <select id="cgtExempt" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcCgtTax()">
-                <option value="no">해당 없음</option>
-                <option value="yes">1세대 1주택 비과세 (2년 이상 보유·거주)</option>
-                <option value="partial">일부 과세 (9억 초과분)</option>
-              </select>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">필요경비 (만원)</div>
-              <input type="number" id="cgtCost" placeholder="취득부대비용, 자본적지출 등" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcCgtTax()">
-            </div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">취득가액 (만원)</div><input type="number" id="cgtBuy" placeholder="예: 50000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcCgtTax()"></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">양도가액 (만원)</div><input type="number" id="cgtSell" placeholder="예: 80000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcCgtTax()"></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">보유 기간</div><select id="cgtHoldYears" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcCgtTax()"><option value="1">1년 미만</option><option value="2">1년 이상 ~ 2년 미만</option><option value="5">2년 이상 ~ 5년 미만</option><option value="10">5년 이상 ~ 10년 미만</option><option value="15">10년 이상 ~ 15년 미만</option><option value="20">15년 이상</option></select></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">1세대 1주택 비과세</div><select id="cgtExempt" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;" onchange="calcCgtTax()"><option value="no">해당 없음</option><option value="yes">1세대 1주택 비과세</option><option value="partial">일부 과세 (9억 초과분)</option></select></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px;">필요경비 (만원)</div><input type="number" id="cgtCost" placeholder="취득부대비용 등" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;outline:none;box-sizing:border-box;" oninput="calcCgtTax()"></div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-h"><div class="card-title">양도소득세 계산 결과</div></div>
-          <div id="cgtResult">
-            <div style="text-align:center;padding:30px;color:var(--gray-400);font-size:12px;">좌측 항목을 입력하면 계산됩니다</div>
-          </div>
-          <div style="margin-top:12px;padding:12px;background:var(--gray-50);border-radius:var(--r);font-size:11.5px;color:var(--gray-500);line-height:1.8;">
-            ※ 지방소득세(양도세의 10%) 별도<br>
-            ※ 장기보유특별공제 반영<br>
-            ※ 실제 세액은 세무사 확인 필요
-          </div>
-        </div>
+        <div class="card"><div class="card-h"><div class="card-title">양도소득세 계산 결과</div></div><div id="cgtResult"><div style="text-align:center;padding:30px;color:var(--gray-400);font-size:12px;">좌측 항목을 입력하면 계산됩니다</div></div></div>
       </div>
     </div>
-
-    <!-- 세금 정보 -->
     <div id="taxInfo" style="display:none;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <div class="card">
-          <div class="card-h"><div class="card-title">취득세율 요약</div></div>
-          <table class="dtable">
-            <thead><tr><th>구분</th><th>세율</th><th>비고</th></tr></thead>
-            <tbody>
-              <tr><td>1주택 (6억 이하)</td><td style="font-family:var(--mono);color:var(--green);">1%</td><td>기본세율</td></tr>
-              <tr><td>1주택 (6~9억)</td><td style="font-family:var(--mono);color:var(--blue);">1~3%</td><td>구간비례</td></tr>
-              <tr><td>1주택 (9억 초과)</td><td style="font-family:var(--mono);color:var(--orange);">3%</td><td>기본세율</td></tr>
-              <tr><td>2주택 (조정)</td><td style="font-family:var(--mono);color:var(--red);">8%</td><td>중과</td></tr>
-              <tr><td>3주택 이상 (조정)</td><td style="font-family:var(--mono);color:var(--red);">12%</td><td>중과</td></tr>
-              <tr><td>조합원 입주권</td><td style="font-family:var(--mono);color:var(--blue);">1~3%</td><td>종전주택 기준</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="card">
-          <div class="card-h"><div class="card-title">장기보유특별공제율</div></div>
-          <table class="dtable">
-            <thead><tr><th>보유기간</th><th>일반</th><th>1세대1주택</th></tr></thead>
-            <tbody>
-              <tr><td>3년 이상</td><td style="font-family:var(--mono);">6%</td><td style="font-family:var(--mono);color:var(--green);">24%</td></tr>
-              <tr><td>4년 이상</td><td style="font-family:var(--mono);">8%</td><td style="font-family:var(--mono);color:var(--green);">32%</td></tr>
-              <tr><td>5년 이상</td><td style="font-family:var(--mono);">10%</td><td style="font-family:var(--mono);color:var(--green);">40%</td></tr>
-              <tr><td>6년 이상</td><td style="font-family:var(--mono);">12%</td><td style="font-family:var(--mono);color:var(--green);">48%</td></tr>
-              <tr><td>10년 이상</td><td style="font-family:var(--mono);">20%</td><td style="font-family:var(--mono);color:var(--green);">80%</td></tr>
-              <tr><td>15년 이상</td><td style="font-family:var(--mono);">30%</td><td style="font-family:var(--mono);color:var(--green);">80%</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="card">
-          <div class="card-h"><div class="card-title">재개발·재건축 핵심 세금 포인트</div></div>
-          <div style="font-size:12.5px;color:var(--gray-600);line-height:2;padding:4px 0;">
-            <div style="margin-bottom:8px;"><strong style="color:var(--blue);">📌 입주권 취득 시</strong><br>
-            관리처분인가 이후 취득한 입주권은 주택 수에 포함되어 다주택 취득세 중과 적용 가능</div>
-            <div style="margin-bottom:8px;"><strong style="color:var(--blue);">📌 1세대 1주택 비과세</strong><br>
-            양도일 기준 2년 이상 보유 (조정지역은 2년 이상 거주 추가 요건)</div>
-            <div style="margin-bottom:8px;"><strong style="color:var(--blue);">📌 재건축 조합원</strong><br>
-            종전주택 + 청산금이 새 주택의 취득가액. 청산금 수령 시 양도세 과세 가능</div>
-            <div><strong style="color:var(--red);">⚠️ 주의</strong><br>
-            세법은 자주 개정됩니다. 반드시 세무사 확인 후 진행하세요.</div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-h"><div class="card-title">양도소득세율</div></div>
-          <table class="dtable">
-            <thead><tr><th>과세표준</th><th>세율</th><th>누진공제</th></tr></thead>
-            <tbody>
-              <tr><td>1,400만원 이하</td><td style="font-family:var(--mono);">6%</td><td style="font-family:var(--mono);">—</td></tr>
-              <tr><td>5,000만원 이하</td><td style="font-family:var(--mono);">15%</td><td style="font-family:var(--mono);">126만</td></tr>
-              <tr><td>8,800만원 이하</td><td style="font-family:var(--mono);">24%</td><td style="font-family:var(--mono);">576만</td></tr>
-              <tr><td>1.5억 이하</td><td style="font-family:var(--mono);">35%</td><td style="font-family:var(--mono);">1,544만</td></tr>
-              <tr><td>3억 이하</td><td style="font-family:var(--mono);">38%</td><td style="font-family:var(--mono);">1,994만</td></tr>
-              <tr><td>5억 이하</td><td style="font-family:var(--mono);">40%</td><td style="font-family:var(--mono);">2,594만</td></tr>
-              <tr><td>10억 이하</td><td style="font-family:var(--mono);">42%</td><td style="font-family:var(--mono);">3,594만</td></tr>
-              <tr><td>10억 초과</td><td style="font-family:var(--mono);">45%</td><td style="font-family:var(--mono);">6,594만</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="card"><div class="card-h"><div class="card-title">취득세율 요약</div></div><table class="dtable"><thead><tr><th>구분</th><th>세율</th><th>비고</th></tr></thead><tbody><tr><td>1주택 (6억 이하)</td><td style="font-family:var(--mono);color:var(--green);">1%</td><td>기본세율</td></tr><tr><td>1주택 (6~9억)</td><td style="font-family:var(--mono);color:var(--blue);">1~3%</td><td>구간비례</td></tr><tr><td>1주택 (9억 초과)</td><td style="font-family:var(--mono);color:var(--orange);">3%</td><td>기본세율</td></tr><tr><td>2주택 (조정)</td><td style="font-family:var(--mono);color:var(--red);">8%</td><td>중과</td></tr><tr><td>3주택 이상 (조정)</td><td style="font-family:var(--mono);color:var(--red);">12%</td><td>중과</td></tr></tbody></table></div>
+        <div class="card"><div class="card-h"><div class="card-title">양도소득세율</div></div><table class="dtable"><thead><tr><th>과세표준</th><th>세율</th><th>누진공제</th></tr></thead><tbody><tr><td>1,400만원 이하</td><td style="font-family:var(--mono);">6%</td><td style="font-family:var(--mono);">—</td></tr><tr><td>5,000만원 이하</td><td style="font-family:var(--mono);">15%</td><td style="font-family:var(--mono);">126만</td></tr><tr><td>8,800만원 이하</td><td style="font-family:var(--mono);">24%</td><td style="font-family:var(--mono);">576만</td></tr><tr><td>1.5억 이하</td><td style="font-family:var(--mono);">35%</td><td style="font-family:var(--mono);">1,544만</td></tr><tr><td>3억 이하</td><td style="font-family:var(--mono);">38%</td><td style="font-family:var(--mono);">1,994만</td></tr><tr><td>5억 이하</td><td style="font-family:var(--mono);">40%</td><td style="font-family:var(--mono);">2,594만</td></tr><tr><td>10억 이하</td><td style="font-family:var(--mono);">42%</td><td style="font-family:var(--mono);">3,594만</td></tr><tr><td>10억 초과</td><td style="font-family:var(--mono);">45%</td><td style="font-family:var(--mono);">6,594만</td></tr></tbody></table></div>
       </div>
     </div>
   </div>
@@ -1167,155 +761,230 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(27,79,21
   <!-- ══ 조합원 권리 ══ -->
   <div id="tab-rights" class="tab-panel">
     <div class="page-h"><div><h2>조합원 권리 <span class="ph-badge">법·제도</span></h2><p>입주권 · 현금청산 · 분양신청 · 권리가액 산정 기준</p></div></div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-      <div class="card">
-        <div class="card-h"><div class="card-title">조합원 자격 요건</div><span class="bdg bdg-blue">도시정비법</span></div>
-        <div style="font-size:12.5px;color:var(--gray-600);line-height:2;padding:4px 0;">
-          <div style="margin-bottom:10px;padding:10px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);">
-            <strong>재개발 조합원</strong><br>
-            정비구역 내 토지 또는 건축물 소유자<br>
-            (토지만 소유해도 조합원 가능)
-          </div>
-          <div style="padding:10px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);">
-            <strong>재건축 조합원</strong><br>
-            정비구역 내 건축물 및 그 부속토지 소유자<br>
-            (토지만 소유 시 조합원 불가)
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-h"><div class="card-title">입주권 vs 현금청산</div><span class="bdg bdg-orange">선택 기준</span></div>
-        <table class="dtable">
-          <thead><tr><th>구분</th><th>입주권</th><th>현금청산</th></tr></thead>
-          <tbody>
-            <tr><td>선택 시점</td><td>분양신청 기간 내</td><td>분양신청 미참여</td></tr>
-            <tr><td>취득 방식</td><td>새 아파트 취득</td><td>현금 수령</td></tr>
-            <tr><td>추가 분담금</td><td>발생 가능</td><td>없음</td></tr>
-            <tr><td>세금</td><td>취득세 발생</td><td>양도세 가능</td></tr>
-            <tr><td>이주 의무</td><td>있음</td><td>있음</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-      <div class="card">
-        <div class="card-h"><div class="card-title">권리가액 산정 방식</div><span class="bdg bdg-green">핵심</span></div>
-        <div style="font-size:12.5px;color:var(--gray-600);line-height:1.9;padding:4px 0;">
-          <div style="background:var(--gray-50);padding:12px;border-radius:var(--r);font-family:var(--mono);font-size:12px;margin-bottom:10px;">
-            권리가액 = 종전자산평가액 × 비례율
-          </div>
-          <strong>종전자산평가액</strong><br>
-          감정평가사 2인이 산정한 토지+건물 감정평가액<br><br>
-          <strong>비례율</strong><br>
-          총 분양수입 ÷ 총 사업비 × 100%<br>
-          (100% 초과 시 이익, 미만 시 손실)<br><br>
-          <strong>추가 분담금</strong><br>
-          조합원 분양가 − 권리가액 = 추가 분담금<br>
-          (음수면 환급)
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-h"><div class="card-title">분양신청 절차</div><span class="bdg bdg-blue">단계별</span></div>
-        <div style="font-size:12.5px;color:var(--gray-600);line-height:1.9;padding:4px 0;">
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;gap:10px;align-items:flex-start;">
-              <span style="background:var(--blue);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
-              <div><strong>관리처분계획인가</strong><br>사업시행인가 후 분양 계획 수립</div>
-            </div>
-            <div style="display:flex;gap:10px;align-items:flex-start;">
-              <span style="background:var(--blue);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
-              <div><strong>분양신청 통지</strong><br>조합이 조합원에게 분양신청 안내 (30일 이상)</div>
-            </div>
-            <div style="display:flex;gap:10px;align-items:flex-start;">
-              <span style="background:var(--blue);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
-              <div><strong>분양신청</strong><br>신청 기간 내 서면 신청 (미신청 = 현금청산)</div>
-            </div>
-            <div style="display:flex;gap:10px;align-items:flex-start;">
-              <span style="background:var(--green);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">4</span>
-              <div><strong>관리처분계획 확정</strong><br>분양대상자 확정 및 입주권 부여</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-h"><div class="card-title">주요 권리 보호 규정</div><span class="bdg bdg-red">꼭 알아야 할 것</span></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:4px 0;">
-        <div style="padding:12px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);">
-          <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px;">이주비 대출</div>
-          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">관리처분인가 후<br>이주 시 금융기관<br>이주비 대출 가능<br>(권리가액 범위 내)</div>
-        </div>
-        <div style="padding:12px;background:#ECFDF5;border-radius:var(--r);border-left:3px solid var(--green);">
-          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px;">세입자 보호</div>
-          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">주거이전비·이사비<br>지급 의무<br>(주거용 세입자<br>3개월 이상 거주)</div>
-        </div>
-        <div style="padding:12px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);">
-          <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px;">손실보상</div>
-          <div style="font-size:12px;color:var(--gray-600);line-height:1.8;">현금청산자·<br>토지수용 시<br>감정평가액 기준<br>보상 의무</div>
-        </div>
-      </div>
+      <div class="card"><div class="card-h"><div class="card-title">조합원 자격 요건</div><span class="bdg bdg-blue">도시정비법</span></div><div style="font-size:12.5px;color:var(--gray-600);line-height:2;padding:4px 0;"><div style="margin-bottom:10px;padding:10px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);"><strong>재개발 조합원</strong><br>정비구역 내 토지 또는 건축물 소유자</div><div style="padding:10px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);"><strong>재건축 조합원</strong><br>정비구역 내 건축물 및 그 부속토지 소유자</div></div></div>
+      <div class="card"><div class="card-h"><div class="card-title">권리가액 산정 방식</div><span class="bdg bdg-green">핵심</span></div><div style="font-size:12.5px;color:var(--gray-600);line-height:1.9;padding:4px 0;"><div style="background:var(--gray-50);padding:12px;border-radius:var(--r);font-family:var(--mono);font-size:12px;margin-bottom:10px;">권리가액 = 종전자산평가액 × 비례율</div><strong>추가 분담금</strong><br>조합원 분양가 − 권리가액 = 추가 분담금<br>(음수면 환급)</div></div>
     </div>
   </div>
 
   <!-- ══ 구역별 수익 비교 ══ -->
   <div id="tab-compare" class="tab-panel">
     <div class="page-h"><div><h2>구역별 수익 비교 <span class="ph-badge">투자 데이터</span></h2><p>관심 구역 나란히 비교 · 실거래가 자동 연동</p></div></div>
-    <div class="card"><div class="empty"><div class="ei">📊</div><p>구역별 수익 비교 기능 준비 중입니다<br><span style="font-size:11px;color:var(--gray-400);">최대 3개 구역 동시 비교 · Standard 이상 제공 예정</span></p></div></div>
+    <div class="card"><div class="empty"><div class="ei">📊</div><p>구역별 수익 비교 기능 준비 중입니다<br><span style="font-size:11px;color:var(--gray-400);">최대 3개 구역 동시 비교 · Premium 이상 제공 예정</span></p></div></div>
   </div>
 
   <!-- ══ 시세 추이 ══ -->
   <div id="tab-trend" class="tab-panel">
-    <div class="page-h"><div><h2>시세 추이 <span class="ph-badge">투자 데이터</span></h2><p>관심 구역 실거래가 변화 추이 · 단계별 시세 영향 분석</p></div></div>
-    <div class="card"><div class="empty"><div class="ei">📈</div><p>시세 추이 기능 준비 중입니다<br><span style="font-size:11px;color:var(--gray-400);">구역별 실거래가 시계열 차트 준비 중</span></p></div></div>
+    <div class="page-h"><div><h2>시세 추이 <span class="ph-badge">투자 데이터</span></h2><p>관심 구역 실거래가 변화 추이</p></div></div>
+    <div class="card"><div class="empty"><div class="ei">📈</div><p>시세 추이 기능 준비 중입니다</p></div></div>
   </div>
 
-  <!-- ══ PRISM (B2B) ══ -->
+  <!-- ══ PRISM ══ -->
   <div id="tab-prism" class="tab-panel">
-    <div class="page-h"><div><h2>PRISM <span class="ph-badge" style="background:var(--blue);color:#fff;">B2B</span></h2><p>Project Risk & Information System for Management · 추진위·조합 맞춤형 대시보드</p></div></div>
+    <div class="page-h"><div><h2>PRISM <span class="ph-badge" style="background:var(--blue);color:#fff;">B2B</span></h2><p>Project Risk & Information System for Management</p></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-      <div class="card" style="border:2px solid var(--blue-mid);">
-        <div class="card-h"><div class="card-title">PRISM이란?</div></div>
-        <div style="padding:8px 0;font-size:13px;color:var(--gray-600);line-height:1.9;">
-          재개발·재건축 <strong>추진위원회 · 조합</strong>을 위한<br>
-          맞춤형 사업 관리 대시보드입니다.<br><br>
-          • 단계별 사업 일정 관리<br>
-          • 조합원 현황 관리<br>
-          • 사업비 집행 현황<br>
-          • AI 기반 리스크 보고서<br>
-          • 공시 자동화 지원
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-h"><div class="card-title">도입 문의</div></div>
-        <div style="padding:8px 0;font-size:13px;color:var(--gray-600);line-height:1.9;">
-          PRISM은 <strong>B2B 별도 계약</strong>으로 제공됩니다.<br><br>
-          추진위·조합의 규모와 단계에 맞춰<br>
-          맞춤형 대시보드를 구축해 드립니다.<br><br>
-          <span style="color:var(--blue);font-weight:600;">📧 문의: admin@redev.ai</span>
-        </div>
-      </div>
+      <div class="card" style="border:2px solid var(--blue-mid);"><div class="card-h"><div class="card-title">PRISM이란?</div></div><div style="padding:8px 0;font-size:13px;color:var(--gray-600);line-height:1.9;">재개발·재건축 <strong>추진위원회 · 조합</strong>을 위한 맞춤형 사업 관리 대시보드입니다.<br><br>• 단계별 사업 일정 관리<br>• 조합원 현황 관리<br>• AI 기반 리스크 보고서</div></div>
+      <div class="card"><div class="card-h"><div class="card-title">도입 문의</div></div><div style="padding:8px 0;font-size:13px;color:var(--gray-600);line-height:1.9;">PRISM은 <strong>B2B 별도 계약</strong>으로 제공됩니다.<br><br><span style="color:var(--blue);font-weight:600;">📧 문의: admin@redev.ai</span></div></div>
     </div>
-  </div>
-
-  <!-- ══ 조합 (구버전 유지) ══ -->
-  <div id="tab-union" class="tab-panel">
-    <div class="page-h"><div><h2>조합 관리</h2></div></div>
-    <div class="card"><div class="empty"><div class="ei">◻</div><p>조합 관리 시스템 구축 예정입니다</p></div></div>
   </div>
 
 </div><!-- /content -->
 </div><!-- /body-wrap -->
 
+<!-- ══ AUTH MODAL ══ -->
+<div class="auth-overlay" id="authOverlay" style="display:none;" onclick="if(event.target===this)closeAuth()">
+  <div class="auth-modal">
+    <button class="auth-close" onclick="closeAuth()">✕</button>
+    <h2 id="authTitle">로그인</h2>
+    <p id="authDesc">REDEV AI에 오신 것을 환영합니다</p>
+    <div class="auth-err" id="authErr"></div>
+    <input class="auth-inp" type="email" id="authEmail" placeholder="이메일" onkeydown="if(event.key==='Enter')authSubmit()">
+    <input class="auth-inp" type="password" id="authPw" placeholder="비밀번호 (6자 이상)" onkeydown="if(event.key==='Enter')authSubmit()">
+    <div id="authNameRow" style="display:none;"><input class="auth-inp" type="text" id="authName" placeholder="이름 (선택사항)"></div>
+    <button class="auth-btn" onclick="authSubmit()" id="authSubmitBtn">로그인</button>
+    <div class="auth-toggle" id="authToggle">
+      계정이 없으신가요? <span onclick="setAuthMode('signup')">회원가입</span>
+    </div>
+  </div>
+</div>
+
 <script>
-const SB='https://jhmhocgzjstwrstjwopm.supabase.co';
-const SK='sb_publishable_UkUrQN6HO03ntKd8aI-hpg_qgTseYLG';
-const SN=['','구역지정','추진위','조합설립','사업시행','관리처분','이주','착공','분양','준공'];
-const SC=['','#9CA3AF','#1D4ED8','#6D28D9','#065F46','#92400E','#9A3412','#86198F','#9F1239','#059669'];
-const PERIODS=[];
-for(let y=2017;y<=2025;y++)for(let q of['03','06','09','12']){if(y===2025&&+q>12)break;PERIODS.push(`${y}-${q}`);}
+// ── SUPABASE AUTH 클라이언트 ──
+const _SB = supabase.createClient(
+  'https://jhmhocgzjstwrstjwopm.supabase.co',
+  'sb_publishable_UkUrQN6HO03ntKd8aI-hpg_qgTseYLG'
+);
+
+let currentUser = null;
+let currentProfile = null;
+let authMode = 'login';
+
+const TIER_LABELS = { free:'무료', standard:'Standard', premium:'Premium', b2b:'B2B' };
+const TIER_CHIPS  = { free:'tier-free', standard:'tier-std', premium:'tier-pre', b2b:'tier-b2b' };
+const TIER_NAMES  = { free:'FREE', standard:'STD', premium:'PRO', b2b:'B2B' };
+
+// 세션 상태 감지
+_SB.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    await loadProfile();
+  } else {
+    currentUser = null;
+    currentProfile = null;
+  }
+  updateAuthUI();
+});
+
+async function loadProfile() {
+  if (!currentUser) return;
+  const { data } = await _SB.from('profiles').select('*').eq('id', currentUser.id).single();
+  currentProfile = data;
+}
+
+function updateAuthUI() {
+  const chip      = document.getElementById('tierChip');
+  const avatar    = document.getElementById('avatarIcon');
+  const menuEmail = document.getElementById('menuEmail');
+  const menuTier  = document.getElementById('menuTier');
+  const menuLogout = document.getElementById('menuLogout');
+  const menuLogin  = document.getElementById('menuLogin');
+
+  if (currentUser && currentProfile) {
+    const tier = currentProfile.tier || 'free';
+    chip.textContent = TIER_NAMES[tier];
+    chip.className   = 'tier-chip ' + TIER_CHIPS[tier];
+    chip.onclick     = toggleUserMenu;
+    avatar.textContent = currentUser.email?.[0]?.toUpperCase() || '👤';
+    menuEmail.textContent = currentUser.email;
+    menuTier.textContent  = TIER_LABELS[tier] + ' 플랜';
+    menuLogout.style.display = 'block';
+    menuLogin.style.display  = 'none';
+  } else {
+    chip.textContent = 'FREE';
+    chip.className   = 'tier-chip tier-free';
+    chip.onclick     = openAuth;
+    avatar.textContent = '👤';
+    menuEmail.textContent = '—';
+    menuTier.textContent  = '로그인이 필요합니다';
+    menuLogout.style.display = 'none';
+    menuLogin.style.display  = 'block';
+  }
+}
+
+function getTier() {
+  return currentProfile?.tier || 'free';
+}
+
+// ── Auth UI 함수 ──
+function openAuth() {
+  setAuthMode('login');
+  document.getElementById('authOverlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('authEmail').focus(), 100);
+}
+
+function closeAuth() {
+  document.getElementById('authOverlay').style.display = 'none';
+  document.getElementById('authErr').style.display = 'none';
+  document.getElementById('authEmail').value = '';
+  document.getElementById('authPw').value = '';
+  if (document.getElementById('authName')) document.getElementById('authName').value = '';
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  const isSignup = mode === 'signup';
+  document.getElementById('authTitle').textContent     = isSignup ? '회원가입' : '로그인';
+  document.getElementById('authDesc').textContent      = isSignup ? '무료로 시작하세요' : 'REDEV AI에 오신 것을 환영합니다';
+  document.getElementById('authSubmitBtn').textContent = isSignup ? '회원가입' : '로그인';
+  document.getElementById('authNameRow').style.display = isSignup ? 'block' : 'none';
+  document.getElementById('authToggle').innerHTML      = isSignup
+    ? '이미 계정이 있으신가요? <span onclick="setAuthMode(\'login\')">로그인</span>'
+    : '계정이 없으신가요? <span onclick="setAuthMode(\'signup\')">회원가입</span>';
+  document.getElementById('authErr').style.display = 'none';
+}
+
+async function authSubmit() {
+  const email = document.getElementById('authEmail').value.trim();
+  const pw    = document.getElementById('authPw').value;
+  const errEl = document.getElementById('authErr');
+  const btn   = document.getElementById('authSubmitBtn');
+
+  if (!email || !pw) { showAuthErr('이메일과 비밀번호를 입력해주세요'); return; }
+  if (pw.length < 6) { showAuthErr('비밀번호는 6자 이상이어야 합니다'); return; }
+
+  btn.textContent = '처리 중...';
+  btn.disabled    = true;
+  errEl.style.display = 'none';
+
+  try {
+    if (authMode === 'signup') {
+      const { error } = await _SB.auth.signUp({ email, password: pw });
+      if (error) throw error;
+      showAuthErr('✅ 가입 완료! 이메일을 확인해 인증해주세요.', '#059669');
+    } else {
+      const { error } = await _SB.auth.signInWithPassword({ email, password: pw });
+      if (error) throw error;
+      closeAuth();
+    }
+  } catch (e) {
+    const msg = e.message?.includes('Invalid login') ? '이메일 또는 비밀번호가 올바르지 않습니다'
+              : e.message?.includes('already registered') ? '이미 가입된 이메일입니다'
+              : e.message?.includes('Email not confirmed') ? '이메일 인증이 필요합니다. 메일함을 확인해주세요.'
+              : e.message || '오류가 발생했습니다';
+    showAuthErr(msg);
+  } finally {
+    btn.textContent = authMode === 'signup' ? '회원가입' : '로그인';
+    btn.disabled    = false;
+  }
+}
+
+function showAuthErr(msg, color = '#DC2626') {
+  const el = document.getElementById('authErr');
+  el.textContent = msg;
+  el.style.color = color;
+  el.style.background = color === '#059669' ? '#ECFDF5' : '#FEF2F2';
+  el.style.display = 'block';
+}
+
+async function signOut() {
+  await _SB.auth.signOut();
+  closeUserMenu2();
+}
+
+function toggleUserMenu() {
+  const menu = document.getElementById('userMenu');
+  const isOpen = menu.style.display === 'block';
+  menu.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    setTimeout(() => document.addEventListener('click', closeUserMenuOutside), 0);
+  }
+}
+
+function closeUserMenuOutside(e) {
+  const avatar = document.getElementById('userAvatar');
+  if (!avatar.contains(e.target)) {
+    document.getElementById('userMenu').style.display = 'none';
+    document.removeEventListener('click', closeUserMenuOutside);
+  }
+}
+
+function closeUserMenu2() {
+  document.getElementById('userMenu').style.display = 'none';
+  document.removeEventListener('click', closeUserMenuOutside);
+}
+
+function openUpgrade() {
+  closeUserMenu2();
+  alert('플랜 업그레이드는 결제 시스템 연동 후 제공될 예정입니다.\n\n현재 등급: ' + TIER_LABELS[getTier()]);
+}
+
+// ── SUPABASE DATA ──
+const SB = 'https://jhmhocgzjstwrstjwopm.supabase.co';
+const SK = 'sb_publishable_UkUrQN6HO03ntKd8aI-hpg_qgTseYLG';
+const SN = ['','구역지정','추진위','조합설립','사업시행','관리처분','이주','착공','분양','준공'];
+const SC = ['','#9CA3AF','#1D4ED8','#6D28D9','#065F46','#92400E','#9A3412','#86198F','#9F1239','#059669'];
+const PERIODS = [];
+for(let y=2017;y<=2025;y++) for(let q of['03','06','09','12']){if(y===2025&&+q>12)break;PERIODS.push(`${y}-${q}`);}
 
 let ALL=[],ALERTS=[],SD={},DD={},CH={};
 let curZ=null,selGu='all',simCH=null;
@@ -1331,23 +1000,18 @@ const OPTS={
 };
 
 async function sbf(t,q=''){
-  const r=await fetch(`${SB}/rest/v1/${t}?${q}`,{
-    headers:{apikey:SK,Authorization:`Bearer ${SK}`,Prefer:'count=exact'}
-  });
+  const r=await fetch(`${SB}/rest/v1/${t}?${q}`,{headers:{apikey:SK,Authorization:`Bearer ${SK}`,Prefer:'count=exact'}});
   return r.json();
 }
 
-// 전체 데이터 페이지네이션 조회 (Supabase 1000건 제한 우회)
 async function sbfAll(t,q='',pageSize=1000){
-  let all=[], offset=0;
+  let all=[],offset=0;
   while(true){
-    const r=await fetch(`${SB}/rest/v1/${t}?${q}&limit=${pageSize}&offset=${offset}`,{
-      headers:{apikey:SK,Authorization:`Bearer ${SK}`}
-    });
+    const r=await fetch(`${SB}/rest/v1/${t}?${q}&limit=${pageSize}&offset=${offset}`,{headers:{apikey:SK,Authorization:`Bearer ${SK}`}});
     const chunk=await r.json();
-    if(!Array.isArray(chunk)||!chunk.length) break;
+    if(!Array.isArray(chunk)||!chunk.length)break;
     all=[...all,...chunk];
-    if(chunk.length<pageSize) break;
+    if(chunk.length<pageSize)break;
     offset+=pageSize;
   }
   return all;
@@ -1357,55 +1021,39 @@ async function init(){await Promise.all([loadAll(),detectAlerts()]);buildGuChips
 
 async function loadAll(){
   try{
-    const zones = await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period');
-    if(!Array.isArray(zones)||!zones.length) return;
-
-    ALL = zones.map(z=>({
-      gu_name: z.gu_name,
-      project_name: z.project_name,
-      stage: z.stage,
-      stage_score: z.stage_score,
-      period: z.last_period,
-    }));
-
-    const tot = zones.length;
-    document.getElementById('kpiTot').textContent = tot.toLocaleString();
-    document.getElementById('sbTot').textContent = tot.toLocaleString();
-    document.getElementById('kpiTotSub').textContent = '총 ' + tot.toLocaleString() + '개 구역';
-
-    const done   = zones.filter(z=>z.stage_score===9).length;
-    const active = zones.filter(z=>z.stage_score>=3&&z.stage_score<=8).length;
-    document.getElementById('kpiDone').textContent  = done.toLocaleString();
-    document.getElementById('kpiDoneR').textContent = Math.round(done/tot*100)+'%';
-    document.getElementById('kpiActive').textContent = active.toLocaleString();
-
-    for(let i=1;i<=9;i++) SD[i]=0;
-    zones.forEach(z=>{ if(z.stage_score) SD[z.stage_score]++; });
-    zones.forEach(z=>{ if(!DD[z.gu_name]) DD[z.gu_name]=0; DD[z.gu_name]++; });
-
-    drawDistHBar(); drawDonut(); drawStageBar(); drawStageTable(); drawStageTbodyDB();
-
-    // 시계열 트렌드는 별도 경량 쿼리
-    const trend = await sbf('redev_timeline','select=period,stage_score&limit=1000&order=period');
-    if(Array.isArray(trend)) drawTrend(trend);
-
-  }catch(e){ console.error('loadAll 오류:', e); }
+    const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period');
+    if(!Array.isArray(zones)||!zones.length)return;
+    ALL=zones.map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period}));
+    const tot=zones.length;
+    document.getElementById('kpiTot').textContent=tot.toLocaleString();
+    document.getElementById('sbTot').textContent=tot.toLocaleString();
+    document.getElementById('kpiTotSub').textContent='총 '+tot.toLocaleString()+'개 구역';
+    const done=zones.filter(z=>z.stage_score===9).length;
+    const active=zones.filter(z=>z.stage_score>=3&&z.stage_score<=8).length;
+    document.getElementById('kpiDone').textContent=done.toLocaleString();
+    document.getElementById('kpiDoneR').textContent=Math.round(done/tot*100)+'%';
+    document.getElementById('kpiActive').textContent=active.toLocaleString();
+    for(let i=1;i<=9;i++)SD[i]=0;
+    zones.forEach(z=>{if(z.stage_score)SD[z.stage_score]++;});
+    zones.forEach(z=>{if(!DD[z.gu_name])DD[z.gu_name]=0;DD[z.gu_name]++;});
+    drawDistHBar();drawDonut();drawStageBar();drawStageTable();drawStageTbodyDB();
+    const trend=await sbf('redev_timeline','select=period,stage_score&limit=1000&order=period');
+    if(Array.isArray(trend))drawTrend(trend);
+  }catch(e){console.error('loadAll 오류:',e);}
 }
 
 async function detectAlerts(){
   try{
-    // redev_timeline에서 최근 데이터만 샘플링해서 지연 감지
-    let all=[], offset=0;
+    let all=[],offset=0;
     while(true){
-      const chunk=await sbf('redev_timeline',
-        `select=gu_name,project_name,stage,period,stage_score&limit=1000&offset=${offset}&order=project_name,period`);
-      if(!Array.isArray(chunk)||!chunk.length) break;
+      const chunk=await sbf('redev_timeline',`select=gu_name,project_name,stage,period,stage_score&limit=1000&offset=${offset}&order=project_name,period`);
+      if(!Array.isArray(chunk)||!chunk.length)break;
       all=[...all,...chunk];
-      if(chunk.length<1000) break;
+      if(chunk.length<1000)break;
       offset+=1000;
-      if(offset>=10000) break; // 최대 10,000건만 (속도)
+      if(offset>=10000)break;
     }
-    if(!all.length) return;
+    if(!all.length)return;
     const zm={};all.forEach(r=>{if(!zm[r.project_name])zm[r.project_name]=[];zm[r.project_name].push(r);});
     const al=[];
     Object.entries(zm).forEach(([name,recs])=>{
@@ -1428,17 +1076,11 @@ async function detectAlerts(){
   }catch(e){console.error(e);}
 }
 
-/* DASHBOARD 구별 가로바 (밀도 높게) */
 function drawDistHBar(){
   const sorted=Object.entries(DD).sort((a,b)=>b[1]-a[1]);
   const max=sorted[0]?.[1]||1;
   document.getElementById('distHBar').innerHTML=sorted.map(([nm,ct],i)=>
-    `<div class="dist-row">
-      <div class="d-rk ${i<3?'t':''}">${i+1}</div>
-      <div class="d-nm">${nm.replace('구','')}</div>
-      <div class="d-bw"><div class="d-bf" style="width:${Math.round(ct/max*100)}%;"></div></div>
-      <div class="d-ct">${ct}</div>
-    </div>`).join('');
+    `<div class="dist-row"><div class="d-rk ${i<3?'t':''}">${i+1}</div><div class="d-nm">${nm.replace('구','')}</div><div class="d-bw"><div class="d-bf" style="width:${Math.round(ct/max*100)}%;"></div></div><div class="d-ct">${ct}</div></div>`).join('');
 }
 
 function drawDonut(){
@@ -1467,14 +1109,14 @@ function drawAlertCharts(al){
   if(CH.adist)CH.adist.destroy();
   CH.adist=new Chart(document.getElementById('alertDistChart'),{type:'bar',
     data:{labels:s.map(d=>d[0].replace('구','')),datasets:[{data:s.map(d=>d[1]),backgroundColor:'rgba(220,38,38,.7)',borderColor:'#DC2626',borderWidth:1,borderRadius:4,borderSkipped:false}]},
-    options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}},plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`${c.raw}개`}}}}
+    options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}
   });
   const sm={};al.forEach(a=>{sm[a.score]=(sm[a.score]||0)+1;});
   const sk=Object.keys(sm).sort();
   if(CH.astage)CH.astage.destroy();
   CH.astage=new Chart(document.getElementById('alertStageChart'),{type:'doughnut',
     data:{labels:sk.map(k=>SN[k]),datasets:[{data:sk.map(k=>sm[k]),backgroundColor:sk.map(k=>SC[k]),borderWidth:2,borderColor:'#fff'}]},
-    options:{...OPTS,cutout:'55%',plugins:{...OPTS.plugins,legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10,family:'IBM Plex Sans KR'},padding:8,boxWidth:10}},tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`${c.label}: ${c.raw}개`}}}}
+    options:{...OPTS,cutout:'55%',plugins:{...OPTS.plugins,legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10,family:'IBM Plex Sans KR'},padding:8,boxWidth:10}}}}
   });
 }
 
@@ -1483,60 +1125,36 @@ function drawStageBar(){
   if(CH.sbar)CH.sbar.destroy();
   CH.sbar=new Chart(document.getElementById('stageBarchart'),{type:'bar',
     data:{labels,datasets:[{data:vals,backgroundColor:cols.map(c=>c+'bb'),borderColor:cols,borderWidth:1.5,borderRadius:5,borderSkipped:false}]},
-    options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}},plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`${c.raw.toLocaleString()}개`}}}}
+    options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}
   });
 }
 
 function drawStageTable(){
   const tot=Object.values(SD).reduce((a,b)=>a+b,0)||1;
-  const html=Object.entries(SD).map(([k,v])=>`
-    <tr>
-      <td><span class="bdg ${k==9?'bdg-green':k>=7?'bdg-red':k>=5?'bdg-orange':'bdg-blue'}">${k}단계</span></td>
-      <td>${SN[k]}</td>
-      <td class="dtable-num" style="font-family:var(--mono);font-weight:600;font-size:14px;color:var(--gray-900);">${v.toLocaleString()}</td>
-      <td style="font-family:var(--mono);font-weight:600;">${Math.round(v/tot*100)}%</td>
-      <td><div style="background:var(--gray-100);height:4px;border-radius:2px;overflow:hidden;width:90px;"><div style="height:100%;border-radius:2px;background:${SC[k]};width:${Math.round(v/tot*100)}%;"></div></div></td>
-    </tr>`).join('');
-  document.getElementById('stageTbody').innerHTML=html;
+  document.getElementById('stageTbody').innerHTML=Object.entries(SD).map(([k,v])=>`
+    <tr><td><span class="bdg ${k==9?'bdg-green':k>=7?'bdg-red':k>=5?'bdg-orange':'bdg-blue'}">${k}단계</span></td><td>${SN[k]}</td><td style="font-family:var(--mono);font-weight:600;font-size:14px;color:var(--gray-900);">${v.toLocaleString()}</td><td style="font-family:var(--mono);font-weight:600;">${Math.round(v/tot*100)}%</td><td><div style="background:var(--gray-100);height:4px;border-radius:2px;overflow:hidden;width:90px;"><div style="height:100%;border-radius:2px;background:${SC[k]};width:${Math.round(v/tot*100)}%;"></div></div></td></tr>`).join('');
 }
 
 function drawStageTbodyDB(){
   const tot=Object.values(SD).reduce((a,b)=>a+b,0)||1;
   document.getElementById('stageTbodyDB').innerHTML=Object.entries(SD).map(([k,v])=>`
-    <tr>
-      <td><span class="bdg ${k==9?'bdg-green':k>=7?'bdg-red':k>=5?'bdg-orange':'bdg-blue'}">${k}</span></td>
-      <td style="font-size:11.5px;">${SN[k]}</td>
-      <td class="stg-num">${v.toLocaleString()}</td>
-      <td style="font-family:var(--mono);font-weight:600;font-size:11.5px;">${Math.round(v/tot*100)}%</td>
-      <td><div class="pw"><div class="pf" style="width:${Math.round(v/tot*100)}%;background:${SC[k]};"></div></div></td>
-    </tr>`).join('');
+    <tr><td><span class="bdg ${k==9?'bdg-green':k>=7?'bdg-red':k>=5?'bdg-orange':'bdg-blue'}">${k}</span></td><td style="font-size:11.5px;">${SN[k]}</td><td class="stg-num">${v.toLocaleString()}</td><td style="font-family:var(--mono);font-weight:600;font-size:11.5px;">${Math.round(v/tot*100)}%</td><td><div class="pw"><div class="pf" style="width:${Math.round(v/tot*100)}%;background:${SC[k]};"></div></div></td></tr>`).join('');
 }
 
 function initRisk(){
   const p=['23Q1','23Q2','23Q3','23Q4','24Q1','24Q2','24Q3','24Q4','25Q1','25Q2','25Q3'];
-  CH.risk=new Chart(document.getElementById('riskChart'),{type:'line',
-    data:{labels:p,datasets:[
-      {label:'금리',data:[8,8,7.5,7.5,7,7,7.2,7,7.2,7.2,7.2],borderColor:'#DC2626',borderWidth:2,tension:.4,pointRadius:2.5,fill:false},
-      {label:'정책',data:[6,6.5,6,5.5,5.5,5.8,6,5.8,5.8,5.8,5.8],borderColor:'#D97706',borderWidth:2,tension:.4,pointRadius:2.5,fill:false},
-      {label:'시장',data:[7,6.5,6,6.5,6,5.8,5.5,6,6.3,6.3,6.3],borderColor:'#1B4FD8',borderWidth:2,tension:.4,pointRadius:2.5,fill:false},
-    ]},
-    options:{...OPTS,plugins:{...OPTS.plugins,legend:{display:true,position:'top',labels:{color:'#6B7280',font:{size:11,family:'IBM Plex Sans KR'},padding:14,boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{min:0,max:10,grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}
+  CH.risk=new Chart(document.getElementById('riskChart')||document.createElement('canvas'),{type:'line',
+    data:{labels:p,datasets:[{label:'금리',data:[8,8,7.5,7.5,7,7,7.2,7,7.2,7.2,7.2],borderColor:'#DC2626',borderWidth:2,tension:.4,pointRadius:2.5,fill:false}]},
+    options:{...OPTS,plugins:{...OPTS.plugins,legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{min:0,max:10,grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}
   });
 }
 
-/* ALERTS */
 function renderAlertsDB(al){
   const el=document.getElementById('alertListDB');
   if(!al.length){el.innerHTML='<div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;">지연 구역 없음</div>';return;}
   el.innerHTML=al.slice(0,30).map(a=>{
     const cls=a.stuck>=6?'h':a.stuck>=4?'m':'l';
-    return`<div class="al-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')">
-      <div class="al-name">${a.name}</div>
-      <div class="al-gu">${a.gu.replace('구','')}</div>
-      <div class="al-stage">${a.stage}</div>
-      <div class="al-num ${cls}">${a.stuck}</div>
-      <div class="al-unit">기간</div>
-    </div>`;
+    return`<div class="al-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div class="al-name">${a.name}</div><div class="al-gu">${a.gu.replace('구','')}</div><div class="al-stage">${a.stage}</div><div class="al-num ${cls}">${a.stuck}</div><div class="al-unit">기간</div></div>`;
   }).join('');
 }
 
@@ -1545,22 +1163,13 @@ function renderAlertsFull(al){
   if(!al.length){el.innerHTML='<div class="empty"><div class="ei">✓</div><p>지연 구역 없음</p></div>';return;}
   el.innerHTML=al.slice(0,25).map(a=>{
     const cls=a.stuck>=6?'h':a.stuck>=4?'m':'l';
-    return`<div class="al-full-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')">
-      <div style="flex:1;"><div class="al-full-name">${a.name}</div><div class="al-full-desc">${a.gu} · ${a.stage} 단계에서 정체 중</div></div>
-      <div style="text-align:right;"><div class="al-full-num ${cls}">${a.stuck}</div><div class="al-full-unit">기간 정체</div></div>
-    </div>`;
+    return`<div class="al-full-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div style="flex:1;"><div class="al-full-name">${a.name}</div><div class="al-full-desc">${a.gu} · ${a.stage} 단계에서 정체 중</div></div><div style="text-align:right;"><div class="al-full-num ${cls}">${a.stuck}</div><div class="al-full-unit">기간 정체</div></div></div>`;
   }).join('');
 }
 
-/* ZONE SEARCH */
 function buildGuChips(){
-  // 구 필터는 고정 목록 사용 (전체 데이터 로드 불필요)
-  const gus=['강남구','강동구','강북구','강서구','관악구','광진구','구로구','금천구',
-    '노원구','도봉구','동대문구','동작구','마포구','서대문구','서초구','성동구',
-    '성북구','송파구','양천구','영등포구','용산구','은평구','종로구','중구','중랑구'];
-  document.getElementById('guChips').innerHTML=
-    `<span class="chip active" onclick="setGu('all',this)">전체</span>`+
-    gus.map(g=>`<span class="chip" onclick="setGu('${g}',this)">${g}</span>`).join('');
+  const gus=['강남구','강동구','강북구','강서구','관악구','광진구','구로구','금천구','노원구','도봉구','동대문구','동작구','마포구','서대문구','서초구','성동구','성북구','송파구','양천구','영등포구','용산구','은평구','종로구','중구','중랑구'];
+  document.getElementById('guChips').innerHTML=`<span class="chip active" onclick="setGu('all',this)">전체</span>`+gus.map(g=>`<span class="chip" onclick="setGu('${g}',this)">${g}</span>`).join('');
 }
 
 function setGu(gu,el){
@@ -1573,113 +1182,49 @@ function setGu(gu,el){
 
 async function searchZ(q){
   const el=document.getElementById('srList');
-
-  // 새 검색 시 이전 결과 초기화
   document.getElementById('tlCard').style.display='none';
   document.getElementById('aiMsgs').innerHTML='<div class="ai-msg bot">구역을 선택하면 사업 현황, 단계 이력, 지연 여부, 투자 시사점을 분석합니다.</div>';
   curZ=null;
-
-  if(!q.trim()){
-    el.innerHTML='<div class="empty"><div class="ei">◎</div><p>구역명을 입력하면 결과가 표시됩니다</p></div>';
-    return;
-  }
+  if(!q.trim()){el.innerHTML='<div class="empty"><div class="ei">◎</div><p>구역명을 입력하면 결과가 표시됩니다</p></div>';return;}
   el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--gray-400);"><span class="spinner"></span>검색 중...</div>`;
-
   try{
-    // Supabase에서 직접 검색 (ilike 필터)
     let query=`select=gu_name,project_name,stage,period,stage_score&project_name=ilike.*${encodeURIComponent(q)}*&limit=50&order=project_name`;
-    if(selGu!=='all') query+=`&gu_name=eq.${encodeURIComponent(selGu)}`;
-
-    const res=await sbf('redev_timeline', query);
-    if(!Array.isArray(res)||!res.length){
-      el.innerHTML='<div class="empty"><div class="ei">◎</div><p>검색 결과 없음</p></div>';
-      return;
-    }
-
-    // 구역별 최신 단계만 추출
-    const lm={};
-    res.forEach(r=>{
-      if(!lm[r.project_name]||r.period>lm[r.project_name].period)lm[r.project_name]=r;
-    });
+    if(selGu!=='all')query+=`&gu_name=eq.${encodeURIComponent(selGu)}`;
+    const res=await sbf('redev_timeline',query);
+    if(!Array.isArray(res)||!res.length){el.innerHTML='<div class="empty"><div class="ei">◎</div><p>검색 결과 없음</p></div>';return;}
+    const lm={};res.forEach(r=>{if(!lm[r.project_name]||r.period>lm[r.project_name].period)lm[r.project_name]=r;});
     const results=Object.values(lm);
-
-    el.innerHTML=results.map(r=>`
-      <div class="sr-row" id="sr-${encodeURIComponent(r.project_name)}" onclick="selZ('${r.project_name.replace(/'/g,"\\'")}')">
-        <div class="sr-gu">${r.gu_name.replace('구','')}</div>
-        <div class="sr-name">${r.project_name}</div>
-        <span class="sr-pill sc${r.stage_score}">${r.stage||'?'}</span>
-        <div class="sr-sc">${r.stage_score}단계</div>
-      </div>`).join('');
-
+    el.innerHTML=results.map(r=>`<div class="sr-row" id="sr-${encodeURIComponent(r.project_name)}" onclick="selZ('${r.project_name.replace(/'/g,"\\'")}')"><div class="sr-gu">${r.gu_name.replace('구','')}</div><div class="sr-name">${r.project_name}</div><span class="sr-pill sc${r.stage_score}">${r.stage||'?'}</span><div class="sr-sc">${r.stage_score}단계</div></div>`).join('');
     if(results.length===1)selZ(results[0].project_name);
-
-  }catch(e){
-    console.error(e);
-    el.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>검색 오류: ${e.message}</p></div>`;
-  }
+  }catch(e){el.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>검색 오류</p></div>`;}
 }
+
 async function selZ(name){
   curZ=name;
   document.querySelectorAll('.sr-row').forEach(r=>r.classList.remove('sel'));
   const el=document.getElementById('sr-'+encodeURIComponent(name));if(el)el.classList.add('sel');
-
-  // Supabase에서 해당 구역 전체 이력 조회
-  const recs=await sbf('redev_timeline',
-    `select=gu_name,project_name,stage,period,stage_score&project_name=eq.${encodeURIComponent(name)}&order=period`);
+  const recs=await sbf('redev_timeline',`select=gu_name,project_name,stage,period,stage_score&project_name=eq.${encodeURIComponent(name)}&order=period`);
   if(!Array.isArray(recs)||!recs.length)return;
-
   document.getElementById('tlCard').style.display='block';
   document.getElementById('tlTitle').textContent=name;
   document.getElementById('tlMeta').textContent=recs[0].gu_name;
   document.getElementById('tlBadge').textContent=recs.length+'기간';
-
-  // 실제 데이터 범위로 동적 기간 생성 (빈 기간 제거)
-  const firstPeriod=recs[0].period;
-  const lastPeriod=recs[recs.length-1].period;
-  const [fy,fq]=firstPeriod.split('-').map(Number);
-  const [ly,lq]=lastPeriod.split('-').map(Number);
-
-  // 첫 기간부터 마지막 기간까지만 표시
+  const firstPeriod=recs[0].period,lastPeriod=recs[recs.length-1].period;
+  const [fy,fq]=firstPeriod.split('-').map(Number),[ly,lq]=lastPeriod.split('-').map(Number);
   const dynPeriods=[];
-  for(let y=fy;y<=ly;y++){
-    for(const q of ['03','06','09','12']){
-      const pStr=`${y}-${String(q).padStart(2,'0')}`;
-      if(y===fy && Number(q)<fq) continue;
-      if(y===ly && Number(q)>lq) break;
-      dynPeriods.push(pStr);
-    }
-  }
-
+  for(let y=fy;y<=ly;y++){for(const q of['03','06','09','12']){const pStr=`${y}-${String(q).padStart(2,'0')}`;if(y===fy&&Number(q)<fq)continue;if(y===ly&&Number(q)>lq)break;dynPeriods.push(pStr);}}
   const pm={};recs.forEach(r=>pm[r.period]=r.stage_score);
   const cols='130px '+dynPeriods.map(()=>'1fr').join(' ');
-
   document.getElementById('tlGrid').innerHTML=
-    `<div class="tl-hrow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;">
-      <div class="tl-nm" style="font-size:9.5px;color:var(--gray-400);padding:5px 10px;">기간</div>
-      ${dynPeriods.map(p=>`<div class="tl-cell" style="padding:5px 0;"><div class="tl-plbl">${p.slice(2).replace('-','Q')}</div></div>`).join('')}
-    </div>
-    <div class="tl-drow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;">
-      <div class="tl-nm">${name.length>14?name.slice(0,14)+'…':name}</div>
-      ${dynPeriods.map(p=>{
-        const sc=pm[p];
-        const color=SC[sc]||'transparent';
-        return sc
-          ?`<div class="tl-cell"><div class="tl-dot" style="background:${color};border-color:${color};opacity:1;" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`
-          :`<div class="tl-cell"><div class="tl-mt"></div></div>`;
-      }).join('')}
-    </div>`;
-
+    `<div class="tl-hrow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm" style="font-size:9.5px;color:var(--gray-400);padding:5px 10px;">기간</div>${dynPeriods.map(p=>`<div class="tl-cell" style="padding:5px 0;"><div class="tl-plbl">${p.slice(2).replace('-','Q')}</div></div>`).join('')}</div>
+    <div class="tl-drow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm">${name.length>14?name.slice(0,14)+'…':name}</div>${dynPeriods.map(p=>{const sc=pm[p];const color=SC[sc]||'transparent';return sc?`<div class="tl-cell"><div class="tl-dot" style="background:${color};border-color:${color};opacity:1;" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`:`<div class="tl-cell"><div class="tl-mt"></div></div>`;}).join('')}</div>`;
   const ctx=recs.slice(-5).map(r=>`${r.period}: ${r.stage}(${r.stage_score}단계)`).join(', ');
   document.getElementById('aiMsgs').innerHTML=`<div class="ai-msg bot"><strong>[${name}]</strong> 최근 이력: ${ctx}<br><br>이 구역에 대해 질문하거나 분석을 요청하세요.</div>`;
-
-  // ALL 배열에 없으면 추가 (AI 분석용)
-  if(!ALL.find(r=>r.project_name===name)){
-    ALL=[...ALL,...recs];
-  }
+  if(!ALL.find(r=>r.project_name===name))ALL=[...ALL,...recs];
 }
+
 function jumpZ(name){sw('search',document.querySelector('[data-tab="search"]'));document.getElementById('zoneInp').value=name;searchZ(name);}
 
-/* GNB SEARCH */
 function gnbQ(val){
   const drop=document.getElementById('gnbDrop');
   if(!val.trim()){drop.style.display='none';return;}
@@ -1687,13 +1232,9 @@ function gnbQ(val){
   const res=Object.values(lm).filter(r=>r.project_name.includes(val)||r.gu_name.includes(val)).slice(0,7);
   if(!res.length){drop.style.display='none';return;}
   drop.style.display='block';
-  drop.innerHTML=res.map(r=>`<div class="gnb-drop-item" onmousedown="jumpZ('${r.project_name.replace(/'/g,"\\'")}')">
-    <span class="gnb-drop-gu">${r.gu_name.replace('구','')}</span>${r.project_name}
-    <span class="gnb-drop-sc">${r.stage_score}단계</span>
-  </div>`).join('');
+  drop.innerHTML=res.map(r=>`<div class="gnb-drop-item" onmousedown="jumpZ('${r.project_name.replace(/'/g,"\\'")}')"><span class="gnb-drop-gu">${r.gu_name.replace('구','')}</span>${r.project_name}<span class="gnb-drop-sc">${r.stage_score}단계</span></div>`).join('');
 }
 
-/* INVESTOR */
 function calcSim(){
   const price=+document.getElementById('sPrice').value,sell=+document.getElementById('sSell').value,years=+document.getElementById('sYears').value,extra=+document.getElementById('sExtra').value;
   document.getElementById('vPrice').textContent=price.toLocaleString();
@@ -1711,11 +1252,10 @@ function calcSim(){
   if(simCH)simCH.destroy();
   simCH=new Chart(document.getElementById('simChart'),{type:'bar',
     data:{labels:['매입원금','추가분담금','예상분양가','순수익'],datasets:[{data:[invest,extra/10000,sellA,prof],backgroundColor:['rgba(27,79,216,.7)','rgba(217,119,6,.7)','rgba(5,150,105,.7)',prof>=0?'rgba(5,150,105,.85)':'rgba(220,38,38,.8)'],borderColor:['#1B4FD8','#D97706','#059669',prof>=0?'#059669':'#DC2626'],borderWidth:1.5,borderRadius:5,borderSkipped:false}]},
-    options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}},plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`${c.raw.toFixed(2)}억원`}}}}
+    options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}
   });
 }
 
-/* AI CHAT */
 async function sendAI(){
   const inp=document.getElementById('aiInp');const msg=inp.value.trim();if(!msg)return;inp.value='';
   const msgs=document.getElementById('aiMsgs');
@@ -1737,7 +1277,6 @@ async function sendAI(){
   }catch(e){const t=document.getElementById('aiTyping');if(t)t.innerHTML='Vercel 배포 환경에서 사용해 주세요.';}
 }
 
-/* TAB SWITCH */
 function sw(tab,el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   const tabEl=document.getElementById('tab-'+tab);
@@ -1747,13 +1286,12 @@ function sw(tab,el){
   if(tab==='investor')setTimeout(calcSim,80);
   if(tab==='trade')setTimeout(loadTrade,80);
   if(tab==='risk')setTimeout(loadRisk,80);
-  if(tab==='stage')setTimeout(loadSeoulRedev,80);
+  if(tab==='stage')setTimeout(()=>{},80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
   if(tab==='news')setTimeout(loadNews,80);
   if(tab==='tax')setTimeout(()=>{document.getElementById('taxAcq').style.display='block';},80);
 }
 
-/* ── 세금 계산기 ── */
 let acqType='buy';
 function setTaxTab(tab,el){
   document.querySelectorAll('#tab-tax .law-tab-btn').forEach(b=>b.classList.remove('active'));
@@ -1775,698 +1313,192 @@ function calcAcqTax(){
   if(!price){document.getElementById('acqResult').innerHTML='<div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">취득가액을 입력하세요</div>';return;}
   let rate=0,note='';
   if(acqType==='union'){rate=0.01;note='조합원 입주권 취득세율 1%';}
-  else if(houses===0){
-    if(price<=6000){rate=0.01;note='6억 이하 1주택 1%';}
-    else if(price<=9000){rate=(price*3-1200)/(price*100);note='6~9억 구간 비례세율';}
-    else{rate=0.03;note='9억 초과 3%';}
-  } else if(houses===1){rate=adj?0.08:0.01;note=adj?'조정지역 2주택 8%':'비조정 일반세율';}
+  else if(houses===0){if(price<=6000){rate=0.01;note='6억 이하 1주택 1%';}else if(price<=9000){rate=(price*3-1200)/(price*100);note='6~9억 구간 비례세율';}else{rate=0.03;note='9억 초과 3%';}}
+  else if(houses===1){rate=adj?0.08:0.01;note=adj?'조정지역 2주택 8%':'비조정 일반세율';}
   else{rate=adj?0.12:0.08;note=adj?'조정지역 3주택 이상 12%':'비조정 8%';}
-  const acqTax=Math.round(price*rate);
-  const eduTax=Math.round(acqTax*0.1);
-  const agriTax=rate>=0.03?Math.round(price*0.002):0;
-  const total=acqTax+eduTax+agriTax;
-  document.getElementById('acqResult').innerHTML=`
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">취득가액</span><span style="font-family:var(--mono);font-weight:600;">${price.toLocaleString()}만원</span></div>
-      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">적용 세율</span><span style="font-family:var(--mono);font-weight:600;color:var(--blue);">${(rate*100).toFixed(2)}%</span></div>
-      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">취득세</span><span style="font-family:var(--mono);">${acqTax.toLocaleString()}만원</span></div>
-      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">지방교육세</span><span style="font-family:var(--mono);">${eduTax.toLocaleString()}만원</span></div>
-      ${agriTax>0?`<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">농어촌특별세</span><span style="font-family:var(--mono);">${agriTax.toLocaleString()}만원</span></div>`:''}
-      <div style="display:flex;justify-content:space-between;padding:12px;background:var(--blue);border-radius:var(--r);"><span style="font-size:13px;font-weight:700;color:#fff;">총 취득세</span><span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#fff;">${total.toLocaleString()}만원</span></div>
-      <div style="font-size:11px;color:var(--gray-400);">${note}</div>
-    </div>`;
+  const acqTax=Math.round(price*rate),eduTax=Math.round(acqTax*0.1),agriTax=rate>=0.03?Math.round(price*0.002):0,total=acqTax+eduTax+agriTax;
+  document.getElementById('acqResult').innerHTML=`<div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">취득가액</span><span style="font-family:var(--mono);font-weight:600;">${price.toLocaleString()}만원</span></div><div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">적용 세율</span><span style="font-family:var(--mono);font-weight:600;color:var(--blue);">${(rate*100).toFixed(2)}%</span></div><div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">취득세</span><span style="font-family:var(--mono);">${acqTax.toLocaleString()}만원</span></div><div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">지방교육세</span><span style="font-family:var(--mono);">${eduTax.toLocaleString()}만원</span></div>${agriTax>0?`<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">농어촌특별세</span><span style="font-family:var(--mono);">${agriTax.toLocaleString()}만원</span></div>`:''}<div style="display:flex;justify-content:space-between;padding:12px;background:var(--blue);border-radius:var(--r);"><span style="font-size:13px;font-weight:700;color:#fff;">총 취득세</span><span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#fff;">${total.toLocaleString()}만원</span></div><div style="font-size:11px;color:var(--gray-400);">${note}</div></div>`;
 }
 function calcCgtTax(){
-  const buy=parseFloat(document.getElementById('cgtBuy')?.value)||0;
-  const sell=parseFloat(document.getElementById('cgtSell')?.value)||0;
-  const holdYears=parseInt(document.getElementById('cgtHoldYears')?.value)||1;
-  const exempt=document.getElementById('cgtExempt')?.value;
-  const cost=parseFloat(document.getElementById('cgtCost')?.value)||0;
+  const buy=parseFloat(document.getElementById('cgtBuy')?.value)||0,sell=parseFloat(document.getElementById('cgtSell')?.value)||0,holdYears=parseInt(document.getElementById('cgtHoldYears')?.value)||1,exempt=document.getElementById('cgtExempt')?.value,cost=parseFloat(document.getElementById('cgtCost')?.value)||0;
   if(!buy||!sell){document.getElementById('cgtResult').innerHTML='<div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">취득가액과 양도가액을 입력하세요</div>';return;}
   if(exempt==='yes'){document.getElementById('cgtResult').innerHTML='<div style="padding:16px;background:#ECFDF5;border-radius:var(--r);text-align:center;"><div style="font-size:24px;font-weight:700;color:var(--green);">비과세</div><div style="font-size:12px;color:var(--gray-500);margin-top:6px;">1세대 1주택 비과세 요건 충족</div></div>';return;}
   const gain=sell-buy-cost;
   if(gain<=0){document.getElementById('cgtResult').innerHTML='<div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">양도차익이 없습니다</div>';return;}
   const ltcRates={1:0,2:0,5:0.06,10:0.20,15:0.30,20:0.30};
-  const ltcRate=ltcRates[holdYears]||0;
-  const ltcDeduct=Math.round(gain*ltcRate);
-  const taxBase=Math.max(0,gain-ltcDeduct-250);
+  const ltcRate=ltcRates[holdYears]||0,ltcDeduct=Math.round(gain*ltcRate),taxBase=Math.max(0,gain-ltcDeduct-250);
   let tax=0;
-  if(taxBase<=1400)tax=taxBase*0.06;
-  else if(taxBase<=5000)tax=taxBase*0.15-126;
-  else if(taxBase<=8800)tax=taxBase*0.24-576;
-  else if(taxBase<=15000)tax=taxBase*0.35-1544;
-  else if(taxBase<=30000)tax=taxBase*0.38-1994;
-  else if(taxBase<=50000)tax=taxBase*0.40-2594;
-  else if(taxBase<=100000)tax=taxBase*0.42-3594;
-  else tax=taxBase*0.45-6594;
-  tax=Math.round(tax);
-  const localTax=Math.round(tax*0.1);
-  document.getElementById('cgtResult').innerHTML=`
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">양도차익</span><span style="font-family:var(--mono);font-weight:600;">${gain.toLocaleString()}만원</span></div>
-      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">장기보유특별공제 (${(ltcRate*100).toFixed(0)}%)</span><span style="font-family:var(--mono);">-${ltcDeduct.toLocaleString()}만원</span></div>
-      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">과세표준</span><span style="font-family:var(--mono);font-weight:600;">${taxBase.toLocaleString()}만원</span></div>
-      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">양도소득세</span><span style="font-family:var(--mono);">${tax.toLocaleString()}만원</span></div>
-      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">지방소득세</span><span style="font-family:var(--mono);">${localTax.toLocaleString()}만원</span></div>
-      <div style="display:flex;justify-content:space-between;padding:12px;background:var(--blue);border-radius:var(--r);"><span style="font-size:13px;font-weight:700;color:#fff;">총 납부세액</span><span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#fff;">${(tax+localTax).toLocaleString()}만원</span></div>
-    </div>`;
+  if(taxBase<=1400)tax=taxBase*0.06;else if(taxBase<=5000)tax=taxBase*0.15-126;else if(taxBase<=8800)tax=taxBase*0.24-576;else if(taxBase<=15000)tax=taxBase*0.35-1544;else if(taxBase<=30000)tax=taxBase*0.38-1994;else if(taxBase<=50000)tax=taxBase*0.40-2594;else if(taxBase<=100000)tax=taxBase*0.42-3594;else tax=taxBase*0.45-6594;
+  tax=Math.round(tax);const localTax=Math.round(tax*0.1);
+  document.getElementById('cgtResult').innerHTML=`<div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">양도차익</span><span style="font-family:var(--mono);font-weight:600;">${gain.toLocaleString()}만원</span></div><div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">장기보유특별공제 (${(ltcRate*100).toFixed(0)}%)</span><span style="font-family:var(--mono);">-${ltcDeduct.toLocaleString()}만원</span></div><div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">과세표준</span><span style="font-family:var(--mono);font-weight:600;">${taxBase.toLocaleString()}만원</span></div><div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">양도소득세</span><span style="font-family:var(--mono);">${tax.toLocaleString()}만원</span></div><div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);"><span style="font-size:12px;color:var(--gray-500);">지방소득세</span><span style="font-family:var(--mono);">${localTax.toLocaleString()}만원</span></div><div style="display:flex;justify-content:space-between;padding:12px;background:var(--blue);border-radius:var(--r);"><span style="font-size:13px;font-weight:700;color:#fff;">총 납부세액</span><span style="font-family:var(--mono);font-size:16px;font-weight:700;color:#fff;">${(tax+localTax).toLocaleString()}만원</span></div></div>`;
 }
 
-/* ── 뉴스·정책 ── */
-let newsKeywordFreq = {};
-
+let newsKeywordFreq={};
 async function loadMolitNews(){
-  const el = document.getElementById('molit-news');
-  if(!el) return;
-  el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);"><span class="spinner"></span>로딩 중...</div>';
-  try {
-    // 네이버 뉴스에서 국토교통부 공식 보도자료 검색
-    const res  = await fetch('/api/news?query=국토교통부+보도자료&display=10&sort=date');
-    const data = await res.json();
-    if(!data.success || !data.items?.length){
-      el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">보도자료 없음</div>';
-      return;
-    }
-    // korea.kr 출처 우선, 없으면 전체 표시
-    const filtered = data.items.filter(i =>
-      i.link?.includes('korea.kr') ||
-      i.link?.includes('molit.go.kr') ||
-      i.title?.includes('[국토교통부]') ||
-      i.title?.includes('[국토부]')
-    );
-    const items = (filtered.length ? filtered : data.items).slice(0, 8);
-    el.innerHTML = items.map(item => {
-      const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}) : '';
-      return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
-        <div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'">
-          <div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title}</div>
-          <div style="font-size:10.5px;color:var(--gray-400);">${item.source} · ${date}</div>
-        </div>
-      </a>`;
+  const el=document.getElementById('molit-news');if(!el)return;
+  el.innerHTML='<div style="padding:12px;font-size:12px;color:var(--gray-400);"><span class="spinner"></span>로딩 중...</div>';
+  try{
+    const res=await fetch('/api/news?query=국토교통부+보도자료&display=10&sort=date');
+    const data=await res.json();
+    if(!data.success||!data.items?.length){el.innerHTML='<div style="padding:12px;font-size:12px;color:var(--gray-400);">보도자료 없음</div>';return;}
+    const filtered=data.items.filter(i=>i.link?.includes('korea.kr')||i.link?.includes('molit.go.kr')||i.title?.includes('[국토교통부]')||i.title?.includes('[국토부]'));
+    const items=(filtered.length?filtered:data.items).slice(0,8);
+    el.innerHTML=items.map(item=>{
+      const date=item.pubDate?new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}):'';
+      return`<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;"><div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'"><div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title}</div><div style="font-size:10.5px;color:var(--gray-400);">${item.source} · ${date}</div></div></a>`;
     }).join('');
-  } catch(e) {
-    el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--gray-400);">연결 실패</div>';
-  }
+  }catch(e){el.innerHTML='<div style="padding:12px;font-size:12px;color:var(--gray-400);">연결 실패</div>';}
 }
 
 async function loadNews(){
-  const keyword = document.getElementById('newsKeyword')?.value || '재개발';
-  const listEl  = document.getElementById('newsListBody');
-  if(!listEl) return;
-  listEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div>';
-
-  // 국토부 보도자료 병렬 로딩
+  const keyword=document.getElementById('newsKeyword')?.value||'재개발';
+  const listEl=document.getElementById('newsListBody');if(!listEl)return;
+  listEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div>';
   loadMolitNews();
-
-  try {
-    const res  = await fetch(`/api/news?query=${encodeURIComponent(keyword)}&display=20&sort=date`);
-    const data = await res.json();
-
-    if(!data.success || !data.items?.length) {
-      listEl.innerHTML = '<div class="empty"><div class="ei">📰</div><p>검색 결과가 없습니다</p></div>';
-      return;
-    }
-
-    // 키워드 빈도 집계 (워드클라우드용)
-    const stopWords = new Set(['있다','없다','했다','한다','됩니다','위해','대한','통해','관련','이번','지난','올해','최근','계획','예정','발표','제공','진행','추진','것으로','에서','으로','하는','하고','하여','이후','까지','부터','대해','따라','위한','받은','있는','없는','통한','된다','된다고','이라고','라고']);
-    data.items.forEach(item => {
-      const words = (item.title + ' ' + item.description).split(/[\s,\.·\[\]""''!?()]+/);
-      words.forEach(w => {
-        w = w.replace(/[^\uAC00-\uD7A3a-zA-Z0-9]/g,'');
-        if(w.length >= 2 && !stopWords.has(w)) {
-          newsKeywordFreq[w] = (newsKeywordFreq[w] || 0) + 1;
-        }
-      });
+  try{
+    const res=await fetch(`/api/news?query=${encodeURIComponent(keyword)}&display=20&sort=date`);
+    const data=await res.json();
+    if(!data.success||!data.items?.length){listEl.innerHTML='<div class="empty"><div class="ei">📰</div><p>검색 결과가 없습니다</p></div>';return;}
+    const stopWords=new Set(['있다','없다','했다','한다','됩니다','위해','대한','통해','관련','이번','지난','올해','최근','계획','예정','발표','제공','진행','추진','것으로','에서','으로','하는','하고','하여','이후','까지','부터','대해','따라','위한','받은','있는','없는','통한','된다']);
+    data.items.forEach(item=>{
+      const words=(item.title+' '+item.description).split(/[\s,\.·\[\]""''!?()]+/);
+      words.forEach(w=>{w=w.replace(/[^\uAC00-\uD7A3a-zA-Z0-9]/g,'');if(w.length>=2&&!stopWords.has(w))newsKeywordFreq[w]=(newsKeywordFreq[w]||0)+1;});
     });
-
-    // 워드클라우드 업데이트
-    const wcEl = document.getElementById('newsWordCloud');
-    if(wcEl) {
-      const sorted = Object.entries(newsKeywordFreq).sort((a,b)=>b[1]-a[1]).slice(0,28);
-      const maxF = sorted[0]?.[1] || 1;
-      const colors = ['var(--blue)','var(--green)','var(--orange)','#6D28D9','var(--red)','#0891B2','#BE185D'];
-      wcEl.innerHTML = sorted.map(([word,freq]) => {
-        const size  = Math.round(10 + (freq/maxF)*20);
-        const color = colors[Math.floor(Math.random()*colors.length)];
-        return `<span style="font-size:${size}px;color:${color};opacity:${0.45+freq/maxF*0.55};font-weight:${freq>4?700:400};cursor:pointer;padding:2px 5px;transition:opacity .2s;" onclick="document.getElementById('newsKeyword').value='${word}';loadNews();" title="${freq}건 등장">${word}</span>`;
+    const wcEl=document.getElementById('newsWordCloud');
+    if(wcEl){
+      const sorted=Object.entries(newsKeywordFreq).sort((a,b)=>b[1]-a[1]).slice(0,28);
+      const maxF=sorted[0]?.[1]||1;
+      const colors=['var(--blue)','var(--green)','var(--orange)','#6D28D9','var(--red)','#0891B2','#BE185D'];
+      wcEl.innerHTML=sorted.map(([word,freq])=>{
+        const size=Math.round(10+(freq/maxF)*20),color=colors[Math.floor(Math.random()*colors.length)];
+        return`<span style="font-size:${size}px;color:${color};opacity:${0.45+freq/maxF*0.55};font-weight:${freq>4?700:400};cursor:pointer;padding:2px 5px;" onclick="document.getElementById('newsKeyword').value='${word}';loadNews();" title="${freq}건">${word}</span>`;
       }).join('');
     }
-
-    // 뉴스 목록 렌더
-    document.getElementById('newsTotalBadge').textContent = `총 ${data.total?.toLocaleString()}건`;
-    listEl.innerHTML = data.items.map(item => {
-      const date = new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-      return `<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
-        <div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .12s;margin-bottom:6px;" onmouseover="this.style.background='var(--blue-light)';this.style.borderColor='var(--blue-mid)'" onmouseout="this.style.background='#fff';this.style.borderColor='var(--border)'">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
-            <div style="flex:1;">
-              <div style="font-size:13px;font-weight:600;color:var(--gray-900);margin-bottom:4px;line-height:1.5;">${item.title}</div>
-              <div style="font-size:11.5px;color:var(--gray-500);line-height:1.6;">${item.description?.slice(0,90)}...</div>
-            </div>
-            <div style="flex-shrink:0;text-align:right;">
-              <span class="law-mtag">${item.source}</span>
-              <div style="font-size:10.5px;color:var(--gray-400);margin-top:4px;">${date}</div>
-            </div>
-          </div>
-        </div>
-      </a>`;
+    document.getElementById('newsTotalBadge').textContent=`총 ${data.total?.toLocaleString()}건`;
+    listEl.innerHTML=data.items.map(item=>{
+      const date=new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      return`<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;"><div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .12s;margin-bottom:6px;" onmouseover="this.style.background='var(--blue-light)';this.style.borderColor='var(--blue-mid)'" onmouseout="this.style.background='#fff';this.style.borderColor='var(--border)'"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;"><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--gray-900);margin-bottom:4px;line-height:1.5;">${item.title}</div><div style="font-size:11.5px;color:var(--gray-500);line-height:1.6;">${item.description?.slice(0,90)}...</div></div><div style="flex-shrink:0;text-align:right;"><span class="law-mtag">${item.source}</span><div style="font-size:10.5px;color:var(--gray-400);margin-top:4px;">${date}</div></div></div></div></a>`;
     }).join('');
-
-  } catch(e) {
-    console.error('뉴스 오류:', e);
-    listEl.innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>뉴스 로딩 오류</p></div>';
-  }
+  }catch(e){listEl.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>뉴스 로딩 오류</p></div>';}
 }
-let lawType='law', lawPage=1, lawPageSize=20;
 
-function setLawType(t, el){
-  lawType=t; lawPage=1;
+let lawType='law',lawPage=1;
+function setLawType(t,el){
+  lawType=t;lawPage=1;
   document.querySelectorAll('.law-tab-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
-  const q = lawType==='prec'?'재개발 조합':lawType==='admrul'?'도시정비':'도시및주거환경정비법';
+  const q=lawType==='prec'?'재개발 조합':lawType==='admrul'?'도시정비':'도시및주거환경정비법';
   document.getElementById('lawQuery').value=q;
 }
-
-function quickLawSearch(q){
-  document.getElementById('lawQuery').value=q;
-  lawPage=1;
-  searchLaw();
-}
-
+function quickLawSearch(q){document.getElementById('lawQuery').value=q;lawPage=1;searchLaw();}
 async function searchLaw(){
-  const query=document.getElementById('lawQuery').value.trim();
-  if(!query)return;
-  const listEl=document.getElementById('lawResultList');
-  const titleEl=document.getElementById('lawResultTitle');
-  const countEl=document.getElementById('lawResultCount');
+  const query=document.getElementById('lawQuery').value.trim();if(!query)return;
+  const listEl=document.getElementById('lawResultList'),titleEl=document.getElementById('lawResultTitle'),countEl=document.getElementById('lawResultCount');
   listEl.innerHTML=`<div style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>검색 중...</div>`;
   countEl.textContent='검색 중';
-
   const OC='recondev2024';
-  const BASE='https://www.law.go.kr/DRF';
-  const targetMap={law:'LawSearch',prec:'PrecSearch',admrul:'AdmrulSearch'};
-  const itemKeyMap={law:'law',prec:'prec',admrul:'admrul'};
-
   try{
-    const url=`${BASE}/lawSearch.do?OC=${OC}&target=${lawType}&type=JSON&display=20&page=${lawPage}&query=${encodeURIComponent(query)}`;
-    const r=await fetch(url);
-    const text=await r.text();
-    let d;
-    try{ d=JSON.parse(text); }catch(e){
-      listEl.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>응답 파싱 오류</p></div>`;
-      return;
-    }
-
-    const rootKey=targetMap[lawType];
-    const itemKey=itemKeyMap[lawType];
-    const rawItems=d?.[rootKey]?.[itemKey]||[];
-    const total=parseInt(d?.[rootKey]?.totalCnt||0);
+    const url=`https://www.law.go.kr/DRF/lawSearch.do?OC=${OC}&target=${lawType}&type=JSON&display=20&page=${lawPage}&query=${encodeURIComponent(query)}`;
+    const r=await fetch(url);const text=await r.text();
+    let d;try{d=JSON.parse(text);}catch(e){listEl.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>응답 파싱 오류</p></div>`;return;}
+    const targetMap={law:'LawSearch',prec:'PrecSearch',admrul:'AdmrulSearch'};
+    const itemKeyMap={law:'law',prec:'prec',admrul:'admrul'};
+    const rawItems=d?.[targetMap[lawType]]?.[itemKeyMap[lawType]]||[];
+    const total=parseInt(d?.[targetMap[lawType]]?.totalCnt||0);
     const items=Array.isArray(rawItems)?rawItems:[rawItems].filter(Boolean);
-
     const typeLabel=lawType==='law'?'법령':lawType==='prec'?'판례':'행정규칙';
-    titleEl.textContent=`${typeLabel} 검색 결과`;
-    countEl.textContent=`총 ${total.toLocaleString()}건`;
-
-    if(!items.length){
-      listEl.innerHTML=`<div class="empty"><div class="ei">🔎</div><p>검색 결과가 없습니다</p></div>`;
-      return;
-    }
-
-    if(lawType==='law'){
-      listEl.innerHTML=items.map((item,i)=>`
-        <div class="law-item" id="law-${i}" onclick="showLawDetail(${i},${JSON.stringify(item).replace(/"/g,'&quot;')})">
-          <div class="law-item-name">${item['법령명한글']||''}</div>
-          <div class="law-item-meta">
-            <span class="law-mtag">${item['법령구분명']||'법령'}</span>
-            <span class="law-mtag">${item['소관부처명']||''}</span>
-            ${item['시행일자']?`<span style="color:var(--gray-400);">시행 ${(item['시행일자']||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')}</span>`:''}
-          </div>
-        </div>`).join('');
-    } else if(lawType==='prec'){
-      listEl.innerHTML=items.map((item,i)=>`
-        <div class="law-item" id="law-${i}" onclick="showPrecDetail(${i},${JSON.stringify(item).replace(/"/g,'&quot;')})">
-          <div class="law-item-name">${item['사건명']||''}</div>
-          <div class="law-item-meta">
-            <span class="law-mtag">${item['법원명']||''}</span>
-            <span class="law-mtag">${item['사건번호']||''}</span>
-            ${item['선고일자']?`<span style="color:var(--gray-400);">${(item['선고일자']||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')} 선고</span>`:''}
-          </div>
-        </div>`).join('');
-    } else {
-      listEl.innerHTML=items.map((item,i)=>`
-        <div class="law-item" id="law-${i}" onclick="showAdmDetail(${i},${JSON.stringify(item).replace(/"/g,'&quot;')})">
-          <div class="law-item-name">${item['행정규칙명']||''}</div>
-          <div class="law-item-meta">
-            <span class="law-mtag">${item['행정규칙종류명']||''}</span>
-            <span class="law-mtag">${item['소관부처명']||''}</span>
-          </div>
-        </div>`).join('');
-    }
-
-    // 페이지네이션
-    const totalPages=Math.ceil(total/20);
-    const pgEl=document.getElementById('lawPagination');
-    if(totalPages>1){
-      pgEl.style.display='flex';
-      const start=Math.max(1,lawPage-2),end=Math.min(totalPages,lawPage+2);
-      let pgHtml=lawPage>1?`<button class="pg-btn" onclick="goLawPage(${lawPage-1})">◀</button>`:'';
-      for(let p=start;p<=end;p++) pgHtml+=`<button class="pg-btn ${p===lawPage?'on':''}" onclick="goLawPage(${p})">${p}</button>`;
-      pgHtml+=lawPage<totalPages?`<button class="pg-btn" onclick="goLawPage(${lawPage+1})">▶</button>`:'';
-      pgEl.innerHTML=pgHtml;
-    } else { pgEl.style.display='none'; }
-
-    // 첫 항목 자동 선택
-    if(items.length>0){
-      const first=items[0];
-      if(lawType==='law') showLawDetail(0,{
-        name:first['법령명한글'],type:first['법령구분명'],ministry:first['소관부처명'],
-        pubDate:first['공포일자'],effDate:first['시행일자'],
-        lawLink:`https://www.law.go.kr/법령/${encodeURIComponent(first['법령명한글']||'')}`
-      });
-      else if(lawType==='prec') showPrecDetail(0,{
-        name:first['사건명'],caseNum:first['사건번호'],court:first['법원명'],
-        judgeDate:first['선고일자'],judgeType:first['선고'],
-        caseType:first['사건종류명'],verdict:first['판결유형'],
-        link:`https://www.law.go.kr/판례/${first['판례일련번호']||''}`
-      });
-      else showAdmDetail(0,{
-        name:first['행정규칙명'],type:first['행정규칙종류명'],
-        ministry:first['소관부처명'],pubDate:first['발령일자'],effDate:first['시행일자']
-      });
-    }
-
-  }catch(e){
-    console.error('법령 검색 오류:',e);
-    listEl.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>검색 오류: ${e.message}</p></div>`;
-  }
+    titleEl.textContent=`${typeLabel} 검색 결과`;countEl.textContent=`총 ${total.toLocaleString()}건`;
+    if(!items.length){listEl.innerHTML=`<div class="empty"><div class="ei">🔎</div><p>검색 결과가 없습니다</p></div>`;return;}
+    if(lawType==='law'){listEl.innerHTML=items.map((item,i)=>`<div class="law-item" id="law-${i}" onclick="showLawDetail(${i},${JSON.stringify(item).replace(/"/g,'&quot;')})"><div class="law-item-name">${item['법령명한글']||''}</div><div class="law-item-meta"><span class="law-mtag">${item['법령구분명']||'법령'}</span><span class="law-mtag">${item['소관부처명']||''}</span>${item['시행일자']?`<span style="color:var(--gray-400);">시행 ${(item['시행일자']||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')}</span>`:''}</div></div>`).join('');}
+    else if(lawType==='prec'){listEl.innerHTML=items.map((item,i)=>`<div class="law-item" id="law-${i}" onclick="showPrecDetail(${i},${JSON.stringify(item).replace(/"/g,'&quot;')})"><div class="law-item-name">${item['사건명']||''}</div><div class="law-item-meta"><span class="law-mtag">${item['법원명']||''}</span><span class="law-mtag">${item['사건번호']||''}</span></div></div>`).join('');}
+    else{listEl.innerHTML=items.map((item,i)=>`<div class="law-item" id="law-${i}"><div class="law-item-name">${item['행정규칙명']||''}</div><div class="law-item-meta"><span class="law-mtag">${item['행정규칙종류명']||''}</span><span class="law-mtag">${item['소관부처명']||''}</span></div></div>`).join('');}
+    const totalPages=Math.ceil(total/20),pgEl=document.getElementById('lawPagination');
+    if(totalPages>1){pgEl.style.display='flex';const start=Math.max(1,lawPage-2),end=Math.min(totalPages,lawPage+2);let pgHtml=lawPage>1?`<button class="pg-btn" onclick="goLawPage(${lawPage-1})">◀</button>`:'';for(let p=start;p<=end;p++)pgHtml+=`<button class="pg-btn ${p===lawPage?'on':''}" onclick="goLawPage(${p})">${p}</button>`;pgHtml+=lawPage<totalPages?`<button class="pg-btn" onclick="goLawPage(${lawPage+1})">▶</button>`:'';pgEl.innerHTML=pgHtml;}else{pgEl.style.display='none';}
+    if(items.length>0&&lawType==='law')showLawDetail(0,{name:items[0]['법령명한글'],type:items[0]['법령구분명'],ministry:items[0]['소관부처명'],pubDate:items[0]['공포일자'],effDate:items[0]['시행일자'],lawLink:`https://www.law.go.kr/법령/${encodeURIComponent(items[0]['법령명한글']||'')}`});
+  }catch(e){document.getElementById('lawResultList').innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>검색 오류</p></div>`;}
 }
-
-function goLawPage(p){ lawPage=p; searchLaw(); }
-
-function showLawDetail(idx, item){
+function goLawPage(p){lawPage=p;searchLaw();}
+function showLawDetail(idx,item){
   document.querySelectorAll('.law-item').forEach(el=>el.classList.remove('sel'));
   const el=document.getElementById('law-'+idx);if(el)el.classList.add('sel');
   document.getElementById('lawDetailTitle').textContent=item.name||'법령 상세';
-  const linkEl=document.getElementById('lawDetailLink');
-  linkEl.href=item.lawLink||'#';
-  linkEl.style.display='block';
-  document.getElementById('lawDetailBody').innerHTML=`
-    <div class="law-detail-lbl">법령 기본정보</div>
-    <div class="law-detail-box">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">법령 구분</div><div style="font-weight:600;">${item.type||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">소관 부처</div><div style="font-weight:600;">${item.ministry||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">공포 일자</div><div style="font-weight:600;">${(item.pubDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">시행 일자</div><div style="font-weight:600;">${(item.effDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div>
-      </div>
-    </div>
-    <div class="law-detail-lbl">법령 활용 안내</div>
-    <div class="law-detail-val" style="font-size:12.5px;color:var(--gray-500);line-height:1.8;">
-      재건축·재개발 사업과 관련된 주요 법령입니다.<br>
-      상세 조문은 <strong>법령정보 바로가기</strong>를 통해 국가법령정보센터에서 확인하세요.<br><br>
-      <span style="color:var(--blue);font-weight:600;">📌 주요 관련 조문</span><br>
-      • 제2조 (정의) — 정비구역, 정비사업의 정의<br>
-      • 제16조 (조합설립추진위원회) — 추진위 구성<br>
-      • 제35조 (조합의 설립인가) — 조합설립 요건<br>
-      • 제50조 (사업시행계획인가) — 사업시행인가 절차<br>
-      • 제74조 (관리처분계획인가) — 관리처분 기준<br>
-      • 제86조 (이전고시) — 준공 후 처리
-    </div>`;
+  const linkEl=document.getElementById('lawDetailLink');linkEl.href=item.lawLink||'#';linkEl.style.display='block';
+  document.getElementById('lawDetailBody').innerHTML=`<div class="law-detail-lbl">법령 기본정보</div><div class="law-detail-box"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">법령 구분</div><div style="font-weight:600;">${item.type||'—'}</div></div><div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">소관 부처</div><div style="font-weight:600;">${item.ministry||'—'}</div></div><div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">시행 일자</div><div style="font-weight:600;">${(item.effDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div></div></div>`;
 }
-
-function showPrecDetail(idx, item){
+function showPrecDetail(idx,item){
   document.querySelectorAll('.law-item').forEach(el=>el.classList.remove('sel'));
   const el=document.getElementById('law-'+idx);if(el)el.classList.add('sel');
-  document.getElementById('lawDetailTitle').textContent=item.name||'판례 상세';
-  const linkEl=document.getElementById('lawDetailLink');
-  linkEl.href=item.link||'#';
-  linkEl.style.display='block';
-  document.getElementById('lawDetailBody').innerHTML=`
-    <div class="law-detail-lbl">판례 기본정보</div>
-    <div class="law-detail-box">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">법원</div><div style="font-weight:600;">${item.court||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">사건번호</div><div style="font-weight:600;">${item.caseNum||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">사건종류</div><div style="font-weight:600;">${item.caseType||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">선고일자</div><div style="font-weight:600;">${(item.judgeDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">판결유형</div><div style="font-weight:600;color:var(--blue);">${item.verdict||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">선고구분</div><div style="font-weight:600;">${item.judgeType||'—'}</div></div>
-      </div>
-    </div>
-    <div class="law-detail-lbl">판례 요약</div>
-    <div class="law-detail-val" style="font-size:12.5px;color:var(--gray-500);line-height:1.8;">
-      판례 전문은 <strong>법령정보 바로가기</strong>를 통해 국가법령정보센터에서 확인하세요.
-    </div>`;
-}
-
-function showAdmDetail(idx, item){
-  document.querySelectorAll('.law-item').forEach(el=>el.classList.remove('sel'));
-  const el=document.getElementById('law-'+idx);if(el)el.classList.add('sel');
-  document.getElementById('lawDetailTitle').textContent=item.name||'행정규칙 상세';
+  document.getElementById('lawDetailTitle').textContent=item['사건명']||'판례 상세';
   document.getElementById('lawDetailLink').style.display='none';
-  document.getElementById('lawDetailBody').innerHTML=`
-    <div class="law-detail-lbl">행정규칙 기본정보</div>
-    <div class="law-detail-box">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">종류</div><div style="font-weight:600;">${item.type||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">소관부처</div><div style="font-weight:600;">${item.ministry||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">발령일자</div><div style="font-weight:600;">${(item.pubDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div>
-        <div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">시행일자</div><div style="font-weight:600;">${(item.effDate||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1.$2.$3')||'—'}</div></div>
-      </div>
-    </div>`;
+  document.getElementById('lawDetailBody').innerHTML=`<div class="law-detail-lbl">판례 기본정보</div><div class="law-detail-box"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">법원</div><div style="font-weight:600;">${item['법원명']||'—'}</div></div><div><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">사건번호</div><div style="font-weight:600;">${item['사건번호']||'—'}</div></div></div></div>`;
 }
-
-/* ── 서울시 정비사업 API ── */
-let seoulCH = {};
-
-async function loadSeoulRedev() {
-  const statusEl = document.getElementById('seoulApiStatus');
-  if(statusEl) statusEl.textContent = '서울시 API 로딩 중...';
-  if(statusEl) statusEl.className = 'bdg bdg-gray';
-
-  try {
-    const res = await fetch('/api/seoul-redev?page=1&size=1000');
-    const data = await res.json();
-
-    if (!data.success) {
-      if(statusEl) statusEl.textContent = 'API 오류: ' + (data.error || '알 수 없음');
-      if(statusEl) statusEl.className = 'bdg bdg-red';
-      return;
-    }
-
-    const items = data.items || [];
-    const summary = data.summary || {};
-
-    // KPI 업데이트
-    document.getElementById('seoulTotal').textContent = data.totalCount.toLocaleString();
-    const kpiRowEl = document.getElementById('seoulKpiRow');
-    if(kpiRowEl) kpiRowEl.style.display = 'grid';
-
-    // 사업 유형별 집계
-    const typeMap = {};
-    items.forEach(item => {
-      const t = item.projectType || '기타';
-      typeMap[t] = (typeMap[t] || 0) + 1;
-    });
-    document.getElementById('seoulRecon').textContent =
-      (typeMap['주택재건축'] || typeMap['재건축'] || 0).toLocaleString();
-    document.getElementById('seoulRedev').textContent =
-      (typeMap['주택재개발'] || typeMap['재개발'] || 0).toLocaleString();
-    document.getElementById('seoulUrban').textContent =
-      (typeMap['도시환경정비'] || typeMap['도시환경'] || 0).toLocaleString();
-
-    // 구별 현황 차트
-    const guData = Object.entries(summary.guCount || {})
-      .sort((a,b) => b[1]-a[1]).slice(0,15);
-    document.getElementById('seoulGuCard').style.display = 'block';
-    if (seoulCH.gu) seoulCH.gu.destroy();
-    seoulCH.gu = new Chart(document.getElementById('seoulGuChart'), {
-      type: 'bar',
-      data: {
-        labels: guData.map(d => d[0].replace('구','')),
-        datasets: [{
-          data: guData.map(d => d[1]),
-          backgroundColor: guData.map((_,i) => `rgba(27,79,216,${0.85-i*0.04})`),
-          borderRadius: 4, borderSkipped: false,
-        }]
-      },
-      options: { ...OPTS,
-        scales: {
-          x: { grid:{display:false}, ticks:{color:'#9CA3AF',font:{size:10}} },
-          y: { grid:{color:'#F3F4F6'}, ticks:{color:'#9CA3AF',font:{size:10}} }
-        },
-        plugins: { ...OPTS.plugins, tooltip: { ...OPTS.plugins.tooltip,
-          callbacks: { label: c => `${c.raw}개 구역` }
-        }}
-      }
-    });
-
-    // 단계별 현황 차트
-    const stageData = Object.entries(summary.stageCount || {})
-      .sort((a,b) => b[1]-a[1]).slice(0,10);
-    document.getElementById('seoulStageCard').style.display = 'block';
-    if (seoulCH.stage) seoulCH.stage.destroy();
-    seoulCH.stage = new Chart(document.getElementById('seoulStageChart'), {
-      type: 'doughnut',
-      data: {
-        labels: stageData.map(d => d[0]),
-        datasets: [{
-          data: stageData.map(d => d[1]),
-          backgroundColor: stageData.map((_,i) => SC[i+1] || '#9CA3AF'),
-          borderWidth: 2, borderColor: '#fff',
-        }]
-      },
-      options: { ...OPTS, cutout: '60%',
-        plugins: { ...OPTS.plugins,
-          legend: { display: true, position: 'right',
-            labels: { color:'#6B7280', font:{size:10,family:'IBM Plex Sans KR'}, padding:8, boxWidth:10 }
-          },
-          tooltip: { ...OPTS.plugins.tooltip,
-            callbacks: { label: c => `${c.label}: ${c.raw}개` }
-          }
-        }
-      }
-    });
-
-    if(statusEl) statusEl.textContent = `서울시 API · ${data.totalCount.toLocaleString()}건`;
-    if(statusEl) statusEl.className = 'bdg bdg-blue';
-
-  } catch(e) {
-    console.error('서울시 API 오류:', e);
-    if(statusEl) statusEl.textContent = 'API 연결 실패';
-    if(statusEl) statusEl.className = 'bdg bdg-red';
-  }
-}
-
 
 let riskCH={};
-
 async function loadRisk(){
-  const timeEl = document.getElementById('riskUpdateTime');
-  if(timeEl) timeEl.textContent='로딩 중...';
+  const timeEl=document.getElementById('riskUpdateTime');if(timeEl)timeEl.textContent='로딩 중...';
   try{
-    // ECOS + 글로벌 지표 병렬 호출
-    const [ecosRes, globalRes] = await Promise.all([
-      fetch('/api/ecos?type=all'),
-      fetch('/api/global-indicators'),
-    ]);
-    const data   = await ecosRes.json();
-    const global = await globalRes.json();
-
-    if(!data.success) throw new Error('ECOS API 오류');
-
-    const rate = data.rate;
-    const ppi  = data.ppi;
-
-    // ── 기준금리 KPI
-    const rateCurrent = rate.current;
-    const rateChange  = Math.round((rateCurrent - rate.prev) * 100) / 100;
-    const ecosRateEl  = document.getElementById('ecosRate');
-    if(ecosRateEl) ecosRateEl.textContent = rateCurrent.toFixed(2) + '%';
-    const ecosRateDateEl = document.getElementById('ecosRateDate');
-    if(ecosRateDateEl) ecosRateDateEl.textContent = rate.date.replace(/(\d{4})(\d{2})/, '$1년 $2월');
-    const rateTag = document.getElementById('ecosRateTag');
-    if(rateTag){
-      rateTag.textContent = rateChange >= 0 ? '▲' + rateChange.toFixed(2) : '▼' + Math.abs(rateChange).toFixed(2);
-      rateTag.className = 'kpi-tag ' + (rateChange >= 0 ? 't-dn' : 't-up');
-    }
-
-    // ── PPI KPI
-    const ecosPpiEl = document.getElementById('ecosPpi');
-    if(ecosPpiEl) ecosPpiEl.textContent = ppi.current.toFixed(1);
-    const ecosPpiDateEl = document.getElementById('ecosPpiDate');
-    if(ecosPpiDateEl) ecosPpiDateEl.textContent = ppi.date.replace(/(\d{4})(\d{2})/, '$1년 $2월') + ' 기준';
-    const ppiTag = document.getElementById('ecosPpiTag');
-    if(ppiTag){
-      ppiTag.textContent = (ppi.yoy >= 0 ? 'YoY +' : 'YoY ') + ppi.yoy.toFixed(1) + '%';
-      ppiTag.className = 'kpi-tag ' + (ppi.yoy >= 0 ? 't-dn' : 't-up');
-    }
-
-    // ── 사업 지연 비율
-    const delayRate = ALERTS.length > 0
-      ? Math.round(ALERTS.filter(a=>a.stuck>=6).length / Math.max(Object.values(SD).reduce((a,b)=>a+b,0), 1) * 100 * 10) / 10
-      : 0;
-    const ecosDelayEl = document.getElementById('ecosDelay');
-    if(ecosDelayEl) ecosDelayEl.textContent = delayRate + '%';
-
-    // ── 글로벌 지표 업데이트
+    const [ecosRes,globalRes]=await Promise.all([fetch('/api/ecos?type=all'),fetch('/api/global-indicators')]);
+    const data=await ecosRes.json(),global=await globalRes.json();
+    if(!data.success)throw new Error('ECOS API 오류');
+    const rate=data.rate,ppi=data.ppi;
+    const rateCurrent=rate.current,rateChange=Math.round((rateCurrent-rate.prev)*100)/100;
+    const ecosRateEl=document.getElementById('ecosRate');if(ecosRateEl)ecosRateEl.textContent=rateCurrent.toFixed(2)+'%';
+    const ecosRateDateEl=document.getElementById('ecosRateDate');if(ecosRateDateEl)ecosRateDateEl.textContent=rate.date.replace(/(\d{4})(\d{2})/,'$1년 $2월');
+    const rateTag=document.getElementById('ecosRateTag');if(rateTag){rateTag.textContent=rateChange>=0?'▲'+rateChange.toFixed(2):'▼'+Math.abs(rateChange).toFixed(2);rateTag.className='kpi-tag '+(rateChange>=0?'t-dn':'t-up');}
+    const ecosPpiEl=document.getElementById('ecosPpi');if(ecosPpiEl)ecosPpiEl.textContent=ppi.current.toFixed(1);
+    const ecosPpiDateEl=document.getElementById('ecosPpiDate');if(ecosPpiDateEl)ecosPpiDateEl.textContent=ppi.date.replace(/(\d{4})(\d{2})/,'$1년 $2월')+' 기준';
+    const ppiTag=document.getElementById('ecosPpiTag');if(ppiTag){ppiTag.textContent=(ppi.yoy>=0?'YoY +':'YoY ')+ppi.yoy.toFixed(1)+'%';ppiTag.className='kpi-tag '+(ppi.yoy>=0?'t-dn':'t-up');}
+    const delayRate=ALERTS.length>0?Math.round(ALERTS.filter(a=>a.stuck>=6).length/Math.max(Object.values(SD).reduce((a,b)=>a+b,0),1)*100*10)/10:0;
+    const ecosDelayEl=document.getElementById('ecosDelay');if(ecosDelayEl)ecosDelayEl.textContent=delayRate+'%';
     if(global.success){
-      // USD/KRW
-      const usdKrwEl = document.getElementById('usdKrw');
-      if(usdKrwEl && global.usdkrw?.current > 0){
-        usdKrwEl.textContent = global.usdkrw.current.toLocaleString() + '원';
-        usdKrwEl.style.color = 'var(--green)';
-        usdKrwEl.style.fontSize = '22px';
-      }
-      // 건설공사비지수
-      const constEl = document.getElementById('constIdx');
-      if(constEl && global.constIdx?.current > 0){
-        constEl.textContent = global.constIdx.current.toFixed(1);
-        constEl.style.color = 'var(--red)';
-        constEl.style.fontSize = '22px';
-      }
-      // 미국 국채금리
-      const usTEl = document.getElementById('usTreasury');
-      if(usTEl && global.usTreasury?.current > 0){
-        usTEl.textContent = global.usTreasury.current.toFixed(2) + '%';
-        usTEl.style.color = 'var(--blue)';
-        usTEl.style.fontSize = '22px';
-      }
-      // WTI
-      const wtiEl = document.getElementById('wtiPrice');
-      if(wtiEl && global.wti?.current > 0){
-        wtiEl.textContent = '$' + global.wti.current.toFixed(1);
-        wtiEl.style.color = 'var(--orange)';
-        wtiEl.style.fontSize = '22px';
-      }
+      const usdKrwEl=document.getElementById('usdKrw');if(usdKrwEl&&global.usdkrw?.current>0){usdKrwEl.textContent=global.usdkrw.current.toLocaleString()+'원';usdKrwEl.style.color='var(--green)';usdKrwEl.style.fontSize='22px';}
+      const constEl=document.getElementById('constIdx');if(constEl&&global.constIdx?.current>0){constEl.textContent=global.constIdx.current.toFixed(1);constEl.style.color='var(--red)';constEl.style.fontSize='22px';}
+      const usTEl=document.getElementById('usTreasury');if(usTEl&&global.usTreasury?.current>0){usTEl.textContent=global.usTreasury.current.toFixed(2)+'%';usTEl.style.color='var(--blue)';usTEl.style.fontSize='22px';}
+      const wtiEl=document.getElementById('wtiPrice');if(wtiEl&&global.wti?.current>0){wtiEl.textContent='$'+global.wti.current.toFixed(1);wtiEl.style.color='var(--orange)';wtiEl.style.fontSize='22px';}
     }
-
-    // ── 업데이트 시간
-    const now = new Date();
-    if(timeEl) timeEl.textContent =
-      `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} 업데이트`;
-
-    // ── 기준금리 차트
-    const rateChartEl = document.getElementById('rateChart');
-    if(rateChartEl && rate.history?.length > 1){
-      const rateLabels = rate.history.map(h => h.date.replace(/(\d{4})(\d{2})/, '$2월'));
-      const rateVals   = rate.history.map(h => h.value);
-      if(riskCH.rate) riskCH.rate.destroy();
-      riskCH.rate = new Chart(rateChartEl, {type:'line',
-        data:{labels:rateLabels, datasets:[{data:rateVals, borderColor:'#1B4FD8',
-          backgroundColor:'rgba(27,79,216,.06)', borderWidth:2.5, fill:true,
-          tension:.3, pointRadius:3, pointBackgroundColor:'#1B4FD8'}]},
-        options:{...OPTS, scales:{
-          x:{grid:{display:false}, ticks:{color:'#9CA3AF', font:{size:10}}},
-          y:{grid:{color:'#F3F4F6'}, ticks:{color:'#9CA3AF', font:{size:11}},
-            suggestedMin:Math.min(...rateVals)-0.5, suggestedMax:Math.max(...rateVals)+0.5}
-        }, plugins:{...OPTS.plugins, tooltip:{...OPTS.plugins.tooltip,
-          callbacks:{label:c=>`기준금리: ${c.raw}%`}}}}
-      });
-    }
-
-    // ── PPI 차트
-    const ppiChartEl = document.getElementById('ppiChart');
-    if(ppiChartEl && ppi.history?.length > 1){
-      const ppiLabels = ppi.history.map(h => h.date.replace(/(\d{4})(\d{2})/, '$2월'));
-      const ppiVals   = ppi.history.map(h => h.value);
-      if(riskCH.ppi) riskCH.ppi.destroy();
-      riskCH.ppi = new Chart(ppiChartEl, {type:'line',
-        data:{labels:ppiLabels, datasets:[{data:ppiVals, borderColor:'#D97706',
-          backgroundColor:'rgba(217,119,6,.06)', borderWidth:2.5, fill:true,
-          tension:.3, pointRadius:3, pointBackgroundColor:'#D97706'}]},
-        options:{...OPTS, scales:{
-          x:{grid:{display:false}, ticks:{color:'#9CA3AF', font:{size:10}}},
-          y:{grid:{color:'#F3F4F6'}, ticks:{color:'#9CA3AF', font:{size:11}}}
-        }, plugins:{...OPTS.plugins, tooltip:{...OPTS.plugins.tooltip,
-          callbacks:{label:c=>`PPI: ${c.raw}`}}}}
-      });
-    }
-
-  }catch(e){
-    console.error('경제지표 오류:', e);
-    if(timeEl) timeEl.textContent = 'API 오류';
-  }
+    const now=new Date();if(timeEl)timeEl.textContent=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} 업데이트`;
+    const rateChartEl=document.getElementById('rateChart');
+    if(rateChartEl&&rate.history?.length>1){const rateLabels=rate.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월'));const rateVals=rate.history.map(h=>h.value);if(riskCH.rate)riskCH.rate.destroy();riskCH.rate=new Chart(rateChartEl,{type:'line',data:{labels:rateLabels,datasets:[{data:rateVals,borderColor:'#1B4FD8',backgroundColor:'rgba(27,79,216,.06)',borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#1B4FD8'}]},options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}});}
+    const ppiChartEl=document.getElementById('ppiChart');
+    if(ppiChartEl&&ppi.history?.length>1){const ppiLabels=ppi.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월'));const ppiVals=ppi.history.map(h=>h.value);if(riskCH.ppi)riskCH.ppi.destroy();riskCH.ppi=new Chart(ppiChartEl,{type:'line',data:{labels:ppiLabels,datasets:[{data:ppiVals,borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.06)',borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#D97706'}]},options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}}});}
+  }catch(e){console.error('경제지표 오류:',e);const timeEl=document.getElementById('riskUpdateTime');if(timeEl)timeEl.textContent='API 오류';}
 }
 
-/* ── 실거래가 API ── */
 async function loadTrade(){
-  const lawdCd=document.getElementById('tradeGu').value;
-  const dealYmd=document.getElementById('tradeYmd').value;
+  const lawdCd=document.getElementById('tradeGu').value,dealYmd=document.getElementById('tradeYmd').value;
   const guNm=document.getElementById('tradeGu').options[document.getElementById('tradeGu').selectedIndex].text;
-
-  // 로딩 초기화
   ['tradeCount','tradeAvg','tradeMax','tradePyeong'].forEach(id=>document.getElementById(id).textContent='—');
   document.getElementById('tradeTotalBadge').textContent='로딩 중';
   document.getElementById('tradeTableBody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400);"><span class="spinner"></span>국토교통부 API 호출 중...</td></tr>';
-
   try{
     const res=await fetch(`/api/apt-trade?lawdCd=${lawdCd}&dealYmd=${dealYmd}&numOfRows=100`);
     const data=await res.json();
-
-    if(!data.success||!data.items||!data.items.length){
-      document.getElementById('tradeTableBody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400);">해당 기간 데이터 없음</td></tr>';
-      document.getElementById('tradeTotalBadge').textContent='0건';
-      return;
-    }
-
+    if(!data.success||!data.items||!data.items.length){document.getElementById('tradeTableBody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400);">해당 기간 데이터 없음</td></tr>';document.getElementById('tradeTotalBadge').textContent='0건';return;}
     tradeData=data.items;
     const amounts=tradeData.map(d=>parseInt(d.dealAmount)||0).filter(v=>v>0);
-    const areas=tradeData.map(d=>parseFloat(d.area)||0).filter(v=>v>0);
-    const avgAmt=Math.round(amounts.reduce((a,b)=>a+b,0)/amounts.length);
-    const maxAmt=Math.max(...amounts);
-
-    // 평당가 계산
-    const pyeongPrices=tradeData.map(d=>{
-      const amt=parseInt(d.dealAmount)||0;
-      const area=parseFloat(d.area)||1;
-      return Math.round(amt/(area/3.3058));
-    }).filter(v=>v>0);
+    const avgAmt=Math.round(amounts.reduce((a,b)=>a+b,0)/amounts.length),maxAmt=Math.max(...amounts);
+    const pyeongPrices=tradeData.map(d=>{const amt=parseInt(d.dealAmount)||0,area=parseFloat(d.area)||1;return Math.round(amt/(area/3.3058));}).filter(v=>v>0);
     const avgPyeong=Math.round(pyeongPrices.reduce((a,b)=>a+b,0)/pyeongPrices.length);
-
     document.getElementById('tradeCount').textContent=data.totalCount.toLocaleString()+'건';
     document.getElementById('tradeAvg').textContent=avgAmt.toLocaleString();
     document.getElementById('tradeMax').textContent=maxAmt.toLocaleString();
     document.getElementById('tradePyeong').textContent=avgPyeong.toLocaleString();
     document.getElementById('tradeTotalBadge').textContent='총 '+data.totalCount+'건';
-
-    // 테이블
     document.getElementById('tradeTableBody').innerHTML=tradeData.map(d=>{
-      const amt=parseInt(d.dealAmount)||0;
-      const area=parseFloat(d.area)||1;
-      const perPyeong=Math.round(amt/(area/3.3058));
+      const amt=parseInt(d.dealAmount)||0,area=parseFloat(d.area)||1,perPyeong=Math.round(amt/(area/3.3058));
       const amtColor=amt>=200000?'var(--red)':amt>=100000?'var(--orange)':'var(--blue)';
-      return`<tr>
-        <td style="font-weight:600;">${d.aptName}</td>
-        <td>${d.umdNm}</td>
-        <td style="font-family:var(--mono);text-align:right;">${area}</td>
-        <td style="font-family:var(--mono);text-align:center;">${d.floor}층</td>
-        <td style="font-family:var(--mono);">${d.dealYear}.${String(d.dealMonth).padStart(2,'0')}.${String(d.dealDay).padStart(2,'0')}</td>
-        <td style="font-family:var(--mono);font-weight:700;color:${amtColor};text-align:right;">${amt.toLocaleString()}</td>
-        <td style="font-family:var(--mono);color:var(--gray-400);text-align:right;">${perPyeong.toLocaleString()}</td>
-      </tr>`;
+      return`<tr><td style="font-weight:600;">${d.aptName}</td><td>${d.umdNm}</td><td style="font-family:var(--mono);text-align:right;">${area}</td><td style="font-family:var(--mono);text-align:center;">${d.floor}층</td><td style="font-family:var(--mono);">${d.dealYear}.${String(d.dealMonth).padStart(2,'0')}.${String(d.dealDay).padStart(2,'0')}</td><td style="font-family:var(--mono);font-weight:700;color:${amtColor};text-align:right;">${amt.toLocaleString()}</td><td style="font-family:var(--mono);color:var(--gray-400);text-align:right;">${perPyeong.toLocaleString()}</td></tr>`;
     }).join('');
-
-    // 금액대 분포 차트
     const bands={'5억↓':0,'5~10억':0,'10~15억':0,'15~20억':0,'20억↑':0};
-    amounts.forEach(a=>{
-      const m=a/10000;
-      if(m<5)bands['5억↓']++;
-      else if(m<10)bands['5~10억']++;
-      else if(m<15)bands['10~15억']++;
-      else if(m<20)bands['15~20억']++;
-      else bands['20억↑']++;
-    });
+    amounts.forEach(a=>{const m=a/10000;if(m<5)bands['5억↓']++;else if(m<10)bands['5~10억']++;else if(m<15)bands['10~15억']++;else if(m<20)bands['15~20억']++;else bands['20억↑']++;});
     document.getElementById('tradeDistBadge').textContent=guNm;
     if(tradeCH.dist)tradeCH.dist.destroy();
-    tradeCH.dist=new Chart(document.getElementById('tradeDistChart'),{type:'bar',
-      data:{labels:Object.keys(bands),datasets:[{data:Object.values(bands),
-        backgroundColor:['rgba(27,79,216,.7)','rgba(5,150,105,.7)','rgba(217,119,6,.7)','rgba(220,38,38,.7)','rgba(109,40,217,.7)'],
-        borderRadius:4,borderSkipped:false}]},
-      options:{...OPTS,scales:{
-        x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},
-        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}
-      },plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`${c.raw}건`}}}}
-    });
-
-    // 단지별 TOP 10 가로 바
-    const aptMap={};
-    tradeData.forEach(d=>{aptMap[d.aptName]=(aptMap[d.aptName]||0)+1;});
+    tradeCH.dist=new Chart(document.getElementById('tradeDistChart'),{type:'bar',data:{labels:Object.keys(bands),datasets:[{data:Object.values(bands),backgroundColor:['rgba(27,79,216,.7)','rgba(5,150,105,.7)','rgba(217,119,6,.7)','rgba(220,38,38,.7)','rgba(109,40,217,.7)'],borderRadius:4,borderSkipped:false}]},options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}});
+    const aptMap={};tradeData.forEach(d=>{aptMap[d.aptName]=(aptMap[d.aptName]||0)+1;});
     const top10=Object.entries(aptMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
     if(tradeCH.apt)tradeCH.apt.destroy();
-    tradeCH.apt=new Chart(document.getElementById('tradeAptChart'),{type:'bar',
-      data:{labels:top10.map(d=>d[0].length>9?d[0].slice(0,9)+'…':d[0]),datasets:[{data:top10.map(d=>d[1]),
-        backgroundColor:'rgba(27,79,216,.7)',borderColor:'#1B4FD8',borderWidth:1,borderRadius:4,borderSkipped:false}]},
-      options:{...OPTS,indexAxis:'y',scales:{
-        x:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10}}},
-        y:{grid:{display:false},ticks:{color:'#374151',font:{size:10,family:'IBM Plex Sans KR'}}}
-      },plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`${c.raw}건`}}}}
-    });
-
-  }catch(e){
-    console.error(e);
-    document.getElementById('tradeTableBody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red);">API 호출 오류 — Vercel 배포 환경에서 사용해 주세요</td></tr>';
-  }
+    tradeCH.apt=new Chart(document.getElementById('tradeAptChart'),{type:'bar',data:{labels:top10.map(d=>d[0].length>9?d[0].slice(0,9)+'…':d[0]),datasets:[{data:top10.map(d=>d[1]),backgroundColor:'rgba(27,79,216,.7)',borderColor:'#1B4FD8',borderWidth:1,borderRadius:4,borderSkipped:false}]},options:{...OPTS,indexAxis:'y',scales:{x:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10}}},y:{grid:{display:false},ticks:{color:'#374151',font:{size:10,family:'IBM Plex Sans KR'}}}}}});
+  }catch(e){document.getElementById('tradeTableBody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red);">API 호출 오류</td></tr>';}
 }
 
 init();
