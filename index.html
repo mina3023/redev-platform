@@ -6,7 +6,7 @@
 <title>REDEV AI — 재건축·재개발 플랫폼</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=539cc6b51e4e31250f1f874d473f6530&libraries=services,clusterer&autoload=false"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=539cc6b51e4e31250f1f874d473f6530&libraries=services,clusterer"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -296,7 +296,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 .locked-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);}
 
 /* ── 카카오 지도 ── */
-#kakaoMap{width:100%;height:calc(100vh - 46px - 130px);border-radius:var(--r-lg);overflow:hidden;background:var(--gray-100);}
+#kakaoMap{width:100%;height:580px;border-radius:var(--r-lg);overflow:hidden;background:var(--gray-100);min-height:400px;}
 .map-controls{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center;}
 .map-btn{padding:6px 14px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:#fff;color:var(--gray-600);border-radius:20px;cursor:pointer;transition:all .12s;}
 .map-btn:hover,.map-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
@@ -581,9 +581,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="map-info-panel" id="mapInfoPanel">
       <button class="map-info-close" onclick="document.getElementById('mapInfoPanel').style.display='none'">✕</button>
       <div class="map-info-title" id="mapInfoTitle">—</div>
+      <div id="mapInfoStage" style="margin-bottom:8px;"></div>
       <div id="mapInfoBody"></div>
-      <button class="btn-primary" style="width:100%;margin-top:10px;font-size:11px;padding:7px;" onclick="goToSearchFromMap()">구역 검색으로 이동 →</button>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+        <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">추진 일정</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;"><span style="color:var(--gray-400);">사업시행인가</span><span style="font-weight:500;color:var(--gray-600);" id="mapDate1">데이터 준비 중</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;"><span style="color:var(--gray-400);">관리처분인가</span><span style="font-weight:500;color:var(--gray-600);" id="mapDate2">데이터 준비 중</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;"><span style="color:var(--gray-400);">착공일</span><span style="font-weight:500;color:var(--gray-600);" id="mapDate3">데이터 준비 중</span></div>
+        </div>
+        <div style="font-size:10px;color:var(--gray-400);margin-top:6px;">* 정비몽땅 데이터 연동 예정</div>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:10px;font-size:11px;padding:7px;" onclick="goToSearchFromMap()">구역 상세 검색 →</button>
     </div>
+    <div id="mapLoading" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.9);padding:16px 24px;border-radius:var(--r-lg);font-size:13px;color:var(--gray-600);box-shadow:var(--sh2);"><span class="spinner"></span>지도 로딩 중...</div>
   </div>
 </div>
 
@@ -1149,22 +1160,26 @@ let kakaoMap=null,mapMarkers=[],mapFilter='all',mapInited=false;
 
 function initKakaoMap(){
   if(mapInited)return;
-  kakao.maps.load(function(){
-    mapInited=true;
-    const container=document.getElementById('kakaoMap');
-    const options={center:new kakao.maps.LatLng(37.5665,126.9780),level:8};
-    kakaoMap=new kakao.maps.Map(container,options);
-    const zoomControl=new kakao.maps.ZoomControl();
-    kakaoMap.addControl(zoomControl,kakao.maps.ControlPosition.RIGHT);
-    // ALL 데이터 로딩 대기 후 마커 표시
-    if(ALL.length>0){
-      loadMapData();
-    } else {
-      const waitForData=setInterval(()=>{
-        if(ALL.length>0){clearInterval(waitForData);loadMapData();}
-      },300);
-    }
-  });
+  if(typeof kakao==='undefined'||!kakao.maps){
+    setTimeout(initKakaoMap,300);return;
+  }
+  mapInited=true;
+  const loading=document.getElementById('mapLoading');
+  if(loading)loading.style.display='block';
+  const container=document.getElementById('kakaoMap');
+  const options={center:new kakao.maps.LatLng(37.5665,126.9780),level:8};
+  kakaoMap=new kakao.maps.Map(container,options);
+  kakao.maps.event.trigger(kakaoMap,'resize');
+  const zoomControl=new kakao.maps.ZoomControl();
+  kakaoMap.addControl(zoomControl,kakao.maps.ControlPosition.RIGHT);
+  if(loading)loading.style.display='none';
+  if(ALL.length>0){
+    loadMapData();
+  } else {
+    const waitForData=setInterval(()=>{
+      if(ALL.length>0){clearInterval(waitForData);loadMapData();}
+    },300);
+  }
 }
 
 const GU_COORDS={
@@ -1219,11 +1234,22 @@ function showMapInfo(name,gu,score,stage){
   const panel=document.getElementById('mapInfoPanel');
   panel.style.display='block';
   document.getElementById('mapInfoTitle').textContent=name;
+  // 단계 배지
+  const stageColors={1:'#9CA3AF',2:'#1D4ED8',3:'#6D28D9',4:'#065F46',5:'#92400E',6:'#9A3412',7:'#86198F',8:'#9F1239',9:'#059669'};
+  const col=stageColors[score]||'#9CA3AF';
+  document.getElementById('mapInfoStage').innerHTML=`<span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${col}22;color:${col};border:1px solid ${col}44;">${stage||SN[score]||'?'} (${score}단계)</span>`;
   const alert=ALERTS.find(a=>a.name===name);
   document.getElementById('mapInfoBody').innerHTML=`
-    <div class="map-info-row"><span style="color:var(--gray-400);">자치구</span><span style="font-weight:500;">${gu}</span></div>
-    <div class="map-info-row"><span style="color:var(--gray-400);">현재 단계</span><span style="font-weight:600;color:var(--blue);">${stage} (${score}단계)</span></div>
-    ${alert?`<div class="map-info-row"><span style="color:var(--gray-400);">지연 경보</span><span style="color:var(--red);font-weight:600;">${alert.stuck}기간 정체 ⚠</span></div>`:``}`;
+    <div style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;">
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-400);">자치구</span><span style="font-weight:500;">${gu}</span></div>
+      ${alert?`<div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-400);">지연 경보</span><span style="color:var(--red);font-weight:600;">⚠ ${alert.stuck}기간 정체</span></div>`:''}
+    </div>`;
+  // 날짜 — 타임라인에서 각 단계 첫 등장 시점 추정
+  const zoneRecs=ALL.filter(r=>r.project_name===name).sort((a,b)=>a.period>b.period?1:-1);
+  const findFirst=(sc)=>{const r=zoneRecs.find(r=>r.stage_score===sc);return r?r.period.replace('-','년 ')+'분기':'—';};
+  document.getElementById('mapDate1').textContent=score>=4?findFirst(4):'미진입';
+  document.getElementById('mapDate2').textContent=score>=5?findFirst(5):'미진입';
+  document.getElementById('mapDate3').textContent=score>=7?findFirst(7):'미진입';
   window._mapSearchName=name;
 }
 
@@ -1426,7 +1452,7 @@ function sw(tab,el){
   if(tab==='risk')setTimeout(loadRisk,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
   if(tab==='news')setTimeout(loadNews,80);
-  if(tab==='map')setTimeout(initKakaoMap,150);
+  if(tab==='map')setTimeout(()=>{initKakaoMap();if(kakaoMap)kakao.maps.event.trigger(kakaoMap,'resize');},300);
   if(tab==='mydash')setTimeout(renderMyDash,80);
   if(tab==='tax')setTimeout(()=>{document.getElementById('taxAcq').style.display='block';},80);
 }
