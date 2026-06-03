@@ -878,15 +878,21 @@ async function authSubmit(){
     if(authMode==='signup'){
       const{data,error}=await _SB.auth.signUp({email,password:pw});
       if(error)throw error;
-      // 회원가입 성공 시 profiles 수동 생성 (트리거 백업)
       if(data?.user){
         await _SB.from('profiles').upsert({id:data.user.id,email:email,tier:'free'},{onConflict:'id'});
       }
-      showAuthErr('✅ 가입 완료! 이메일을 확인해 인증 후 로그인해주세요.','#059669');
+      showAuthErr('✅ 가입 완료! 이메일 인증 없이 바로 로그인하세요.','#059669');
     }else{
-      const{error}=await _SB.auth.signInWithPassword({email,password:pw});
+      const{data,error}=await _SB.auth.signInWithPassword({email,password:pw});
       if(error)throw error;
+      // 로그인 성공 — 모달 즉시 닫기
       closeAuth();
+      // profile 직접 로드
+      if(data?.user){
+        currentUser=data.user;
+        await loadProfile();
+        updateAuthUI();
+      }
     }
   }catch(e){
     const msg=e.message?.includes('Invalid login')?'이메일 또는 비밀번호가 올바르지 않습니다'
