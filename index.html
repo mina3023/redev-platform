@@ -322,7 +322,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   <div class="gnb-right" style="position:relative;display:flex;align-items:center;gap:12px;">
     <div class="gnb-srch">
       <span style="color:rgba(255,255,255,.3);font-size:12px;">⌕</span>
-      <input type="text" placeholder="구역명 검색..." id="gnbSrch" oninput="gnbQ(this.value)" onblur="setTimeout(()=>{document.getElementById('gnbDrop').style.display='none'},200)">
+      <input type="text" placeholder="구역명 검색..." id="gnbSrch" autocomplete="off" name="zone-search" oninput="gnbQ(this.value)" onblur="setTimeout(()=>{document.getElementById('gnbDrop').style.display='none'},200)">
     </div>
     <div class="gnb-drop" id="gnbDrop"></div>
     <div class="live-chip"><span class="live-dot"></span>LIVE</div>
@@ -809,10 +809,14 @@ async function loadProfile(){
   try{
     const{data,error}=await _SB.from('profiles').select('*').eq('id',currentUser.id).single();
     if(error&&error.code==='PGRST116'){
-      // 프로필이 없으면 생성
       const{data:newProfile}=await _SB.from('profiles').insert({id:currentUser.id,email:currentUser.email,tier:'free'}).select().single();
       currentProfile=newProfile;
     } else {
+      // tier 값 정규화 (한글로 들어온 경우 대비)
+      if(data){
+        const tierMap={'무료':'free','스탠다드':'standard','standard':'standard','프리미엄':'premium','premium':'premium','블랙':'black','블랙라인':'black','black':'black','b2b':'b2b','프리':'free','free':'free'};
+        data.tier=tierMap[data.tier?.toLowerCase?.()??data.tier]||data.tier||'free';
+      }
       currentProfile=data;
     }
   }catch(e){console.error('loadProfile 오류:',e);}
