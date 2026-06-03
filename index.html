@@ -885,14 +885,16 @@ async function authSubmit(){
     }else{
       const{data,error}=await _SB.auth.signInWithPassword({email,password:pw});
       if(error)throw error;
-      // 로그인 성공 — 모달 즉시 닫기
-      closeAuth();
-      // profile 직접 로드
-      if(data?.user){
-        currentUser=data.user;
-        await loadProfile();
-        updateAuthUI();
-      }
+      // 로그인 성공
+      currentUser=data.user;
+      currentProfile={id:data.user.id,email:data.user.email,tier:'free'};
+      document.getElementById('authOverlay').style.display='none';
+      document.getElementById('authErr').style.display='none';
+      btn.textContent='로그인';btn.disabled=false;
+      // 백그라운드에서 실제 profile 로드
+      loadProfile().then(()=>updateAuthUI());
+      updateAuthUI();
+      return;
     }
   }catch(e){
     const msg=e.message?.includes('Invalid login')?'이메일 또는 비밀번호가 올바르지 않습니다'
