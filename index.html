@@ -6,7 +6,6 @@
 <title>REDEV AI — 재건축·재개발 플랫폼</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=539cc6b51e4e31250f1f874d473f6530&libraries=services,clusterer"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -561,7 +560,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 지도 ══ -->
 <div id="tab-map" class="tab-panel">
-  <div class="page-h"><div><h2>지도 <span class="ph-badge">카카오맵</span></h2><p>서울 정비사업 구역 지도 시각화 · 단계별 필터</p></div></div>
+  <div class="page-h"><div><h2>지도 <span class="ph-badge">카카오맵</span></h2><p>서울 정비사업 구역 지도 시각화 · 단계별 필터</p></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="startGeocode()" style="padding:6px 12px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer;" id="geocodeBtn">📍 좌표 자동 변환</button>
+      <span id="geocodeStatus" style="font-size:11px;color:var(--gray-400);"></span>
+    </div>
+  </div>
   <div class="map-controls">
     <button class="map-btn active" onclick="setMapFilter('all',this)">전체</button>
     <button class="map-btn" onclick="setMapFilter('1',this)">1단계 구역지정</button>
@@ -966,7 +970,7 @@ async function sbfAll(t,q='',ps=1000){
   return all;
 }
 
-async function init(){await Promise.all([loadAll(),detectAlerts()]);buildGuChips();calcSim();}
+async function init(){await Promise.all([loadAll(),detectAlerts(),loadZoneCoords()]);buildGuChips();calcSim();}
 
 async function loadAll(){
   try{
@@ -1157,29 +1161,137 @@ function gnbQ(val){
 
 // ── 카카오맵 (autoload=false 방식) ──
 let kakaoMap=null,mapMarkers=[],mapFilter='all',mapInited=false;
+let ZONE_COORDS={}; // {project_name: {lat, lng}}
+
+// 좌표 로드 (Supabase)
+async function loadZoneCoords(){
+  try{
+    const res=await fetch(`${SB}/rest/v1/zone_coordinates?select=project_name,lat,lng&limit=1000`,{headers:{apikey:SK,Authorization:`Bearer ${SK}`}});
+    const data=await res.json();
+    if(Array.isArray(data)){
+      data.forEach(d=>{if(d.lat&&d.lng)ZONE_COORDS[d.project_name]={lat:parseFloat(d.lat),lng:parseFloat(d.lng)};});
+      console.log(`좌표 ${Object.keys(ZONE_COORDS).length}개 로드 완료`);
+      if(mapInited)loadMapData();
+    }
+  }catch(e){console.error('좌표 로드 오류:',e);}
+}
+
+// 카카오 주소검색
+function geocodeAddr(addr){
+  return new Promise((resolve)=>{
+    if(!kakao?.maps?.services){resolve(null);return;}
+    const geocoder=new kakao.maps.services.Geocoder();
+    geocoder.addressSearch(addr,(result,status)=>{
+      if(status===kakao.maps.services.Status.OK&&result.length>0){
+        resolve({lat:parseFloat(result[0].y),lng:parseFloat(result[0].x)});
+      } else {
+        // 주소 검색 실패시 키워드 검색 시도
+        const ps=new kakao.maps.services.Places();
+        ps.keywordSearch(addr,(r2,s2)=>{
+          if(s2===kakao.maps.services.Status.OK&&r2.length>0){
+            resolve({lat:parseFloat(r2[0].y),lng:parseFloat(r2[0].x)});
+          } else resolve(null);
+        });
+      }
+    });
+  });
+}
+
+// 주소 데이터 (엑셀 기반)
+const ZONE_ADDRESSES=[
+  {name:'수송1-2',gu:'종로구',addr:'서울특별시 종로구 종로1길 36'},
+  {name:'수송1-7',gu:'종로구',addr:'서울특별시 종로구 종로5길 68'},
+  {name:'신영1',gu:'종로구',addr:'서울특별시 종로구 세검정로6길 62-2'},
+  {name:'사직2',gu:'종로구',addr:'서울특별시 종로구 사직로 62-2'},
+  {name:'돈의문2',gu:'종로구',addr:'서울특별시 종로구 통일로 150-7'},
+  {name:'한남3',gu:'용산구',addr:'서울특별시 용산구 독서당로 101'},
+  {name:'한남4',gu:'용산구',addr:'서울특별시 용산구 독서당로 120'},
+  {name:'한남5',gu:'용산구',addr:'서울특별시 용산구 보광로 60'},
+  {name:'이문1',gu:'동대문구',addr:'서울특별시 동대문구 이문로 94'},
+  {name:'이문3',gu:'동대문구',addr:'서울특별시 동대문구 이문로 96'},
+  {name:'휘경1',gu:'동대문구',addr:'서울특별시 동대문구 휘경로 36'},
+  {name:'노량진1',gu:'동작구',addr:'서울특별시 동작구 노량진동 278-2'},
+  {name:'노량진2',gu:'동작구',addr:'서울특별시 동작구 장승배기로15길 34'},
+  {name:'노량진3',gu:'동작구',addr:'서울특별시 동작구 장승배기로24길 6'},
+  {name:'노량진4',gu:'동작구',addr:'서울특별시 동작구 장승배기로20가길 17-28'},
+  {name:'노량진5',gu:'동작구',addr:'서울특별시 동작구 등용로4길 148'},
+  {name:'노량진6',gu:'동작구',addr:'서울특별시 동작구 등용로4길 78'},
+  {name:'노량진7',gu:'동작구',addr:'서울특별시 동작구 등용로8가길 6'},
+  {name:'노량진8',gu:'동작구',addr:'서울특별시 동작구 등용로 114'},
+  {name:'흑석2',gu:'동작구',addr:'서울특별시 동작구 흑석로 92'},
+  {name:'흑석9',gu:'동작구',addr:'서울특별시 동작구 서달로11길 27'},
+  {name:'아현1',gu:'마포구',addr:'서울특별시 마포구 마포대로 53'},
+  {name:'북아현1',gu:'마포구',addr:'서울특별시 마포구 연희로 105'},
+  {name:'북아현2',gu:'마포구',addr:'서울특별시 마포구 연희로 13'},
+  {name:'북아현3',gu:'마포구',addr:'서울특별시 마포구 신촌로 104'},
+  {name:'가재울4',gu:'서대문구',addr:'서울특별시 서대문구 가재울로 57'},
+  {name:'가재울6',gu:'서대문구',addr:'서울특별시 서대문구 가재울로 24'},
+  {name:'가재울7',gu:'서대문구',addr:'서울특별시 서대문구 수색로 260'},
+  {name:'미아3',gu:'강북구',addr:'서울특별시 강북구 도봉로 166'},
+  {name:'개포1',gu:'강남구',addr:'서울특별시 강남구 개포로 621'},
+  {name:'개포4',gu:'강남구',addr:'서울특별시 강남구 개포로 109'},
+  {name:'압구정3',gu:'강남구',addr:'서울특별시 강남구 압구정로 220'},
+  {name:'압구정4',gu:'강남구',addr:'서울특별시 강남구 압구정로 254'},
+  {name:'반포1',gu:'서초구',addr:'서울특별시 서초구 반포대로 170'},
+  {name:'반포2',gu:'서초구',addr:'서울특별시 서초구 반포대로 235'},
+  {name:'잠원1',gu:'서초구',addr:'서울특별시 서초구 잠원로 55'},
+  {name:'둔촌주공',gu:'강동구',addr:'서울특별시 강동구 올림픽로 664'},
+  {name:'고덕1',gu:'강동구',addr:'서울특별시 강동구 고덕로 264'},
+  {name:'상계3-16',gu:'노원구',addr:'서울특별시 노원구 노원로 319'},
+  {name:'수색증산1',gu:'은평구',addr:'서울특별시 은평구 수색로 290'},
+];
+
+async function startGeocode(){
+  const btn=document.getElementById('geocodeBtn');
+  const status=document.getElementById('geocodeStatus');
+  if(!window._kakaoReady){alert('카카오맵이 아직 로딩 중입니다. 잠시 후 다시 시도해주세요.');return;}
+  btn.disabled=true;btn.textContent='변환 중...';
+  let success=0,fail=0;
+  for(let i=0;i<ZONE_ADDRESSES.length;i++){
+    const z=ZONE_ADDRESSES[i];
+    if(ZONE_COORDS[z.name]){success++;continue;}
+    status.textContent=`${i+1}/${ZONE_ADDRESSES.length} — ${z.name}`;
+    const coord=await geocodeAddr(z.addr);
+    if(coord){
+      await fetch(`${SB}/rest/v1/zone_coordinates`,{
+        method:'POST',
+        headers:{apikey:SK,Authorization:`Bearer ${SK}`,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
+        body:JSON.stringify({project_name:z.name,gu_name:z.gu,address:z.addr,lat:coord.lat,lng:coord.lng})
+      });
+      ZONE_COORDS[z.name]=coord;success++;
+    } else fail++;
+    await new Promise(r=>setTimeout(r,120));
+  }
+  status.textContent=`완료! ✅ ${success}개 성공, ❌ ${fail}개 실패`;
+  btn.textContent='📍 좌표 자동 변환';btn.disabled=false;
+  if(mapInited)loadMapData();
+}
 
 function initKakaoMap(){
   if(mapInited)return;
-  if(typeof kakao==='undefined'||!kakao.maps){
-    setTimeout(initKakaoMap,300);return;
+  if(!window._kakaoReady){
+    console.log('카카오맵 대기 중...');
+    setTimeout(initKakaoMap,300);
+    return;
   }
   mapInited=true;
-  const loading=document.getElementById('mapLoading');
-  if(loading)loading.style.display='block';
+  console.log('카카오맵 초기화 시작');
   const container=document.getElementById('kakaoMap');
   const options={center:new kakao.maps.LatLng(37.5665,126.9780),level:8};
   kakaoMap=new kakao.maps.Map(container,options);
-  kakao.maps.event.trigger(kakaoMap,'resize');
-  const zoomControl=new kakao.maps.ZoomControl();
-  kakaoMap.addControl(zoomControl,kakao.maps.ControlPosition.RIGHT);
-  if(loading)loading.style.display='none';
-  if(ALL.length>0){
-    loadMapData();
-  } else {
-    const waitForData=setInterval(()=>{
-      if(ALL.length>0){clearInterval(waitForData);loadMapData();}
-    },300);
-  }
+  setTimeout(()=>{
+    kakao.maps.event.trigger(kakaoMap,'resize');
+    const zoomControl=new kakao.maps.ZoomControl();
+    kakaoMap.addControl(zoomControl,kakao.maps.ControlPosition.RIGHT);
+    console.log('카카오맵 초기화 완료');
+    if(ALL.length>0){
+      loadMapData();
+    } else {
+      const waitForData=setInterval(()=>{
+        if(ALL.length>0){clearInterval(waitForData);loadMapData();}
+      },300);
+    }
+  },100);
 }
 
 const GU_COORDS={
@@ -1202,23 +1314,30 @@ function loadMapData(){
   zones.forEach(zone=>{
     if(mapFilter!=='all'&&mapFilter!=='alert'&&zone.stage_score!==parseInt(mapFilter))return;
     if(mapFilter==='alert'&&!ALERTS.find(a=>a.name===zone.project_name))return;
-    const coords=GU_COORDS[zone.gu_name];if(!coords)return;
-    // 같은 구 내에서 랜덤 분산
-    const jitter=[(Math.random()-.5)*.045,(Math.random()-.5)*.045];
-    const pos=new kakao.maps.LatLng(coords[0]+jitter[0],coords[1]+jitter[1]);
+    let lat,lng,hasCoord=false;
+    if(ZONE_COORDS[zone.project_name]){
+      lat=ZONE_COORDS[zone.project_name].lat;
+      lng=ZONE_COORDS[zone.project_name].lng;
+      hasCoord=true;
+    } else {
+      const coords=GU_COORDS[zone.gu_name];if(!coords)return;
+      lat=coords[0]+(Math.random()-.5)*.045;
+      lng=coords[1]+(Math.random()-.5)*.045;
+    }
+    const pos=new kakao.maps.LatLng(lat,lng);
     const isAlert=ALERTS.find(a=>a.name===zone.project_name);
     const color=isAlert&&mapFilter==='alert'?'#DC2626':SC[zone.stage_score]||'#9CA3AF';
-    const size=isAlert?12:9;
+    const size=hasCoord?12:8;
     const nameSafe=zone.project_name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
     const marker=new kakao.maps.CustomOverlay({
       position:pos,
-      content:`<div onclick="showMapInfo('${nameSafe}','${zone.gu_name}',${zone.stage_score},'${zone.stage||''}')" style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,.8);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .1s;" onmouseover="this.style.transform='scale(1.6)'" onmouseout="this.style.transform='scale(1)'"></div>`,
-      zIndex:1
+      content:`<div onclick="showMapInfo('${nameSafe}','${zone.gu_name}',${zone.stage_score},'${zone.stage||''}')" style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,.85);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .1s;${hasCoord?'':'opacity:.7;'}" onmouseover="this.style.transform='scale(1.6)'" onmouseout="this.style.transform='scale(1)'"></div>`,
+      zIndex:hasCoord?2:1
     });
     marker.setMap(kakaoMap);mapMarkers.push(marker);
     count++;
   });
-  console.log(`지도 마커 ${count}개 렌더링`);
+  console.log(`마커 ${count}개 (정확: ${Object.keys(ZONE_COORDS).length}개)`);
 }
 
 function clearMapMarkers(){mapMarkers.forEach(m=>m.setMap(null));mapMarkers=[];}
@@ -1653,6 +1772,21 @@ function calcSim(){
 }
 
 init();
+</script>
+<!-- 카카오맵 SDK 동적 로딩 -->
+<script>
+(function(){
+  const s=document.createElement('script');
+  s.type='text/javascript';
+  s.src='//dapi.kakao.com/v2/maps/sdk.js?appkey=539cc6b51e4e31250f1f874d473f6530&libraries=services,clusterer&autoload=false';
+  s.onload=function(){
+    kakao.maps.load(function(){
+      window._kakaoReady=true;
+      console.log('카카오맵 SDK 준비 완료');
+    });
+  };
+  document.body.appendChild(s);
+})();
 </script>
 </body>
 </html>
