@@ -299,17 +299,137 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 .map-controls{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center;}
 .map-btn{padding:6px 14px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:#fff;color:var(--gray-600);border-radius:20px;cursor:pointer;transition:all .12s;}
 .map-btn:hover,.map-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
-.map-legend{display:flex;gap:10px;margin-left:auto;align-items:center;}
-.map-legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gray-600);}
-.map-legend-dot{width:10px;height:10px;border-radius:50%;}
+.map-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray-600);padding:3px 8px;border-radius:20px;border:1px solid var(--border);background:var(--gray-50);cursor:pointer;transition:all .12s;}
+.map-legend-item:hover{border-color:var(--blue);background:var(--blue-light);}
+.map-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .map-info-panel{position:absolute;bottom:20px;left:20px;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;width:260px;box-shadow:var(--sh2);z-index:10;display:none;}
 .map-info-title{font-size:13px;font-weight:600;color:var(--gray-900);margin-bottom:8px;}
 .map-info-row{display:flex;justify-content:space-between;font-size:11.5px;padding:4px 0;border-bottom:1px solid var(--gray-100);}
 .map-info-row:last-of-type{border-bottom:none;}
 .map-info-close{position:absolute;top:8px;right:10px;cursor:pointer;color:var(--gray-400);background:none;border:none;font-size:16px;}
+
+/* ── 모바일 하단 탭바 ── */
+.mobile-tabbar{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:100;padding:4px 0 env(safe-area-inset-bottom);}
+.mobile-tabbar-inner{display:flex;justify-content:space-around;}
+.mob-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;font-size:10px;color:var(--gray-400);cursor:pointer;border:none;background:none;font-family:var(--font);min-width:44px;min-height:44px;justify-content:center;}
+.mob-tab.active{color:var(--blue);}
+.mob-tab-icon{font-size:18px;line-height:1;}
+
+/* ── 반응형 ── */
+@media (max-width:768px){
+  /* body */
+  body{overflow:auto;}
+  
+  /* GNB */
+  .gnb{padding:0 12px;height:52px;}
+  .logo-text span{display:none;}
+  .gnb-srch{display:none;}
+  .live-chip{display:none;}
+  .gnb-right{gap:8px;}
+  
+  /* 레이아웃 */
+  .body-wrap{flex-direction:column;}
+  .sidebar{display:none;}
+  .content{padding:10px 10px 80px;}
+  
+  /* 하단 탭바 표시 */
+  .mobile-tabbar{display:block;}
+  
+  /* 홈 대시보드 */
+  .db-wrap{height:auto;gap:12px;}
+  .db-kpi-row{grid-template-columns:1fr 1fr;gap:8px;}
+  .kpi-val{font-size:24px;}
+  .db-row2{grid-template-columns:1fr;gap:10px;}
+  .db-row3{grid-template-columns:1fr;gap:10px;}
+  
+  /* 카드 */
+  .card{padding:14px;}
+  .page-h h2{font-size:15px;}
+  
+  /* 마이 대시보드 */
+  .my-layout{grid-template-columns:1fr;height:auto;}
+  .my-sidebar{max-height:200px;}
+  
+  /* 지도 */
+  #kakaoMap{height:400px;}
+  .map-info-panel{left:10px;right:10px;width:auto;bottom:10px;}
+  .map-controls{gap:5px;}
+  .map-btn{padding:5px 10px;font-size:11px;}
+  
+  /* 세금 계산기 */
+  .sim-layout{grid-template-columns:1fr;}
+  
+  /* 테이블 */
+  .dtable{font-size:11px;}
+  .dtable th,.dtable td{padding:7px 8px;}
+  
+  /* 탭 패널 */
+  .tab-panel.active{display:block;}
+  
+  /* 법령 */
+  #lawResultList,#lawDetailBody{max-height:300px;}
+  
+  /* 실거래가 */
+  #tab-trade .kpi-val{font-size:18px;}
+  
+  /* 검색 */
+  .chip{font-size:10px;padding:3px 8px;}
+  .zone-inp{font-size:14px;}
+
+  /* 홈 차트 높이 */
+  .cc{min-height:180px;}
+  .cc-body{min-height:120px;}
+}
+
+@media (max-width:480px){
+  .db-kpi-row{grid-template-columns:1fr 1fr;}
+  .kpi-val{font-size:20px;}
+  .page-h{flex-direction:column;gap:8px;align-items:flex-start;}
+}
 </style>
 </head>
 <body>
+
+<!-- 모바일 하단 탭바 -->
+<div class="mobile-tabbar">
+  <div class="mobile-tabbar-inner">
+    <button class="mob-tab active" onclick="sw('home',null);setMobTab(this)">
+      <span class="mob-tab-icon">⌂</span>홈
+    </button>
+    <button class="mob-tab" onclick="sw('search',null);setMobTab(this)">
+      <span class="mob-tab-icon">◎</span>검색
+    </button>
+    <button class="mob-tab" onclick="sw('map',null);setMobTab(this)">
+      <span class="mob-tab-icon">🗺</span>지도
+    </button>
+    <button class="mob-tab" onclick="sw('alert',null);setMobTab(this)">
+      <span class="mob-tab-icon">△</span>경보
+    </button>
+    <button class="mob-tab" onclick="sw('trade',null);setMobTab(this)">
+      <span class="mob-tab-icon">₩</span>실거래
+    </button>
+    <button class="mob-tab" onclick="openMobMenu()">
+      <span class="mob-tab-icon">☰</span>더보기
+    </button>
+  </div>
+</div>
+
+<!-- 모바일 더보기 메뉴 -->
+<div id="mobMenu" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;" onclick="if(event.target===this)closeMobMenu()">
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;">
+    <div style="width:36px;height:4px;background:var(--gray-200);border-radius:2px;margin:0 auto 16px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button onclick="sw('mydash',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>★</span>마이 대시보드</button>
+      <button onclick="sw('stage',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>≡</span>단계 관리</button>
+      <button onclick="sw('news',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>📰</span>뉴스·정책</button>
+      <button onclick="sw('risk',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>📊</span>경제 지표</button>
+      <button onclick="sw('legal',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>⚖</span>법령·판례</button>
+      <button onclick="sw('tax',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>🧾</span>세금 계산기</button>
+      <button onclick="sw('rights',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>📋</span>조합원 권리</button>
+      <button onclick="sw('investor',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>💰</span>수익 계산기</button>
+    </div>
+  </div>
+</div>
 
 <!-- GNB -->
 <header class="gnb">
@@ -566,19 +686,32 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
       <span id="geocodeStatus" style="font-size:11px;color:var(--gray-400);"></span>
     </div>
   </div>
-  <div class="map-controls">
+  <div class="map-controls" style="margin-bottom:8px;">
     <button class="map-btn active" onclick="setMapFilter('all',this)">전체</button>
-    <button class="map-btn" onclick="setMapFilter('1',this)">1단계 구역지정</button>
-    <button class="map-btn" onclick="setMapFilter('3',this)">3단계 조합설립</button>
-    <button class="map-btn" onclick="setMapFilter('5',this)">5단계 관리처분</button>
-    <button class="map-btn" onclick="setMapFilter('7',this)">7단계 착공</button>
-    <button class="map-btn" onclick="setMapFilter('9',this)">9단계 준공</button>
+    <button class="map-btn" onclick="setMapFilter('1',this)">1단계</button>
+    <button class="map-btn" onclick="setMapFilter('2',this)">2단계</button>
+    <button class="map-btn" onclick="setMapFilter('3',this)">3단계</button>
+    <button class="map-btn" onclick="setMapFilter('4',this)">4단계</button>
+    <button class="map-btn" onclick="setMapFilter('5',this)">5단계</button>
+    <button class="map-btn" onclick="setMapFilter('6',this)">6단계</button>
+    <button class="map-btn" onclick="setMapFilter('7',this)">7단계</button>
+    <button class="map-btn" onclick="setMapFilter('8',this)">8단계</button>
+    <button class="map-btn" onclick="setMapFilter('9',this)">9단계</button>
     <button class="map-btn" onclick="setMapFilter('alert',this)" style="border-color:var(--red);color:var(--red);">⚠ 지연경보</button>
-    <div class="map-legend">
-      <div class="map-legend-item"><div class="map-legend-dot" style="background:#1D4ED8;"></div>진행중</div>
-      <div class="map-legend-item"><div class="map-legend-dot" style="background:#059669;"></div>준공</div>
-      <div class="map-legend-item"><div class="map-legend-dot" style="background:#DC2626;"></div>지연</div>
-    </div>
+  </div>
+  <!-- 단계별 범례 -->
+  <div id="mapLegend" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;padding:10px 14px;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);">
+    <div style="font-size:10.5px;font-weight:600;color:var(--gray-400);align-self:center;margin-right:4px;">단계별 색상</div>
+    <div class="map-legend-item" id="leg1"><div class="map-legend-dot" style="background:#9CA3AF;"></div><span>1단계 구역지정 <b id="legN1" style="font-family:var(--mono);"></b></span></div>
+    <div class="map-legend-item" id="leg2"><div class="map-legend-dot" style="background:#1D4ED8;"></div><span>2단계 추진위 <b id="legN2" style="font-family:var(--mono);"></b></span></div>
+    <div class="map-legend-item" id="leg3"><div class="map-legend-dot" style="background:#6D28D9;"></div><span>3단계 조합설립 <b id="legN3" style="font-family:var(--mono);"></b></span></div>
+    <div class="map-legend-item" id="leg4"><div class="map-legend-dot" style="background:#065F46;"></div><span>4단계 사업시행 <b id="legN4" style="font-family:var(--mono);"></b></span></div>
+    <div class="map-legend-item" id="leg5"><div class="map-legend-dot" style="background:#92400E;"></div><span>5단계 관리처분 <b id="legN5" style="font-family:var(--mono);"></b></span></div>
+    <div class="map-legend-item" id="leg6"><div class="map-legend-dot" style="background:#9A3412;"></div><span>6단계 이주 <b id="legN6" style="font-family:var(--mono);"></b></span></div>
+    <div class="map-legend-item" id="leg7"><div class="map-legend-dot" style="background:#86198F;"></div><span>7단계 착공 <b id="legN7" style="font-family:var(--mono);"></b></span></div>
+    <div class="map-legend-item" id="leg8"><div class="map-legend-dot" style="background:#9F1239;"></div><span>8단계 분양 <b id="legN8" style="font-family:var(--mono);"></b></span></div>
+    <div class="map-legend-item" id="leg9"><div class="map-legend-dot" style="background:#059669;"></div><span>9단계 준공 <b id="legN9" style="font-family:var(--mono);"></b></span></div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#DC2626;border:2px solid #fff;box-shadow:0 0 0 1.5px #DC2626;"></div><span style="color:var(--red);">⚠ 지연경보</span></div>
   </div>
   <div style="position:relative;">
     <div id="kakaoMap"></div>
@@ -1269,34 +1402,54 @@ function loadMapData(){
   clearMapMarkers();
   const lm={};ALL.forEach(r=>{if(!lm[r.project_name]||r.period>lm[r.project_name].period)lm[r.project_name]=r;});
   const zones=Object.values(lm);
-  let count=0;
+
+  // 단계별 카운트 집계
+  const stageCnt={1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0};
+  zones.forEach(z=>{if(z.stage_score>=1&&z.stage_score<=9)stageCnt[z.stage_score]++;});
+  for(let i=1;i<=9;i++){const el=document.getElementById('legN'+i);if(el)el.textContent=stageCnt[i]||'';}
+
+  // 서울 경계 (대략적인 범위)
+  const SEOUL_BOUNDS={minLat:37.413, maxLat:37.715, minLng:126.734, maxLng:127.269};
+
+  let count=0,coordCount=0;
   zones.forEach(zone=>{
     if(mapFilter!=='all'&&mapFilter!=='alert'&&zone.stage_score!==parseInt(mapFilter))return;
     if(mapFilter==='alert'&&!ALERTS.find(a=>a.name===zone.project_name))return;
+
     let lat,lng,hasCoord=false;
     if(ZONE_COORDS[zone.project_name]){
       lat=ZONE_COORDS[zone.project_name].lat;
       lng=ZONE_COORDS[zone.project_name].lng;
-      hasCoord=true;
+      // 서울 경계 밖이면 자치구 중심으로 대체
+      if(lat<SEOUL_BOUNDS.minLat||lat>SEOUL_BOUNDS.maxLat||lng<SEOUL_BOUNDS.minLng||lng>SEOUL_BOUNDS.maxLng){
+        const coords=GU_COORDS[zone.gu_name];
+        if(!coords)return;
+        lat=coords[0]+(Math.random()-.5)*.03;
+        lng=coords[1]+(Math.random()-.5)*.03;
+      } else {
+        hasCoord=true;
+        coordCount++;
+      }
     } else {
       const coords=GU_COORDS[zone.gu_name];if(!coords)return;
-      lat=coords[0]+(Math.random()-.5)*.045;
-      lng=coords[1]+(Math.random()-.5)*.045;
+      lat=coords[0]+(Math.random()-.5)*.03;
+      lng=coords[1]+(Math.random()-.5)*.03;
     }
+
     const pos=new kakao.maps.LatLng(lat,lng);
     const isAlert=ALERTS.find(a=>a.name===zone.project_name);
-    const color=isAlert&&mapFilter==='alert'?'#DC2626':SC[zone.stage_score]||'#9CA3AF';
-    const size=hasCoord?12:8;
+    const color=isAlert?'#DC2626':SC[zone.stage_score]||'#9CA3AF';
+    const size=hasCoord?11:8;
     const nameSafe=zone.project_name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
     const marker=new kakao.maps.CustomOverlay({
       position:pos,
-      content:`<div onclick="showMapInfo('${nameSafe}','${zone.gu_name}',${zone.stage_score},'${zone.stage||''}')" style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,.85);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .1s;${hasCoord?'':'opacity:.7;'}" onmouseover="this.style.transform='scale(1.6)'" onmouseout="this.style.transform='scale(1)'"></div>`,
+      content:`<div onclick="showMapInfo('${nameSafe}','${zone.gu_name}',${zone.stage_score},'${zone.stage||''}')" style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,.85);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .1s;${hasCoord?'':'opacity:.6;'}" onmouseover="this.style.transform='scale(1.7)'" onmouseout="this.style.transform='scale(1)'"></div>`,
       zIndex:hasCoord?2:1
     });
     marker.setMap(kakaoMap);mapMarkers.push(marker);
     count++;
   });
-  console.log(`마커 ${count}개 (정확: ${Object.keys(ZONE_COORDS).length}개)`);
+  console.log(`마커 ${count}개 (정확한 좌표: ${coordCount}개)`);
 }
 
 function clearMapMarkers(){mapMarkers.forEach(m=>m.setMap(null));mapMarkers=[];}
@@ -1533,7 +1686,14 @@ function sw(tab,el){
   if(tab==='map')setTimeout(()=>{initKakaoMap();if(kakaoMap)kakao.maps.event.trigger(kakaoMap,'resize');},300);
   if(tab==='mydash')setTimeout(renderMyDash,80);
   if(tab==='tax')setTimeout(()=>{document.getElementById('taxAcq').style.display='block';},80);
+  const content=document.querySelector('.content');if(content)content.scrollTop=0;
 }
+function setMobTab(el){
+  document.querySelectorAll('.mob-tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+}
+function openMobMenu(){document.getElementById('mobMenu').style.display='block';}
+function closeMobMenu(){document.getElementById('mobMenu').style.display='none';}
 
 // ── 세금 계산기 ──
 let acqType='buy';
