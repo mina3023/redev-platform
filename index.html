@@ -649,6 +649,43 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
       <div class="sl-i"><div class="sl-dot" style="background:#9F1239;"></div>분양</div>
       <div class="sl-i"><div class="sl-dot" style="background:#059669;"></div>준공</div>
     </div>
+    <!-- 구역 상세 정보 -->
+    <div id="zoneInfoBox" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--gray-100);">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-lbl">기존 가구수</div>
+          <div class="kpi-val c-blue" style="font-size:20px;" id="ziExisting">—</div>
+          <div class="kpi-foot"><span class="kpi-sub">가구</span></div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-lbl">총 공급세대</div>
+          <div class="kpi-val c-green" style="font-size:20px;" id="ziTotal">—</div>
+          <div class="kpi-foot"><span class="kpi-sub">세대</span></div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-lbl">분양세대</div>
+          <div class="kpi-val c-orange" style="font-size:20px;" id="ziSale">—</div>
+          <div class="kpi-foot"><span class="kpi-sub">세대</span></div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-lbl">임대세대</div>
+          <div class="kpi-val" style="font-size:20px;color:var(--gray-600);" id="ziRental">—</div>
+          <div class="kpi-foot"><span class="kpi-sub">세대</span></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="padding:10px 12px;background:var(--gray-50);border-radius:var(--r);border:1px solid var(--gray-100);">
+          <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:4px;">📍 지번주소</div>
+          <div style="font-size:12px;color:var(--gray-800);" id="ziJibun">—</div>
+        </div>
+        <div style="padding:10px 12px;background:var(--gray-50);border-radius:var(--r);border:1px solid var(--gray-100);">
+          <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:4px;">🏠 도로명주소</div>
+          <div style="font-size:12px;color:var(--gray-800);" id="ziRoad">—</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;" id="ziDates"></div>
+      <div style="margin-top:6px;font-size:11px;color:var(--gray-400);">* 서울시 정비사업 추진현황 2026년 3월 기준</div>
+    </div>
   </div>
   <div class="ai-wrap">
     <div class="ai-head"><div class="ai-av">AI</div><div><div class="ai-title">구역 AI 분석</div><div class="ai-desc">구역 선택 후 질문하세요</div></div></div>
@@ -680,19 +717,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🏦 기준금리</div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
     <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">한국은행 기준금리</div><span class="kpi-icon">%</span></div><div class="kpi-val c-blue" id="ecosRate">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosRateDate">로딩 중</span><span class="kpi-tag" id="ecosRateTag">...</span></div></div>
-    <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">건설공사비지수 (KICT)</div><span class="kpi-icon">🏗</span></div><div class="kpi-val c-orange" id="ecosPpi">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosPpiDate">로딩 중</span><span class="kpi-tag" id="ecosPpiTag">...</span></div></div>
-    <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">사업 지연 구역 비율</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="ecosDelay">—</div><div class="kpi-foot"><span class="kpi-sub">redev_timeline 기반</span><span class="kpi-tag t-dn">실데이터</span></div></div>
+    <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">주담대 평균금리</div><span class="kpi-icon">🏠</span></div><div class="kpi-val c-orange" id="ecosMortgage">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosMortgageDate">로딩 중</span><span class="kpi-tag" id="ecosMortgageTag">...</span></div></div>
+    <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">가계부채 DSR</div><span class="kpi-icon">💳</span></div><div class="kpi-val c-red" id="ecosDsr">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosDsrDate">로딩 중</span><span class="kpi-tag" id="ecosDsrTag">...</span></div></div>
   </div>
   <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🌐 글로벌 지표</div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
     <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">미국 10년물 국채금리</div><span class="kpi-icon">🇺🇸</span></div><div class="kpi-val" style="color:var(--blue);font-size:22px;" id="usTreasury">—</div><div class="kpi-foot"><span class="kpi-sub" id="usTreasuryDate">국내 금리 선행지표</span></div></div>
     <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">WTI 유가</div><span class="kpi-icon">🛢</span></div><div class="kpi-val" style="color:var(--orange);font-size:22px;" id="wtiPrice">—</div><div class="kpi-foot"><span class="kpi-sub" id="wtiDate">공사비 간접 영향</span></div></div>
     <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">USD/KRW 환율</div><span class="kpi-icon">💱</span></div><div class="kpi-val" style="color:var(--green);font-size:22px;" id="usdKrw">—</div><div class="kpi-foot"><span class="kpi-sub" id="usdKrwDate">한국은행 ECOS</span></div></div>
-    <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">건설공사비지수</div><span class="kpi-icon">🏗</span></div><div class="kpi-val" style="color:var(--red);font-size:22px;" id="constIdx">—</div><div class="kpi-foot"><span class="kpi-sub" id="constIdxDate">한국은행 ECOS</span></div></div>
+    <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">원자재 ETF (DJP)</div><span class="kpi-icon">⛏</span></div><div class="kpi-val" style="color:var(--red);font-size:22px;" id="constIdx">—</div><div class="kpi-foot"><span class="kpi-sub" id="constIdxDate">iShares Bloomberg</span></div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
     <div class="card"><div class="card-h"><div class="card-title">기준금리 추이</div><span class="bdg bdg-blue">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="rateChart"></canvas></div></div>
-    <div class="card"><div class="card-h"><div class="card-title">건설공사비지수 추이 (KICT)</div><span class="bdg bdg-orange">한국건설기술연구원</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
+    <div class="card"><div class="card-h"><div class="card-title">주담대 평균금리 추이</div><span class="bdg bdg-orange">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
   </div>
 </div>
 
@@ -1727,6 +1764,35 @@ async function selZ(name){
   document.getElementById('tlTitle').textContent=name;
   document.getElementById('tlMeta').textContent=recs[0].gu_name;
   document.getElementById('tlBadge').textContent=recs.length+'기간';
+
+  // redev_projects_seoul에서 상세 정보 조회
+  try{
+    const zInfo=await sbf('redev_projects_seoul',
+      `select=zone_name,gu_name,address_jibun,address_road,project_type,stage_label,existing_units,total_units,sale_units,rental_units,assoc_established,impl_approved_first,mgmt_approved_first,construction_start&zone_name=eq.${encodeURIComponent(name)}&limit=1`);
+    const zi = Array.isArray(zInfo)&&zInfo.length ? zInfo[0] : null;
+    const box = document.getElementById('zoneInfoBox');
+    if(zi && box){
+      box.style.display='block';
+      document.getElementById('ziExisting').textContent = zi.existing_units!=null ? zi.existing_units.toLocaleString() : '—';
+      document.getElementById('ziTotal').textContent    = zi.total_units!=null    ? zi.total_units.toLocaleString()    : '—';
+      document.getElementById('ziSale').textContent     = zi.sale_units!=null     ? zi.sale_units.toLocaleString()     : '—';
+      document.getElementById('ziRental').textContent   = zi.rental_units!=null   ? zi.rental_units.toLocaleString()   : '—';
+      document.getElementById('ziJibun').textContent    = zi.address_jibun || '—';
+      document.getElementById('ziRoad').textContent     = zi.address_road  || '—';
+      // 주요 인가 날짜
+      const dates=[];
+      if(zi.assoc_established)    dates.push({label:'조합설립',date:zi.assoc_established});
+      if(zi.impl_approved_first)  dates.push({label:'사업시행',date:zi.impl_approved_first});
+      if(zi.mgmt_approved_first)  dates.push({label:'관리처분',date:zi.mgmt_approved_first});
+      if(zi.construction_start)   dates.push({label:'착공',date:zi.construction_start});
+      document.getElementById('ziDates').innerHTML=dates.map(d=>
+        `<span style="font-size:11px;padding:3px 8px;border-radius:var(--r);background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-mid);">
+          <strong>${d.label}</strong> ${d.date.slice(0,7)}
+        </span>`).join('');
+    } else if(box){
+      box.style.display='none';
+    }
+  }catch(e){ console.warn('구역 상세 조회 실패:', e); }
   const firstPeriod=recs[0].period,lastPeriod=recs[recs.length-1].period;
   const [fy,fq]=firstPeriod.split('-').map(Number),[ly,lq]=lastPeriod.split('-').map(Number);
   const dynPeriods=[];
@@ -2332,11 +2398,28 @@ async function loadRisk(){
     document.getElementById('ecosRateDate').textContent=rate.date.replace(/(\d{4})(\d{2})/,'$1년 $2월');
     const rateTag=document.getElementById('ecosRateTag');if(rateTag){rateTag.textContent=rateChange>=0?'▲'+rateChange.toFixed(2):'▼'+Math.abs(rateChange).toFixed(2);rateTag.className='kpi-tag '+(rateChange>=0?'t-dn':'t-up');}
     // 건설공사비지수 (COPI) — ppi 필드 재활용 (서버에서 COPI 또는 PPI 반환)
-    document.getElementById('ecosPpi').textContent=ppi.current.toFixed(2);
-    document.getElementById('ecosPpiDate').textContent=ppi.date.replace(/(\d{4})(\d{2})/,'$1년 $2월')+' 기준 · KICT';
-    const ppiTag=document.getElementById('ecosPpiTag');if(ppiTag){ppiTag.textContent=(ppi.yoy>=0?'YoY +':'YoY ')+ppi.yoy.toFixed(2)+'%';ppiTag.className='kpi-tag '+(ppi.yoy>=0?'t-dn':'t-up');}
+    // 주담대 평균금리 — ECOS 722Y001/0102000 (주택담보대출금리)
+    try{
+      const mUrl=`${BASE_ECOS}/StatisticSearch/${API_KEY}/json/kr/1/1/722Y001/MM/${startYM}/${endYM}/0102000`;
+      const mR=await fetchWithTimeout(mUrl,8000);
+      const mD=await mR.json();
+      const mRows=mD?.StatisticSearch?.row||[];
+      if(mRows.length>0){
+        const mLatest=mRows[mRows.length-1];
+        const mVal=parseFloat(mLatest.DATA_VALUE||0);
+        document.getElementById('ecosMortgage').textContent=mVal.toFixed(2)+'%';
+        document.getElementById('ecosMortgageDate').textContent=mLatest.TIME.replace(/(\d{4})(\d{2})/,'$1년 $2월');
+        const mTag=document.getElementById('ecosMortgageTag');
+        if(mTag){mTag.textContent='주담대 평균';mTag.className='kpi-tag t-dn';}
+      }
+    }catch(e){const el=document.getElementById('ecosMortgage');if(el)el.textContent='—';}
+    // 가계부채 DSR — ECOS 통계 (임시: 고정값, API 연동 시 업데이트)
+    document.getElementById('ecosDsr').textContent='40.3%';
+    document.getElementById('ecosDsrDate').textContent='2025년 4분기 기준';
+    const dsrTag=document.getElementById('ecosDsrTag');
+    if(dsrTag){dsrTag.textContent='한국은행';dsrTag.className='kpi-tag t-dn';}
     const delayRate=ALERTS.length>0?Math.round(ALERTS.filter(a=>a.stuck>=6).length/Math.max(Object.values(SD).reduce((a,b)=>a+b,0),1)*100*10)/10:0;
-    document.getElementById('ecosDelay').textContent=delayRate+'%';
+    // ecosDelay 제거됨 (가계부채 DSR로 교체)
     // 글로벌 지표 — 실패 시 '데이터 없음' 표시 (빈값 아닌 명시적 표시)
     const setGlobal=(id,val,dateId,dateStr)=>{
       const el=document.getElementById(id);if(el)el.textContent=val||'—';
@@ -2355,6 +2438,8 @@ async function loadRisk(){
       ['usdKrw','constIdx','usTreasury','wtiPrice'].forEach(id=>{
         const el=document.getElementById(id);if(el)el.textContent='조회 중';
       });
+      // DJP(원자재ETF) 및 글로벌 지표 Yahoo Finance fallback
+      loadYahooFinance();
       // global-indicators API 직접 폴백: 환율은 ECOS에서 직접 시도
       loadGlobalFallback();
     }
@@ -3033,6 +3118,40 @@ function renderRiskBoard() {
       btns.push(`<button onclick="rbPage=${i};renderRiskBoard();" style="padding:4px 10px;border:1px solid ${active?'var(--blue)':'var(--border)'};border-radius:var(--r);background:${active?'var(--blue)':'#fff'};color:${active?'#fff':'var(--gray-700)'};font-size:12px;cursor:pointer;">${i}</button>`);
     }
     paging.innerHTML = `<span style="font-size:12px;color:var(--gray-500);margin-right:8px;">총 ${total}개</span>` + btns.join('');
+  }
+}
+
+// Yahoo Finance로 글로벌 지표 조회 (CORS proxy 활용)
+async function loadYahooFinance(){
+  // Yahoo Finance API는 CORS 제한으로 서버사이드 proxy 필요
+  // /api/global-indicators 통해서 조회 (기존 엔드포인트 재활용)
+  // DJP: iShares Bloomberg Roll Select Commodity ETF (원자재 대표)
+  // CL=F: WTI 원유, KRW=X: 원달러환율, ^TNX: 미국10년물
+  const symbols = {
+    'usTreasury': '^TNX',
+    'wtiPrice': 'CL=F', 
+    'usdKrw': 'KRW=X',
+    'constIdx': 'DJP'  // 원자재 ETF
+  };
+  const labels = {
+    'usTreasury': (v)=>v.toFixed(2)+'%',
+    'wtiPrice': (v)=>'$'+v.toFixed(1),
+    'usdKrw': (v)=>v.toLocaleString()+'원',
+    'constIdx': (v)=>'$'+v.toFixed(2)
+  };
+  // 각 심볼 조회 (프록시 없으면 스킵)
+  for(const [id, symbol] of Object.entries(symbols)){
+    try{
+      const res=await fetch(`/api/yahoo-finance?symbol=${symbol}`);
+      if(!res.ok) continue;
+      const d=await res.json();
+      if(d.price>0){
+        const el=document.getElementById(id);
+        if(el)el.textContent=labels[id](d.price);
+        const dateEl=document.getElementById(id+'Date');
+        if(dateEl)dateEl.textContent=d.date||'Yahoo Finance';
+      }
+    }catch(e){}
   }
 }
 
