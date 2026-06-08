@@ -1631,8 +1631,12 @@ let tradeData=[],tradeCH={};
 const OPTS={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#E5E7EB',borderWidth:1,titleColor:'#111827',bodyColor:'#6B7280',padding:9,cornerRadius:5,titleFont:{family:'IBM Plex Sans KR',size:11,weight:'600'},bodyFont:{family:'IBM Plex Sans KR',size:11}}}};
 
 async function sbf(t,q=''){
-  const r=await fetch(`${SB}/rest/v1/${t}?${q}`,{headers:{apikey:SK,Authorization:`Bearer ${SK}`,Prefer:'count=exact'}});
-  return r.json();
+  const r=await fetch(`${SB}/rest/v1/${t}?${q}`,{
+    headers:{apikey:SK,Authorization:`Bearer ${SK}`,Accept:'application/json'}
+  });
+  if(!r.ok){console.warn('sbf 오류:',r.status,t,q);return [];}
+  const d=await r.json();
+  return Array.isArray(d)?d:(d?[d]:[]);
 }
 async function sbfAll(t,q='',ps=1000){
   let all=[],offset=0;
@@ -1816,20 +1820,45 @@ async function selZ(name){
 
   // redev_projects_seoul에서 상세 정보 조회
   try{
-    // zone_name 매칭: "노량진8구역" → "노량진8" 변환 후 ilike 검색
-    const zoneName = name
-      .replace(/재건축정비사업조합$/, '').replace(/재개발정비사업조합$/, '')
-      .replace(/주택재건축$/, '').replace(/주택재개발$/, '')
-      .replace(/정비사업$/, '').replace(/조합$/, '')
+    const ZI_SELECT = 'select=zone_name,gu_name,address_jibun,address_road,project_type,stage_label,existing_units,total_units,sale_units,rental_units,assoc_established,impl_approved_first,mgmt_approved_first,construction_start';
+    const guName = recs[0]?.gu_name || '';
+
+    // 핵심 이름 추출: 불필요한 접미어 제거
+    const coreName = name
+      .replace(/재건축정비사업조합$|재개발정비사업조합$|정비사업조합$|조합$/,'')
+      .replace(/주택재건축$|주택재개발$|정비사업$/,'')
+      .replace(/아파트$|단지$/,'')
       .trim();
-    // 1차: exact match, 2차: ilike 부분매칭
+
+    // 1차: exact match (자치구 + 이름)
     let zInfo = await sbf('redev_projects_seoul',
-      `select=zone_name,gu_name,address_jibun,address_road,project_type,stage_label,existing_units,total_units,sale_units,rental_units,assoc_established,impl_approved_first,mgmt_approved_first,construction_start&zone_name=eq.${encodeURIComponent(zoneName)}&limit=1`);
+      `${ZI_SELECT}&zone_name=eq.${encodeURIComponent(coreName)}&gu_name=eq.${encodeURIComponent(guName)}&limit=1`);
+
+    // 2차: exact match (이름만)
     if(!Array.isArray(zInfo)||!zInfo.length){
-      // ilike로 부분 매칭 (구역명 앞부분으로 검색)
-      const shortName = zoneName.replace(/구역$/, '').replace(/단지$/, '').replace(/아파트$/, '');
       zInfo = await sbf('redev_projects_seoul',
-        `select=zone_name,gu_name,address_jibun,address_road,project_type,stage_label,existing_units,total_units,sale_units,rental_units,assoc_established,impl_approved_first,mgmt_approved_first,construction_start&zone_name=ilike.${encodeURIComponent(shortName+'*')}&limit=1`);
+        `${ZI_SELECT}&zone_name=eq.${encodeURIComponent(coreName)}&limit=1`);
+    }
+
+    // 3차: 구역 접미어 제거 후 매칭 (노량진8구역 → 노량진8)
+    if(!Array.isArray(zInfo)||!zInfo.length){
+      const noSuffix = coreName.replace(/구역$/,'');
+      zInfo = await sbf('redev_projects_seoul',
+        `${ZI_SELECT}&zone_name=eq.${encodeURIComponent(noSuffix)}&gu_name=eq.${encodeURIComponent(guName)}&limit=1`);
+    }
+
+    // 4차: ilike 부분매칭 (* 를 직접 URL에 포함, encodeURIComponent 사용 안 함)
+    if(!Array.isArray(zInfo)||!zInfo.length){
+      const noSuffix2 = coreName.replace(/구역$/,'').replace(/단지$/,'');
+      const ilikePath = `${ZI_SELECT}&zone_name=ilike.${encodeURIComponent(noSuffix2)}*&gu_name=eq.${encodeURIComponent(guName)}&limit=1`;
+      zInfo = await sbf('redev_projects_seoul', ilikePath);
+    }
+
+    // 5차: 자치구 무시하고 ilike
+    if(!Array.isArray(zInfo)||!zInfo.length){
+      const noSuffix3 = coreName.replace(/구역$/,'').replace(/단지$/,'');
+      zInfo = await sbf('redev_projects_seoul',
+        `${ZI_SELECT}&zone_name=ilike.${encodeURIComponent(noSuffix3)}*&limit=1`);
     }
     const zi = Array.isArray(zInfo)&&zInfo.length ? zInfo[0] : null;
     const box = document.getElementById('zoneInfoBox');
