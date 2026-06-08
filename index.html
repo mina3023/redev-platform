@@ -1361,7 +1361,7 @@ const _SB = supabase.createClient(
       storageKey: 'redev-session',
       storage: window.localStorage,
       autoRefreshToken: true,
-      detectSessionInUrl: false
+      detectSessionInUrl: true
     }
   }
 );
@@ -1371,12 +1371,32 @@ const TIER_CHIPS={free:'tier-free',standard:'tier-std',premium:'tier-pre',black:
 const TIER_NAMES={free:'FREE',standard:'STD',premium:'PRO',black:'BLACK',b2b:'B2B'};
 
 _SB.auth.onAuthStateChange(async(event,session)=>{
-  if(session?.user){currentUser=session.user;await loadProfile();}
-  else{currentUser=null;currentProfile=null;}
+  if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED'){
+    if(session?.user){currentUser=session.user;await loadProfile();}
+  } else if(event==='SIGNED_OUT'){
+    currentUser=null;currentProfile=null;
+  } else if(session?.user && !currentUser){
+    // 초기 로드 시 세션 복원
+    currentUser=session.user;await loadProfile();
+  } else if(!session){
+    currentUser=null;currentProfile=null;
+  }
   updateAuthUI();
   const mydash=document.getElementById('tab-mydash');
   if(mydash&&mydash.classList.contains('active'))renderMyDash();
 });
+
+// 페이지 로드 시 저장된 세션 즉시 복원
+(async()=>{
+  try{
+    const{data:{session}}=await _SB.auth.getSession();
+    if(session?.user&&!currentUser){
+      currentUser=session.user;
+      await loadProfile();
+      updateAuthUI();
+    }
+  }catch(e){console.warn('세션 복원 실패:',e);}
+})();
 
 async function loadProfile(){
   if(!currentUser)return;
@@ -1459,9 +1479,20 @@ async function authSubmit(){
     }else{
       const{data,error}=await _SB.auth.signInWithPassword({email,password:pw});
       if(error)throw error;
-      // 로그인 성공
-      currentUser=data.user;
-      currentProfile={id:data.user.id,email:data.user.email,tier:'free'};
+      // 로그인 성공 — 세션 명시적 저장
+      currentUser = data.user;
+      currentProfile = {id:data.user.id, email:data.user.email, tier:'free'};
+      // 세션을 localStorage에 강제 저장
+      if(data.session){
+        try{
+          localStorage.setItem('redev-session', JSON.stringify({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+            expires_at: data.session.expires_at,
+            user: data.user
+          }));
+        } catch(e){}
+      }
       document.getElementById('authOverlay').style.display='none';
       document.getElementById('authErr').style.display='none';
       btn.textContent='로그인';btn.disabled=false;
@@ -1483,7 +1514,18 @@ function showAuthErr(msg,color='#DC2626'){
   el.textContent=msg;el.style.color=color;
   el.style.background=color==='#059669'?'#ECFDF5':'#FEF2F2';el.style.display='block';
 }
-async function signOut(){await _SB.auth.signOut();closeUserMenu2();}
+async function signOut(){
+  try{
+    await _SB.auth.signOut();
+    Object.keys(localStorage).forEach(k=>{
+      if(k==='redev-session'||k.startsWith('sb-')||k.includes('supabase'))
+        localStorage.removeItem(k);
+    });
+  }catch(e){console.warn('로그아웃 오류:',e);}
+  currentUser=null;currentProfile=null;
+  updateAuthUI();
+  closeUserMenu2();
+}
 function toggleUserMenu(){
   const menu=document.getElementById('userMenu');
   const isOpen=menu.style.display==='block';
