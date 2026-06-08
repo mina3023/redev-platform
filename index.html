@@ -684,7 +684,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 경제 지표 ══ -->
 <div id="tab-risk" class="tab-panel">
-  <div class="page-h"><div><h2>경제 지표</h2><p>기준금리(한국은행 ECOS) · 건설공사비지수(KICT) · 글로벌 지표 · 재개발 투자 판단 참고 데이터</p></div><div style="display:flex;align-items:center;gap:8px;"><span class="bdg bdg-green" id="riskUpdateTime">로딩 중...</span><button onclick="loadRisk()" style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:11.5px;cursor:pointer;">새로고침</button></div></div>
+  <div class="page-h"><div><h2>경제 지표 <span class="ph-badge">한국은행 ECOS</span> <span class="ph-badge" style="background:#059669;">KICT</span></h2><p>투자 판단 참고 데이터</p></div><div style="display:flex;align-items:center;gap:8px;"><span class="bdg bdg-green" id="riskUpdateTime">로딩 중...</span><button onclick="loadRisk()" style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:11.5px;cursor:pointer;">새로고침</button></div></div>
   <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🏦 기준금리</div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
     <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">한국은행 기준금리</div><span class="kpi-icon">%</span></div><div class="kpi-val c-blue" id="ecosRate">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosRateDate">로딩 중</span><span class="kpi-tag" id="ecosRateTag">...</span></div></div>
@@ -773,7 +773,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 뉴스·정책 ══ -->
 <div id="tab-news" class="tab-panel">
-  <div class="page-h"><div><h2>뉴스·정책 <span class="ph-badge">국토부·서울시</span></h2><p>재개발·재건축 관련 최신 뉴스</p></div>
+  <div class="page-h"><div><h2>뉴스·정책</h2><p>재건축·재개발 조합 관련 최신 뉴스</p></div>
     <div style="display:flex;gap:8px;align-items:center;">
       <select id="newsKeyword" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:#fff;cursor:pointer;outline:none;" onchange="loadNews()">
         <option value="재개발">재개발</option><option value="재건축">재건축</option>
@@ -785,7 +785,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
     <div class="card"><div class="card-h"><div class="card-title">검색어 트렌드</div><span class="bdg bdg-blue">빅데이터 기반</span></div><div id="newsWordCloud" style="padding:12px;min-height:120px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;"><span style="color:var(--gray-400);font-size:12px;">뉴스 로딩 후 생성됩니다</span></div></div>
-    <div class="card"><div class="card-h"><div class="card-title">조합 관련 뉴스</div><span class="bdg bdg-green">네이버뉴스 연동</span></div><div id="molit-news" style="max-height:140px;overflow-y:auto;"><div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">로딩 중...</div></div></div>
+    <div class="card"><div class="card-h"><div class="card-title">재건축·재개발 뉴스</div><span class="bdg bdg-green">네이버뉴스 연동</span></div><div id="molit-news" style="max-height:140px;overflow-y:auto;"><div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">로딩 중...</div></div></div>
   </div>
   <div class="card"><div class="card-h"><div class="card-title">최신 뉴스</div><span class="bdg bdg-gray" id="newsTotalBadge">로딩 중</span></div>
     <div id="newsListBody" style="display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto;"><div style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div></div>
