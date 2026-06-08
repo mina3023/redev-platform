@@ -1,7 +1,5 @@
 /**
- * api/ecos.js — 건설공사비지수 코드 탐색 버전
- * /api/ecos?type=search  → StatisticSearch 항목코드 탐색
- * /api/ecos?type=debug2  → 301계열 통계표 목록 확인
+ * api/ecos.js — 건설공사비지수 항목코드 정밀 탐색
  */
 
 export default async function handler(req, res) {
@@ -21,105 +19,36 @@ export default async function handler(req, res) {
   startDate.setMonth(startDate.getMonth() - 23);
   const startYM = `${startDate.getFullYear()}${String(startDate.getMonth()+1).padStart(2,'0')}`;
 
-  // ── 통계표 목록에서 건설 관련 코드 탐색
-  if (type === 'debug2') {
+  // ── 항목코드 전체 조회 (필드명 raw 출력)
+  if (type === 'debug3') {
     const result = {};
 
-    // 1. StatisticTableList — 건설 관련 통계표 전체 조회
-    // 분류코드 없이 전체에서 건설 관련 탐색
-    for (const cls of ['3','4','8','9','30','31','40','90']) {
+    // 301Y013, 301Y017 항목 전체 raw 출력 (100개)
+    for (const stat of ['301Y013', '301Y017', '301Y014', '404Y014']) {
       try {
-        const url = `${BASE}/StatisticTableList/${API_KEY}/json/kr/1/100/${cls}`;
-        const r = await fetch(url);
-        const d = await r.json();
-        const rows = d?.StatisticTableList?.row || [];
-        const found = rows.filter(r =>
-          r.STAT_NAME?.includes('건설') || r.STAT_NAME?.includes('공사비')
-        );
-        if (found.length > 0) {
-          result[`cls_${cls}`] = found.map(r => ({
-            code: r.STAT_CODE, name: r.STAT_NAME, cycle: r.CYCLE
-          }));
-        }
-      } catch(e) {}
-    }
-
-    // 2. 기존에 작동하던 기준금리 코드(722Y001)로 항목구조 파악
-    try {
-      const url = `${BASE}/StatisticItemList/${API_KEY}/json/kr/1/50/722Y001`;
-      const r = await fetch(url);
-      const d = await r.json();
-      result['_sample_itemList_722Y001'] = d?.StatisticItemList?.row?.slice(0,5) || d?.RESULT;
-    } catch(e) { result['_sample_error'] = e.message; }
-
-    // 3. 301Y013, 301Y017 항목 목록 직접 조회
-    for (const stat of ['301Y013','301Y017','301Y014','404Y014','404Y001']) {
-      try {
-        const url = `${BASE}/StatisticItemList/${API_KEY}/json/kr/1/50/${stat}`;
+        const url = `${BASE}/StatisticItemList/${API_KEY}/json/kr/1/100/${stat}`;
         const r = await fetch(url);
         const d = await r.json();
         const rows = d?.StatisticItemList?.row || [];
-        if (rows.length > 0) {
-          result[`items_${stat}`] = rows.slice(0,10).map(r => ({
-            item1: r.ITEM_CODE1, item2: r.ITEM_CODE2,
-            name: r.ITEM_NAME1, cycle: r.CYCLE
-          }));
-        } else {
-          result[`items_${stat}`] = d?.RESULT || '항목없음';
-        }
+        // raw 전체 출력 (첫 5개)
+        result[stat] = {
+          total: rows.length,
+          sample: rows.slice(0, 5),  // 필드명 확인용 raw
+          error: d?.RESULT
+        };
       } catch(e) {
-        result[`items_${stat}`] = e.message;
+        result[stat] = { error: e.message };
       }
     }
 
-    return res.status(200).json({ success: true, debug2: result });
+    return res.status(200).json({ success: true, debug3: result });
   }
 
-  // ── 항목코드 포함 StatisticSearch 테스트
-  if (type === 'search') {
-    const result = {};
-    // 항목코드 없이 와일드카드로 시도
-    const tests = [
-      { stat: '301Y013', item: '%', label: 'COPI구-와일드' },
-      { stat: '301Y017', item: '%', label: 'COPI신-와일드' },
-      { stat: '301Y013', item: '',  label: 'COPI구-빈값' },
-      // 기준금리처럼 숫자 항목코드
-      { stat: '301Y013', item: '0000000', label: 'COPI-0' },
-      { stat: '301Y013', item: '1',       label: 'COPI-1' },
-      { stat: '301Y013', item: 'S',       label: 'COPI-S' },
-      { stat: '301Y013', item: 'T',       label: 'COPI-T' },
-      { stat: '301Y013', item: 'A',       label: 'COPI-A' },
-      { stat: '301Y013', item: 'B',       label: 'COPI-B' },
-      { stat: '301Y013', item: 'C0000',   label: 'COPI-C0000' },
-      { stat: '404Y014', item: 'A',       label: 'PPI-A' },
-      { stat: '404Y014', item: 'AA',      label: 'PPI-AA' },
-      { stat: '404Y014', item: 'AAA',     label: 'PPI-AAA' },
-      // 기준금리처럼 7자리 숫자
-      { stat: '722Y001', item: '0101000', label: '기준금리(검증)' },
-    ];
-
-    for (const t of tests) {
-      try {
-        const url = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/3/${t.stat}/MM/202505/202506/${t.item}`;
-        const r = await fetch(url);
-        const d = await r.json();
-        const rows = d?.StatisticSearch?.row || [];
-        if (rows.length > 0) {
-          result[t.label] = { ok: true, value: rows[rows.length-1]?.DATA_VALUE, rows: rows.length };
-        } else {
-          result[t.label] = { ok: false, msg: d?.RESULT?.MESSAGE || '없음' };
-        }
-      } catch(e) {
-        result[t.label] = { ok: false, msg: e.message };
-      }
-    }
-    return res.status(200).json({ success: true, search: result });
-  }
-
-  // ── 기존 로직 유지 (rate / all)
+  // ── 기본 로직
   try {
     const results = {};
 
+    // 1. 기준금리
     if (type === 'rate' || type === 'all') {
       const url = `${BASE}/KeyStatisticList/${API_KEY}/json/kr/1/100`;
       const r = await fetch(url);
@@ -149,23 +78,110 @@ export default async function handler(req, res) {
           return { date:`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`, value:currentRate };
         });
       }
-      results.rate = { current:currentRate, prev:history.length>=2?history[history.length-2].value:currentRate, date:rateDate, history };
+      results.rate = {
+        current: currentRate,
+        prev: history.length >= 2 ? history[history.length-2].value : currentRate,
+        date: rateDate,
+        history
+      };
     }
 
-    // ppi — 건설공사비지수 찾을 때까지 임시로 건설기성액 증감률 사용
+    // 2. 건설공사비지수 — 항목코드 자동 탐색
     if (type === 'ppi' || type === 'all') {
-      // 건설기성액은 KeyStatList에서 바로 가져올 수 있음 (9조원 → 지수로 활용)
-      // 실제 건설공사비지수 코드 확정 전 임시: 0 반환하고 화면에 "데이터 조회 중" 표시
-      results.ppi = { current: 0, yoy: 0, date: endYM, history: [], label: '건설공사비지수(코드확인중)' };
+      let copiRows = [];
+      let foundInfo = '';
+
+      // StatisticItemList로 실제 항목코드 가져온 뒤 StatisticSearch 조회
+      for (const stat of ['301Y017', '301Y013', '301Y014', '404Y014']) {
+        try {
+          // 1) 항목 목록 조회
+          const itemUrl = `${BASE}/StatisticItemList/${API_KEY}/json/kr/1/50/${stat}`;
+          const itemR = await fetch(itemUrl);
+          const itemD = await itemR.json();
+          const itemRows = itemD?.StatisticItemList?.row || [];
+
+          if (!itemRows.length) continue;
+
+          // 2) 월별(M) 항목 중 총지수/전체 계열 먼저, 없으면 첫 번째
+          const monthlyItems = itemRows.filter(r => r.CYCLE === 'M' || r.CYCLE === 'MM');
+          const candidates = monthlyItems.length ? monthlyItems : itemRows;
+
+          // ITEM_CODE 필드명 동적 탐색 (API마다 다를 수 있음)
+          for (const item of candidates.slice(0, 10)) {
+            // 가능한 항목코드 필드명들
+            const itemCode = item.ITEM_CODE || item.ITEM_CODE1 ||
+                             item.item1 || item.item_code || '';
+            const itemName = item.ITEM_NAME || item.ITEM_NAME1 ||
+                             item.item_name || item.name || '';
+            const cycle = item.CYCLE || item.cycle || '';
+
+            if (!itemCode || cycle === 'A' || cycle === 'Q') continue; // 연간·분기 스킵
+
+            // 3) 해당 항목코드로 StatisticSearch
+            const url = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/24/${stat}/MM/${startYM}/${endYM}/${itemCode}`;
+            const r = await fetch(url);
+            const d = await r.json();
+            const rows = d?.StatisticSearch?.row || [];
+
+            if (rows.length > 0) {
+              const lastVal = parseFloat(rows[rows.length-1]?.DATA_VALUE || 0);
+              // 건설공사비지수는 50 이상이어야 유효
+              if (lastVal >= 50) {
+                copiRows = rows;
+                foundInfo = `${stat}/${itemCode} (${itemName}) = ${lastVal}`;
+                console.log('COPI 성공:', foundInfo);
+                break;
+              }
+            }
+          }
+          if (copiRows.length > 0) break;
+        } catch(e) {
+          console.log(`${stat} 탐색 실패:`, e.message);
+        }
+      }
+
+      if (copiRows.length > 0) {
+        const latest = copiRows[copiRows.length - 1];
+        const prev12 = copiRows.length >= 13 ? copiRows[copiRows.length - 13] : copiRows[0];
+        const latestVal = parseFloat(latest?.DATA_VALUE || 0);
+        const prev12Val = parseFloat(prev12?.DATA_VALUE || 0);
+        const yoy = prev12Val > 0
+          ? Math.round((latestVal - prev12Val) / prev12Val * 100 * 10) / 10
+          : 0;
+
+        results.ppi = {
+          current: latestVal,
+          yoy,
+          date: latest?.TIME || '',
+          history: copiRows.slice(-12).map(r => ({
+            date: r.TIME, value: parseFloat(r.DATA_VALUE || 0),
+          })),
+          label: '건설공사비지수',
+          foundCode: foundInfo,
+        };
+      } else {
+        // 모든 시도 실패 → 0 반환, 화면에서 "—" 표시
+        results.ppi = {
+          current: 0, yoy: 0, date: endYM, history: [],
+          label: '건설공사비지수', foundCode: '탐색실패'
+        };
+      }
     }
 
     if (type === 'all') {
       const rate = results.rate?.current || 2.75;
-      results.riskScores = { rate: Math.min(10, Math.round(rate*2*10)/10), policy:5.8, legal:2.9, ppi:3 };
+      const copiYoy = results.ppi?.yoy || 0;
+      results.riskScores = {
+        rate: Math.min(10, Math.round(rate * 2 * 10) / 10),
+        policy: 5.8, legal: 2.9,
+        ppi: Math.min(10, Math.max(1, Math.round((2 + Math.max(0, copiYoy) * 0.7) * 10) / 10))
+      };
     }
 
-    return res.status(200).json({ success:true, ...results });
+    return res.status(200).json({ success: true, ...results });
+
   } catch(err) {
-    return res.status(500).json({ error:'ECOS API 호출 실패', detail:err.message });
+    console.error('ECOS API 오류:', err);
+    return res.status(500).json({ error: 'ECOS API 호출 실패', detail: err.message });
   }
 }
