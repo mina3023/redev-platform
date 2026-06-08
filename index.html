@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>REDEV AI — 재건축·재개발 플랫폼</title>
+<title>REDEV AI — 재건축·재개발 정보의 모든 것</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -471,7 +471,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <header class="gnb">
   <div class="logo">
     <div class="logo-mark">RD</div>
-    <div class="logo-text">REDEV AI <span>재건축·재개발 플랫폼</span></div>
+    <div class="logo-text">REDEV AI <span>재건축·재개발 정보의 모든 것</span></div>
   </div>
   <div style="flex:1;"></div>
   <div class="gnb-right" style="position:relative;display:flex;align-items:center;gap:12px;">
@@ -684,7 +684,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 경제 지표 ══ -->
 <div id="tab-risk" class="tab-panel">
-  <div class="page-h"><div><h2>경제 지표 <span class="ph-badge">한국은행 ECOS</span></h2><p>기준금리 · 글로벌 지표 · 재개발 투자 판단 참고 데이터</p></div><div style="display:flex;align-items:center;gap:8px;"><span class="bdg bdg-green" id="riskUpdateTime">로딩 중...</span><button onclick="loadRisk()" style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:11.5px;cursor:pointer;">새로고침</button></div></div>
+  <div class="page-h"><div><h2>경제 지표</h2><p>기준금리(한국은행 ECOS) · 건설공사비지수(KICT) · 글로벌 지표 · 재개발 투자 판단 참고 데이터</p></div><div style="display:flex;align-items:center;gap:8px;"><span class="bdg bdg-green" id="riskUpdateTime">로딩 중...</span><button onclick="loadRisk()" style="padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:11.5px;cursor:pointer;">새로고침</button></div></div>
   <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🏦 기준금리</div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
     <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">한국은행 기준금리</div><span class="kpi-icon">%</span></div><div class="kpi-val c-blue" id="ecosRate">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosRateDate">로딩 중</span><span class="kpi-tag" id="ecosRateTag">...</span></div></div>
@@ -2067,7 +2067,7 @@ let newsKeywordFreq={};
 async function loadMolitNews(){
   const el=document.getElementById('molit-news');if(!el)return;
   // 재개발·재건축 조합 관련 기사로 교체
-  const queries=['재개발 조합','재건축 조합','정비사업 조합원'];
+  const queries=['재건축 재개발 조합','재개발 조합 비리','재건축 조합 분쟁','정비사업 조합원 권리'];
   const q=queries[Math.floor(Date.now()/3600000)%queries.length]; // 시간대별 로테이션
   try{
     const res=await fetch(`/api/news?query=${encodeURIComponent(q)}&display=8&sort=date`);
