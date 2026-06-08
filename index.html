@@ -3123,35 +3123,32 @@ function renderRiskBoard() {
 
 // Yahoo Finance로 글로벌 지표 조회 (CORS proxy 활용)
 async function loadYahooFinance(){
-  // Yahoo Finance API는 CORS 제한으로 서버사이드 proxy 필요
-  // /api/global-indicators 통해서 조회 (기존 엔드포인트 재활용)
-  // DJP: iShares Bloomberg Roll Select Commodity ETF (원자재 대표)
-  // CL=F: WTI 원유, KRW=X: 원달러환율, ^TNX: 미국10년물
-  const symbols = {
-    'usTreasury': '^TNX',
-    'wtiPrice': 'CL=F', 
-    'usdKrw': 'KRW=X',
-    'constIdx': 'DJP'  // 원자재 ETF
+  const symbolMap = {
+    'usTreasury': { sym:'^TNX',  fmt: v=>v.toFixed(2)+'%',          dateId:'usTreasuryDate' },
+    'wtiPrice':   { sym:'CL=F',  fmt: v=>'$'+v.toFixed(1),           dateId:'wtiDate'        },
+    'usdKrw':     { sym:'KRW=X', fmt: v=>Math.round(v).toLocaleString()+'원', dateId:'usdKrwDate' },
+    'constIdx':   { sym:'DJP',   fmt: v=>'$'+v.toFixed(2),           dateId:'constIdxDate'   },
   };
-  const labels = {
-    'usTreasury': (v)=>v.toFixed(2)+'%',
-    'wtiPrice': (v)=>'$'+v.toFixed(1),
-    'usdKrw': (v)=>v.toLocaleString()+'원',
-    'constIdx': (v)=>'$'+v.toFixed(2)
-  };
-  // 각 심볼 조회 (프록시 없으면 스킵)
-  for(const [id, symbol] of Object.entries(symbols)){
+  for(const [id, cfg] of Object.entries(symbolMap)){
     try{
-      const res=await fetch(`/api/yahoo-finance?symbol=${symbol}`);
+      const res = await fetch(`/api/yahoo-finance?symbol=${encodeURIComponent(cfg.sym)}`);
       if(!res.ok) continue;
-      const d=await res.json();
-      if(d.price>0){
-        const el=document.getElementById(id);
-        if(el)el.textContent=labels[id](d.price);
-        const dateEl=document.getElementById(id+'Date');
-        if(dateEl)dateEl.textContent=d.date||'Yahoo Finance';
+      const d = await res.json();
+      if(!d.success || !d.price) continue;
+      // 값 표시
+      const el = document.getElementById(id);
+      if(el) el.textContent = cfg.fmt(d.price);
+      // 날짜/출처
+      const dateEl = document.getElementById(cfg.dateId);
+      if(dateEl) dateEl.textContent = d.fallback ? '참고값' : d.date || 'Yahoo Finance';
+      // 등락 표시 (있는 경우)
+      const chgEl = document.getElementById(id+'Chg');
+      if(chgEl && d.changePct){
+        const sign = d.changePct >= 0 ? '▲' : '▼';
+        chgEl.textContent = sign + Math.abs(d.changePct).toFixed(2) + '%';
+        chgEl.style.color = d.changePct >= 0 ? 'var(--red)' : 'var(--green)';
       }
-    }catch(e){}
+    } catch(e){ console.warn('Yahoo Finance 조회 실패:', cfg.sym, e.message); }
   }
 }
 
