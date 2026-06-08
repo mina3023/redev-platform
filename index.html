@@ -1641,12 +1641,17 @@ async function sbf(t,q=''){
 async function sbfAll(t,q='',ps=1000){
   let all=[],offset=0;
   while(true){
-    const r=await fetch(`${SB}/rest/v1/${t}?${q}&limit=${ps}&offset=${offset}`,{headers:{apikey:SK,Authorization:`Bearer ${SK}`}});
-    const chunk=await r.json();
-    if(!Array.isArray(chunk)||!chunk.length)break;
-    all=[...all,...chunk];
-    if(chunk.length<ps)break;
-    offset+=ps;
+    try{
+      const r=await fetch(`${SB}/rest/v1/${t}?${q}&limit=${ps}&offset=${offset}`,{
+        headers:{apikey:SK,Authorization:`Bearer ${SK}`,Accept:'application/json'}
+      });
+      if(!r.ok){console.warn('sbfAll 오류:',r.status,t);break;}
+      const chunk=await r.json();
+      if(!Array.isArray(chunk)||!chunk.length)break;
+      all=[...all,...chunk];
+      if(chunk.length<ps)break;
+      offset+=ps;
+    }catch(e){console.warn('sbfAll fetch 실패:',e);break;}
   }
   return all;
 }
@@ -1656,10 +1661,13 @@ async function init(){await Promise.all([loadAll(),detectAlerts(),loadZoneCoords
 async function loadAll(){
   try{
     // is_completed=false 필터 → 준공 완료 사업장 제외
-    const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period,is_completed,is_suspended&is_completed=eq.false');
+    // is_completed 컬럼이 뷰에 없을 수 있으므로 일단 전체 조회 후 클라이언트 필터
+    const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period');
     if(!Array.isArray(zones)||!zones.length)return;
-    ALL=zones.map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period,is_completed:z.is_completed,is_suspended:z.is_suspended}));
-    const tot=zones.length;
+    // 준공(stage_score=9) 제외는 클라이언트에서 처리
+    const activeZones=zones.filter(z=>z.stage_score!==9);
+    ALL=activeZones.map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period}));
+    const tot=activeZones.length;
     document.getElementById('kpiTot').textContent=tot.toLocaleString();
     document.getElementById('sbTot').textContent=tot.toLocaleString();
     document.getElementById('kpiTotSub').textContent='총 '+tot.toLocaleString()+'개 구역';
@@ -1681,7 +1689,7 @@ async function detectAlerts(){
   try{
     let all=[],offset=0;
     while(true){
-      const chunk=await sbf('redev_timeline',`select=gu_name,project_name,stage,period,stage_score,is_completed&is_completed=eq.false&limit=1000&offset=${offset}&order=project_name,period`);
+      const chunk=await sbf('redev_timeline',`select=gu_name,project_name,stage,period,stage_score&limit=1000&offset=${offset}&order=project_name,period`);
       if(!Array.isArray(chunk)||!chunk.length)break;
       all=[...all,...chunk];
       if(chunk.length<1000)break;
