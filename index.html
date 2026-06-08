@@ -386,25 +386,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   .kpi-val{font-size:20px;}
   .page-h{flex-direction:column;gap:8px;align-items:flex-start;}
 }
-
-/* ── 조합원 권리 14단계 ── */
-.rights-step{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--gray-100);}
-.rights-step:last-child{border-bottom:none;}
-.rs-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;}
-.rs-body{flex:1;}
-.rs-name{font-size:12.5px;font-weight:600;color:var(--gray-900);margin-bottom:1px;}
-.rs-desc{font-size:11px;color:var(--gray-500);line-height:1.5;}
-.rs-law{font-size:10px;color:var(--blue);margin-top:2px;}
-/* ── 체크리스트 ── */
-.cl-wrap{display:flex;flex-direction:column;gap:5px;}
-.cl-item{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border-radius:var(--r);border:1px solid var(--gray-100);background:#fff;cursor:pointer;transition:background .1s;}
-.cl-item:hover{background:var(--blue-light);}
-.cl-item.cl-done{opacity:.6;}
-.cl-item.cl-done .cl-text{text-decoration:line-through;color:var(--gray-400);}
-.cl-box{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--gray-300);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px;}
-.cl-item.cl-done .cl-box{background:var(--blue);border-color:var(--blue);}
-.cl-text{font-size:12.5px;color:var(--gray-800);line-height:1.5;}
-.cl-tag{display:inline-block;font-size:10px;padding:1px 5px;border-radius:3px;font-weight:500;}
 </style>
 </head>
 <body>
@@ -885,57 +866,226 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 조합원 권리 ══ -->
 <div id="tab-rights" class="tab-panel">
-  <div class="page-h"><div><h2>조합원 권리 <span class="ph-badge">법·제도</span></h2><p>입주권 · 현금청산 · 분양신청 · 권리가액 산정 · 공식 절차 14단계</p></div></div>
+  <div class="page-h"><div><h2>조합원 권리 <span class="ph-badge">법·제도</span></h2><p>재개발사업 절차 · 법령 기반 정보 (찾기쉬운 생활법령정보 2026.05 기준)</p></div></div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-    <div class="card"><div class="card-h"><div class="card-title">조합원 자격 요건</div><span class="bdg bdg-blue">도시정비법</span></div><div style="font-size:12.5px;color:var(--gray-600);line-height:2;padding:4px 0;"><div style="margin-bottom:10px;padding:10px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);"><strong>재개발 조합원</strong><br>정비구역 내 토지 또는 건축물 소유자</div><div style="padding:10px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);"><strong>재건축 조합원</strong><br>정비구역 내 건축물 및 그 부속토지 소유자</div></div></div>
-    <div class="card"><div class="card-h"><div class="card-title">권리가액 산정 방식</div><span class="bdg bdg-green">핵심</span></div><div style="font-size:12.5px;color:var(--gray-600);line-height:1.9;padding:4px 0;"><div style="background:var(--gray-50);padding:12px;border-radius:var(--r);font-family:var(--mono);font-size:12px;margin-bottom:10px;">권리가액 = 종전자산평가액 × 비례율</div><strong>추가 분담금</strong><br>조합원 분양가 − 권리가액 = 추가 분담금<br>(음수면 환급)</div></div>
+  <!-- 가로 4단계 탭 -->
+  <div id="rightsTabNav" style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border);overflow-x:auto;">
+    <button class="rtab-btn active" onclick="switchRTab(0,this)" style="padding:10px 18px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--blue);border-bottom:2px solid var(--blue);margin-bottom:-2px;white-space:nowrap;font-family:var(--font);">사업 준비</button>
+    <button class="rtab-btn" onclick="switchRTab(1,this)" style="padding:10px 18px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--gray-400);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;font-family:var(--font);">조합설립 등</button>
+    <button class="rtab-btn" onclick="switchRTab(2,this)" style="padding:10px 18px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--gray-400);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;font-family:var(--font);">사업시행 · 분양 · 관리처분</button>
+    <button class="rtab-btn" onclick="switchRTab(3,this)" style="padding:10px 18px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--gray-400);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;font-family:var(--font);">사업 완료</button>
   </div>
 
-  <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0;" onclick="toggleRightsAccordion()">
-      <div class="card-title" style="margin-bottom:0;">정부 공식 재개발사업 절차 14단계</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="bdg bdg-blue">찾기쉬운 생활법령정보 2026.05</span>
-        <span id="rightsArrow" style="font-size:13px;color:var(--gray-400);transition:transform .2s;">▼</span>
+  <!-- 탭 패널들 -->
+  <div id="rtab-0" class="rtab-panel">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="card"><div class="card-h"><div class="card-title">조합원 자격 요건</div><span class="bdg bdg-blue">도시정비법</span></div>
+        <div style="font-size:12.5px;color:var(--gray-600);line-height:2;padding:4px 0;">
+          <div style="margin-bottom:10px;padding:10px;background:var(--blue-light);border-radius:var(--r);border-left:3px solid var(--blue);"><strong>재개발 조합원</strong><br>정비구역 내 토지 또는 건축물의 소유자 또는 그 지상권자</div>
+          <div style="padding:10px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);"><strong>재건축 조합원</strong><br>정비구역 내 건축물 및 그 부속토지 소유자</div>
+        </div>
+      </div>
+      <div class="card"><div class="card-h"><div class="card-title">권리가액 산정 방식</div><span class="bdg bdg-green">핵심</span></div>
+        <div style="font-size:12.5px;color:var(--gray-600);line-height:1.9;padding:4px 0;">
+          <div style="background:var(--gray-50);padding:12px;border-radius:var(--r);font-family:var(--mono);font-size:12px;margin-bottom:10px;">권리가액 = 종전자산평가액 × 비례율</div>
+          <strong>추가 분담금</strong><br>조합원 분양가 − 권리가액 = 추가 분담금<br>(음수면 환급)
+        </div>
       </div>
     </div>
-    <div id="rightsAccBody" style="display:none;margin-top:14px;">
-      <div style="font-size:11px;color:var(--gray-400);margin-bottom:14px;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);">출처: 찾기쉬운 생활법령정보 (2026년 5월 15일 기준) · 「도시 및 주거환경정비법」</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--blue);letter-spacing:.06em;margin-bottom:8px;padding:3px 8px;background:var(--blue-light);border-radius:3px;display:inline-block;">사업 준비</div>
-          <div class="rights-step"><div class="rs-num" style="background:#BFDBFE;color:#1D4ED8;">1</div><div class="rs-body"><div class="rs-name">기본계획 수립</div><div class="rs-desc">도시 및 주거환경 정비기본계획 수립</div><div class="rs-law">도시정비법 제4조</div></div></div>
-          <div class="rights-step"><div class="rs-num" style="background:#BFDBFE;color:#1D4ED8;">2</div><div class="rs-body"><div class="rs-name">정비계획 수립 및 정비구역 지정</div><div class="rs-desc">정비구역 지정 및 해제 포함</div><div class="rs-law">도시정비법 제8조</div></div></div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:#6D28D9;letter-spacing:.06em;margin-bottom:8px;padding:3px 8px;background:#EDE9FE;border-radius:3px;display:inline-block;">사업 시행 계획</div>
-          <div class="rights-step"><div class="rs-num" style="background:#EDE9FE;color:#6D28D9;">3</div><div class="rs-body"><div class="rs-name">추진위원회 구성 및 승인</div><div class="rs-desc">조합 시행 — 조합설립추진위원회 구성</div><div class="rs-law">도시정비법 제31조</div></div></div>
-          <div class="rights-step"><div class="rs-num" style="background:#EDE9FE;color:#6D28D9;">4</div><div class="rs-body"><div class="rs-name">창립총회</div><div class="rs-desc">조합원 과반수 출석, 출석 과반수 동의</div><div class="rs-law">도시정비법 제35조</div></div></div>
-          <div class="rights-step"><div class="rs-num" style="background:#EDE9FE;color:#6D28D9;">5</div><div class="rs-body"><div class="rs-name">조합설립 인가</div><div class="rs-desc">시장·군수 인가 후 법인격 취득</div><div class="rs-law">도시정비법 제35조</div></div></div>
-          <div class="rights-step"><div class="rs-num" style="background:#EDE9FE;color:#6D28D9;">6</div><div class="rs-body"><div class="rs-name">시공자 선정</div><div class="rs-desc">경쟁입찰 원칙 — 수의계약 시 총회 의결 필요</div><div class="rs-law">도시정비법 제29조</div></div></div>
-          <div class="rights-step"><div class="rs-num" style="background:#EDE9FE;color:#6D28D9;">7</div><div class="rs-body"><div class="rs-name">사업시행인가</div><div class="rs-desc">사업시행계획서 작성 및 시장·군수 인가</div><div class="rs-law">도시정비법 제50조</div></div></div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:#065F46;letter-spacing:.06em;margin-bottom:8px;padding:3px 8px;background:#D1FAE5;border-radius:3px;display:inline-block;">분양 · 관리처분</div>
-          <div class="rights-step"><div class="rs-num" style="background:#D1FAE5;color:#065F46;">8</div><div class="rs-body"><div class="rs-name">분양공고 및 분양신청</div><div class="rs-desc">미신청 시 현금청산 대상</div><div class="rs-law">도시정비법 제72조</div></div></div>
-          <div class="rights-step"><div class="rs-num" style="background:#D1FAE5;color:#065F46;">9</div><div class="rs-body"><div class="rs-name">감리자 선정</div><div class="rs-desc">공사 품질 및 적정 시공 감리</div><div class="rs-law">도시정비법 제89조</div></div></div>
-          <div class="rights-step" style="border-left:2px solid var(--red);padding-left:8px;"><div class="rs-num" style="background:#FEF2F2;color:#DC2626;">10</div><div class="rs-body"><div class="rs-name" style="color:var(--red);">관리처분계획 수립 및 인가</div><div class="rs-desc">⭐ 권리가액·분담금 확정 — 가장 중요한 단계</div><div class="rs-law">도시정비법 제74조</div></div></div>
-          <div class="rights-step"><div class="rs-num" style="background:#D1FAE5;color:#065F46;">11</div><div class="rs-body"><div class="rs-name">이주·철거·착공</div><div class="rs-desc">관리처분인가 후 철거 가능 (인가 전 철거 불가)</div><div class="rs-law">도시정비법 제81조 · 건축물관리법 제30조</div></div></div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:#059669;letter-spacing:.06em;margin-bottom:8px;padding:3px 8px;background:#ECFDF5;border-radius:3px;display:inline-block;">사업 완료</div>
-          <div class="rights-step"><div class="rs-num" style="background:#ECFDF5;color:#059669;">12</div><div class="rs-body"><div class="rs-name">준공인가 신청 및 준공인가</div><div class="rs-desc">자체 준공검사 후 시장·군수 준공인가</div><div class="rs-law">도시정비법 제83조</div></div></div>
-          <div class="rights-step"><div class="rs-num" style="background:#ECFDF5;color:#059669;">13</div><div class="rs-body"><div class="rs-name">이전고시</div><div class="rs-desc">소유권 이전 및 등기 이전</div><div class="rs-law">도시정비법 제86조</div></div></div>
-          <div class="rights-step"><div class="rs-num" style="background:#ECFDF5;color:#059669;">14</div><div class="rs-body"><div class="rs-name">청산 및 조합 해산</div><div class="rs-desc">청산금 지급·수령, 조합 해산</div><div class="rs-law">도시정비법 제89조 · 민법</div></div></div>
-        </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">재개발사업 계획</div><span class="bdg bdg-blue">도시정비법 제4조·제8조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">기본계획 수립</div><div class="rc-body">특별시장·광역시장 등은 관할 구역에 대해 도시·주거환경정비기본계획을 <strong>10년 단위</strong>로 수립하고, <strong>5년마다</strong> 타당성을 검토합니다.</div></div>
+        <div class="rc-section"><div class="rc-title">정비계획 수립 대상지역</div><div class="rc-body">노후·불량건축물이 전체 건축물의 <strong>60% 이상</strong>인 지역으로 정비기반시설 정비 필요, 인구 과밀, 공장 매연 인접지역 등이 해당됩니다.</div></div>
+        <div class="rc-section"><div class="rc-title">토지등소유자의 정비계획 입안 제안</div><div class="rc-body">토지등소유자는 정비계획 수립 예정일 경과, 공공재개발 추진 등 7가지 사유 시 입안권자에게 정비계획 입안을 제안할 수 있습니다. 토지등소유자 <strong>3분의 2 이하</strong> 동의 필요.</div></div>
       </div>
-      <div style="margin-top:12px;padding:10px 14px;background:#FFF7ED;border-radius:var(--r);border-left:3px solid var(--orange);font-size:12px;color:var(--gray-600);">
-        <strong>조합 외 시행의 경우</strong> — 주민대표회의 구성·승인 → 시행자 지정 → 사업시행인가 → 관리처분인가 → 이주·철거·착공 → 자체 준공검사 → 이전고시 및 청산
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">정비구역 지정 및 해제</div><span class="bdg bdg-orange">도시정비법 제16조·제20조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">정비구역 지정</div><div class="rc-body">지방도시계획위원회의 심의를 거쳐 지정권자가 정비구역을 지정하고 공보에 고시합니다.</div></div>
+        <div class="rc-section"><div class="rc-title rc-alert">정비구역 해제 사유 (의무)</div><div class="rc-body">
+          <div class="rc-item">정비구역 지정·고시일부터 <strong>2년</strong> 내 추진위원회 승인 미신청</div>
+          <div class="rc-item">추진위원회 승인일부터 <strong>2년</strong> 내 조합설립인가 미신청</div>
+          <div class="rc-item">조합설립인가일부터 <strong>3년</strong> 내 사업시행계획인가 미신청</div>
+        </div></div>
+        <div class="rc-section"><div class="rc-title">정비구역 직권 해제</div><div class="rc-body">토지등소유자 100분의 30 이상 해제 요청, 조합원 1/2~2/3 이상 동의로 해제 요청(사업시행계획인가 미신청 시) 등의 경우 직권 해제 가능.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-title">사업시행자 유형</div><span class="bdg bdg-gray">도시정비법 제25~28조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">조합 시행</div><div class="rc-body">조합이 단독 또는 조합원 과반수 동의로 토지주택공사등·건설업자 등과 공동 시행.</div></div>
+        <div class="rc-section"><div class="rc-title">공공시행자</div><div class="rc-body">천재지변·긴급 사유, 정비계획 예정일 2년 내 사업시행계획인가 미신청, 추진위원회 승인 후 3년 내 조합설립인가 미신청 등의 경우 시장·군수등이 직접 시행하거나 토지주택공사등을 사업시행자로 지정.</div></div>
+        <div class="rc-section"><div class="rc-title">지정개발자</div><div class="rc-body">정비구역 토지의 50% 이상 소유자로 토지등소유자 1/2 이상 추천을 받은 자, 민관합동법인, 신탁업자 등.</div></div>
       </div>
     </div>
   </div>
+
+  <div id="rtab-1" class="rtab-panel" style="display:none;">
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">추진위원회 구성</div><span class="bdg bdg-blue">도시정비법 제31조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">구성 요건</div><div class="rc-body">토지등소유자 <strong>과반수 동의</strong>를 받아 추진위원장 포함 5명 이상의 추진위원으로 구성. 시장·군수등의 승인 필요.</div></div>
+        <div class="rc-section"><div class="rc-title">추진위원 결격사유</div><div class="rc-body">미성년자·피성년후견인, 파산선고 후 복권 안 된 자, 금고 이상 실형 집행 종료 후 2년 미경과, 도시정비법 위반 벌금 100만원 이상 후 10년 미경과 등.</div></div>
+        <div class="rc-section"><div class="rc-title rc-tip">핵심 포인트</div><div class="rc-body">추진위원회 구성에 동의한 토지등소유자는 <strong>조합 설립에 동의한 것으로 간주</strong>됩니다. (단, 조합설립인가 신청 전 반대 의사표시 가능)</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">창립총회 및 조합설립인가</div><span class="bdg bdg-blue">도시정비법 제35조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">조합설립 동의 요건</div><div class="rc-body">토지등소유자 <strong>4분의 3 이상</strong> + 토지면적 <strong>2분의 1 이상</strong> 토지소유자의 동의 필요.</div></div>
+        <div class="rc-section"><div class="rc-title">창립총회 소집</div><div class="rc-body">총회 <strong>14일 전</strong>까지 회의목적·안건·일시·장소를 인터넷 공개 및 등기우편 발송 필수. 토지등소유자 과반수 출석, 출석 과반수 찬성으로 결의.</div></div>
+        <div class="rc-section"><div class="rc-title">창립총회 처리 사항</div><div class="rc-body">조합 정관 확정 / 조합임원 선임 / 대의원 선임 / 기타 사전 통지 사항.</div></div>
+        <div class="rc-section"><div class="rc-title">조합 성립</div><div class="rc-body">조합설립인가일부터 <strong>30일 이내</strong> 주된 사무소 소재지에 등기 시 법인으로 성립. 명칭에 "정비사업조합" 문자 사용 필수.</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">조합원 자격 상세</div><span class="bdg bdg-orange">도시정비법 제39조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title rc-alert">투기과열지구 조합원 자격 제한</div><div class="rc-body">관리처분계획 인가 후 건축물·토지를 양수한 자는 원칙적으로 조합원 불가. 단, 세대원 근무·질병치료·취학, 상속, 1세대 1주택자로 소유기간 10년·거주기간 5년 이상 등 예외 존재.</div></div>
+        <div class="rc-section"><div class="rc-title">조합임원 구성</div><div class="rc-body">조합장 1명 + 이사 3명 이상(조합원 100인 초과 시 5명 이상) + 감사 1~3명. 임기 3년 이하, 연임 가능.</div></div>
+        <div class="rc-section"><div class="rc-title">조합임원 해임</div><div class="rc-body">조합원 <strong>10분의 1 이상</strong> 요구로 소집된 총회에서 조합원 과반수 출석·출석 과반수 동의 시 해임 가능.</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">조합 총회 운영</div><span class="bdg bdg-gray">도시정비법 제44·45조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">총회 소집</div><div class="rc-body">조합장 직권 또는 조합원 <strong>5분의 1 이상</strong> 또는 대의원 <strong>3분의 2 이상</strong> 요구로 소집. 총회 개최 <strong>7일 전</strong>까지 목적·안건·일시·장소 통지.</div></div>
+        <div class="rc-section"><div class="rc-title">총회 의결 필수 사항</div><div class="rc-body">정관 변경 / 자금 차입 / 예산 / 시공자·설계자 선정 / 조합임원 선임·해임 / 사업시행계획서 작성 / 관리처분계획 수립 / 조합 해산 등 17가지.</div></div>
+        <div class="rc-section"><div class="rc-title">의결 방법</div><div class="rc-body">원칙: 조합원 과반수 출석 + 출석 과반수 찬성. 사업시행계획서·관리처분계획 수립: <strong>조합원 과반수 찬성</strong>. 정비사업비 10% 이상 증가 시: <strong>조합원 3분의 2 이상 찬성</strong>.</div></div>
+        <div class="rc-section"><div class="rc-title">시공자 선정 총회</div><div class="rc-body">조합원 <strong>과반수 직접 출석</strong> 필요. 대의원회에서 6인 이상 건설업자 선정 후 총회 상정. 합동설명회 2회 이상 의무 개최.</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">토지등소유자 동의 방법</div><span class="bdg bdg-gray">도시정비법 제36조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">동의 방법</div><div class="rc-body">서면동의서(성명 기재 + 지장 날인 + 신분증 사본 첨부) 또는 전자서명동의서 제출. 시장·군수등 검인 또는 확인 필수.</div></div>
+        <div class="rc-section"><div class="rc-title">동의 철회 기한</div><div class="rc-body">인·허가 신청 전까지 철회 가능. 조합설립 동의는 최초 동의일부터 <strong>30일</strong>까지만 철회 가능 (창립총회 후 불가).</div></div>
+        <div class="rc-section"><div class="rc-title rc-alert">주의</div><div class="rc-body">철회서는 동의 상대방과 시장·군수등에게 <strong>내용증명</strong>으로 발송해야 효력 발생.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-title">조합 외 시행 — 주민대표회의·전체회의</div><span class="bdg bdg-gray">도시정비법 제47·48조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">주민대표회의 구성</div><div class="rc-body">토지등소유자 <strong>과반수 동의</strong>로 구성(위원장·부위원장 각 1명, 감사 1~3명 포함 5~25명). 시장·군수등 또는 토지주택공사등이 사업시행을 원할 때 구성.</div></div>
+        <div class="rc-section"><div class="rc-title">토지등소유자 전체회의</div><div class="rc-body">신탁업자가 사업시행자인 경우, 시행규정 확정·정비사업비·시공자 선정·관리처분계획 등은 전체회의 의결 필수.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="rtab-2" class="rtab-panel" style="display:none;">
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">사업시행계획서 작성</div><span class="bdg bdg-blue">도시정비법 제52조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">포함 사항</div><div class="rc-body">토지이용계획 / 정비기반시설 설치계획 / 주민이주대책 / 세입자 주거·이주대책 / 범죄예방대책 / 임대주택 건설계획 / 국민주택규모 주택 건설계획 / 기존주택 철거계획서(석면 현황 포함) 등.</div></div>
+        <div class="rc-section"><div class="rc-title">인가 신청 전 절차</div><div class="rc-body">조합원 <strong>과반수 찬성</strong>으로 총회 의결. 정비사업비 10% 이상 증가 시 <strong>3분의 2 이상</strong> 찬성 필요.</div></div>
+        <div class="rc-section"><div class="rc-title">인가 결정</div><div class="rc-body">제출일로부터 <strong>60일 이내</strong> 인가 여부 결정·통보.</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">이주대책 · 손실보상</div><span class="bdg bdg-orange">도시정비법 제61·65조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">임시거주시설</div><div class="rc-body">사업시행자는 철거되는 주택의 소유자·세입자에게 임대주택 등 임시거주 또는 주택자금 융자 알선 의무. 공사 완료 후 <strong>30일 이내</strong> 임시거주시설 철거·원상회복.</div></div>
+        <div class="rc-section"><div class="rc-title">영업손실 보상</div><div class="rc-body">영업장소 이전 시 휴업기간(원칙 <strong>4개월 이내</strong>, 최대 2년) 영업이익 + 이전비용 등 보상.</div></div>
+        <div class="rc-section"><div class="rc-title">주거이전비</div><div class="rc-body">소유자: 가구원수에 따른 <strong>2개월분</strong> 주거이전비. 세입자(3개월 이상 거주): <strong>4개월분</strong> 주거이전비. 보상대상자 인정시점: 정비구역 지정을 위한 주민공람 공고일.</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">분양공고 및 분양신청</div><span class="bdg bdg-blue">도시정비법 제72조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">분양통지·공고</div><div class="rc-body">사업시행계획인가 고시일로부터 <strong>90일 이내</strong> 토지등소유자에게 통지, <strong>120일 이내</strong> 일간신문 공고.</div></div>
+        <div class="rc-section"><div class="rc-title rc-alert">분양신청 기간</div><div class="rc-body">통지일로부터 <strong>30일 이상 60일 이내</strong>에 신청. 기간 내 신청 안 하면 현금청산 대상! 한 차례 20일 연장 가능.</div></div>
+        <div class="rc-section"><div class="rc-title">투기과열지구 분양신청 제한</div><div class="rc-body">분양대상자 선정일로부터 <strong>5년 이내</strong>에는 투기과열지구에서 분양신청 불가 (상속·결혼·이혼 예외).</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">관리처분계획 수립 및 인가</div><span class="bdg bdg-red">도시정비법 제74·78조 ⭐가장 중요</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">관리처분계획 주요 내용</div><div class="rc-body">분양설계 / 분양대상자 주소·성명 / 분양예정 대지·건축물 추산액 / 종전 토지·건축물 명세 및 가격 / 정비사업비 추산액 및 분담규모 / 세입자별 손실보상 권리명세 / 현금청산 대상자 명세 등 14가지.</div></div>
+        <div class="rc-section"><div class="rc-title rc-alert">총회 의결 필수</div><div class="rc-body">관리처분계획인가 신청 전 총회 개최일 <strong>1개월 전</strong>에 분양예정 건축물 추산액·분담금·정비사업비 등을 각 조합원에게 문서 통지. 조합원 <strong>과반수 찬성</strong>으로 의결.</div></div>
+        <div class="rc-section"><div class="rc-title">공람 및 인가 절차</div><div class="rc-body">인가 신청 전 관계 서류 <strong>30일 이상</strong> 공람·의견 청취. 신청 후 <strong>30일 이내</strong>(타당성 검증 시 60일) 인가 결정·통보.</div></div>
+        <div class="rc-section"><div class="rc-title rc-alert">관리처분인가 후 주의사항</div><div class="rc-body">인가 고시 후 이전고시 날까지 <strong>종전 토지·건축물 사용·수익 금지</strong> (사업시행자 동의 또는 손실보상 미완료 시 예외).</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">분양 미신청자 현금청산</div><span class="bdg bdg-gray">도시정비법 제73조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">협의 기간</div><div class="rc-body">관리처분계획 인가·고시 다음 날부터 <strong>90일 이내</strong>에 손실보상 협의. 분양신청기간 종료 다음 날부터 협의 시작 가능.</div></div>
+        <div class="rc-section"><div class="rc-title">협의 미성립 시</div><div class="rc-body">협의 기간 만료 다음 날부터 <strong>60일 이내</strong>에 수용재결 신청 또는 매도청구소송 제기. 기간 초과 시 지연이자 부담(연 5~15%).</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-title">철거 및 착공</div><span class="bdg bdg-orange">도시정비법 제81조 · 건축물관리법 제30조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title rc-alert">철거 시기</div><div class="rc-body"><strong>관리처분계획인가를 받은 후</strong>에만 철거 가능. 인가 전 철거 불가.</div></div>
+        <div class="rc-section"><div class="rc-title">조기 철거 가능 사유</div><div class="rc-body">건축물 붕괴 등 안전사고 우려 / 폐공가 밀집으로 범죄발생 우려 → 소유자 동의 + 시장·군수등 허가 필요.</div></div>
+        <div class="rc-section"><div class="rc-title">철거 전 의무</div><div class="rc-body">철거 전 물건조서·사진·영상자료 작성 보관 (착공 전까지). 석면 함유 건축자재 현황 및 철거·처리계획 철거계획서에 포함 필수.</div></div>
+        <div class="rc-section"><div class="rc-title">착공 기한</div><div class="rc-body">주택법 승인일로부터 <strong>5년 이내</strong> 착공. 시공보증서 제출 의무.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="rtab-3" class="rtab-panel" style="display:none;">
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">준공인가</div><span class="bdg bdg-green">도시정비법 제83조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">준공인가 신청</div><div class="rc-body">시장·군수등이 아닌 사업시행자는 공사 완료 시 준공인가신청서·건축물 설치내역서·공사감리자 의견서 등을 제출. 지체 없이 준공검사 실시.</div></div>
+        <div class="rc-section"><div class="rc-title">준공인가 전 사용허가</div><div class="rc-body">전기·수도·난방·상하수도 시설 완비, 관리처분계획 적합, 입주자 안전 기준 충족 시 사용 허가 가능.</div></div>
+        <div class="rc-section"><div class="rc-title">정비구역 해제</div><div class="rc-body">준공인가 고시일(관리처분계획 수립 시 이전고시일) 다음 날에 정비구역 해제. 단, 조합 존속에는 영향 없음.</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">이전고시 및 등기</div><span class="bdg bdg-blue">도시정비법 제86~88조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">소유권 이전</div><div class="rc-body">공사완료 고시 후 지체 없이 대지확정측량·토지 분할 절차 거쳐 분양받을 자에게 소유권 이전. 공보 고시 후 시장·군수등에게 보고.</div></div>
+        <div class="rc-section"><div class="rc-title rc-tip">소유권 취득 시점</div><div class="rc-body">이전고시가 있은 날의 <strong>다음 날</strong>에 대지·건축물 소유권 취득. 취득세 납부 기한 60일.</div></div>
+        <div class="rc-section"><div class="rc-title">권리 이전</div><div class="rc-body">종전 토지·건축물의 지상권·전세권·저당권·임차권 등 등기된 권리는 이전받은 대지·건축물에 설정된 것으로 봄.</div></div>
+        <div class="rc-section"><div class="rc-title rc-alert">등기 제한</div><div class="rc-body">이전고시일부터 대지·건축물 등기 완료 시까지 저당권 등 다른 등기 불가.</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">청산금 지급 및 산정</div><span class="bdg bdg-gray">도시정비법 제89조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">청산금이란</div><div class="rc-body">종전 소유 토지·건축물 가격과 분양받은 대지·건축물 가격의 차액. 이전고시 후 지급 또는 징수.</div></div>
+        <div class="rc-section"><div class="rc-title">분할 지급·징수</div><div class="rc-body">정관 또는 총회 의결로 관리처분계획인가 후부터 이전고시일까지 분할 지급·징수 가능.</div></div>
+        <div class="rc-section"><div class="rc-title rc-alert">소멸시효</div><div class="rc-body">청산금 수령 권리 또는 징수 권리는 이전고시일 다음 날부터 <strong>5년</strong>간 행사 안 하면 소멸.</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-h"><div class="card-title">사업비 부담</div><span class="bdg bdg-gray">도시정비법 제92~94조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">정비사업비 부담</div><div class="rc-body">원칙적으로 사업시행자 부담. 시장·군수등은 도로·상하수도·공원·공용주차장·공동구·녹지·하천·광장 등 비용 전부 또는 일부 부담 가능.</div></div>
+        <div class="rc-section"><div class="rc-title">부과금</div><div class="rc-body">사업시행자는 정비사업비와 수입 차액을 토지등소유자에게 부과·징수 가능. 체납 시 연체료 부과.</div></div>
+        <div class="rc-section"><div class="rc-title">국가·지방자치단체 지원</div><div class="rc-body">시장·군수등 또는 토지주택공사등이 시행하는 정비사업의 기초조사비·정비기반시설 건설비 일부 보조 또는 융자 가능.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-title">조합 해산</div><span class="bdg bdg-gray">도시정비법 제45조·49조</span></div>
+      <div class="rights-content">
+        <div class="rc-section"><div class="rc-title">해산 절차</div><div class="rc-body">총회 의결(조합원 과반수 출석 + 출석 과반수 찬성)로 해산. 정관 또는 총회 결의가 없으면 조합장이 청산인.</div></div>
+        <div class="rc-section"><div class="rc-title">청산인 업무</div><div class="rc-body">현존 조합사무 종결 / 채권추심·채무변제 / 잔여재산 인도 등.</div></div>
+        <div class="rc-section"><div class="rc-title">등기·신고</div><div class="rc-body">해산 시 취임 후 <strong>3주 이내</strong> 해산 등기·주무관청 신고. 청산 종결 시 <strong>3주 이내</strong> 청산종결등기·신고.</div></div>
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<style>
+.rtab-btn{transition:color .15s,border-color .15s;}
+.rtab-btn:hover{color:var(--blue)!important;}
+.rights-content{display:flex;flex-direction:column;gap:0;}
+.rc-section{padding:10px 0;border-bottom:1px solid var(--gray-100);}
+.rc-section:last-child{border-bottom:none;}
+.rc-title{font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.rc-title::before{content:'';display:inline-block;width:3px;height:12px;background:var(--blue);border-radius:2px;flex-shrink:0;}
+.rc-title.rc-alert::before{background:var(--red);}
+.rc-title.rc-tip::before{background:var(--green);}
+.rc-body{font-size:12.5px;color:var(--gray-600);line-height:1.8;padding-left:9px;}
+.rc-item{padding:2px 0;padding-left:12px;position:relative;}
+.rc-item::before{content:'•';position:absolute;left:0;color:var(--gray-400);}
+</style>
 
 <!-- ══ 투자 분석 ══ -->
 <div id="tab-investor" class="tab-panel">
@@ -1617,15 +1767,6 @@ function renderProjectDetail(proj){
       </div>
       <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">사업추진 일정</div>
       ${scheduleHtml}
-
-      <div style="margin-top:16px;">
-        <div style="font-size:11px;font-weight:600;color:var(--gray-600);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-          ✅ 단계별 조합원 체크리스트
-          <span style="font-size:10px;color:var(--gray-400);font-weight:400;">현재 단계 기준 · 클릭해서 완료 체크</span>
-        </div>
-        ${renderChecklist(stageScore, proj.id)}
-      </div>
-
       <div style="margin-top:14px;">
         <div style="font-size:11px;font-weight:600;color:var(--gray-600);margin-bottom:6px;">📝 내 메모 <span style="font-size:10px;color:var(--gray-400);font-weight:400;">(조합 공지, 특이사항 자유 입력)</span></div>
         <textarea id="projMemo_${proj.id}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;font-family:var(--font);resize:vertical;min-height:80px;outline:none;box-sizing:border-box;" placeholder="조합에서 공지한 일정, 특이사항 등을 자유롭게 메모하세요...">${proj.memo||''}</textarea>
@@ -1963,168 +2104,18 @@ function calcSim(){
   });
 }
 
-// ── 조합원 권리 아코디언 ──
-function toggleRightsAccordion(){
-  const body=document.getElementById('rightsAccBody');
-  const arrow=document.getElementById('rightsArrow');
-  const isOpen=body.style.display!=='none';
-  body.style.display=isOpen?'none':'block';
-  arrow.style.transform=isOpen?'':'rotate(180deg)';
-}
-
-// ── 단계별 체크리스트 데이터 ──
-const CHECKLIST_DATA={
-  1:{label:'추진위',items:[
-    {text:'추진위원장 선출 공고 및 구성 확인',tag:'법령'},
-    {text:'추진위원회 운영규정 열람 신청',tag:'법령'},
-    {text:'동의서 제출 전 권리가액 추정 자료 요청',tag:'금전'},
-    {text:'조합원 동의 요건 충족 여부 확인 (면적·소유자 수)',tag:'법령'},
-    {text:'인근 재개발 사례 수익률 비교 검토',tag:'금전'},
-  ]},
-  2:{label:'추진위',items:[
-    {text:'추진위원장 선출 공고 및 구성 확인',tag:'법령'},
-    {text:'추진위원회 운영규정 열람 신청',tag:'법령'},
-    {text:'동의서 제출 전 권리가액 추정 자료 요청',tag:'금전'},
-    {text:'조합원 동의 요건 충족 여부 확인',tag:'법령'},
-    {text:'인근 재개발 사례 수익률 비교 검토',tag:'금전'},
-  ]},
-  3:{label:'조합설립',items:[
-    {text:'창립총회 소집 공고 날짜 확인 (14일 전 공고 의무)',tag:'필수'},
-    {text:'창립총회 참석 또는 위임장 제출',tag:'총회'},
-    {text:'조합 정관 열람 신청 및 이상 조항 확인',tag:'법령'},
-    {text:'조합원 명부 열람·등사 신청',tag:'법령'},
-    {text:'조합임원 이력·자격 적정 여부 확인',tag:'필수'},
-    {text:'분담금 초기 추정액 서면 통보 요청',tag:'금전'},
-  ]},
-  4:{label:'사업시행인가',items:[
-    {text:'사업시행계획서 공람 신청 (공람 기간 30일)',tag:'필수'},
-    {text:'건축계획 내 내 물건 포함 여부 확인',tag:'금전'},
-    {text:'이주 시기·이주비 조건 사전 확인',tag:'금전'},
-    {text:'분담금 추정액 증가 시 이의신청 기간 확인',tag:'법령'},
-    {text:'조합 총회 개최 여부 모니터링',tag:'총회'},
-    {text:'시공사 선정 과정 경쟁입찰 여부 확인',tag:'필수'},
-  ]},
-  5:{label:'관리처분인가',items:[
-    {text:'감정평가액 통보서 수령 및 인근 시세 비교',tag:'필수'},
-    {text:'감정평가 이의신청 기간 내 신청 (필요 시)',tag:'법령'},
-    {text:'관리처분계획 공람 신청',tag:'법령'},
-    {text:'분양 신청서 기한 내 제출 (미제출 시 현금청산)',tag:'필수'},
-    {text:'분양 신청 내역 서면 확인',tag:'금전'},
-    {text:'이주비 대출 조건 및 지급 시기 확인',tag:'금전'},
-    {text:'조합원 총회 (관리처분계획 의결) 참석',tag:'총회'},
-  ]},
-  6:{label:'이주·철거',subs:[
-    {subLabel:'이주',items:[
-      {text:'이주 지원금 지급 시기 및 금액 서면 확인',tag:'금전'},
-      {text:'이주비 확정 후 임시 거주지 계약 진행',tag:'필수'},
-      {text:'이사 완료 후 명도 확인서 수령',tag:'법령',law:'도시정비법 제81조'},
-      {text:'세입자 이주 완료 여부 확인 (임대인)',tag:'필수'},
-    ]},
-    {subLabel:'철거 — 법령 확인',items:[
-      {text:'관리처분인가 완료 후 철거 진행 여부 확인 (인가 전 철거 불가)',tag:'필수',law:'도시정비법 제81조②'},
-      {text:'철거계획서 내 석면 현황·처리계획 포함 여부 확인',tag:'법령',law:'도시정비법 제52조①13호'},
-      {text:'석면 함유 건축자재 현황 및 철거·처리계획 공문 수령',tag:'필수',law:'도시정비법 시행령 제47조②'},
-      {text:'철거 전 물건조서·사진·영상자료 작성·보관 여부 확인',tag:'법령',law:'도시정비법 시행령 제72조①'},
-      {text:'철거허가 신청 또는 신고 완료 여부 확인',tag:'법령',law:'건축물관리법 제30조①'},
-      {text:'조기 철거 시 소유자 동의 + 시장 허가 취득 여부 확인',tag:'법령',law:'도시정비법 제81조③'},
-    ]},
-    {subLabel:'착공 준비',items:[
-      {text:'착공신고서 및 첨부서류 제출 여부 확인',tag:'법령',law:'건축법 제21조①'},
-      {text:'시공보증서 제출 여부 시장·군수 확인',tag:'법령',law:'도시정비법 제82조②'},
-      {text:'공사 착수 기한 내 시작 여부 확인 (승인일로부터 5년 이내)',tag:'필수',law:'주택법 제16조①'},
-    ]},
-  ]},
-  7:{label:'착공·시공',items:[
-    {text:'공사 진행 현황 월별 조합 공지 확인',tag:'법령'},
-    {text:'입주자 사전점검 일정 공고 확인',tag:'필수'},
-    {text:'분양 계약서 세부 조항 검토',tag:'법령'},
-    {text:'중도금 대출 일정 및 조건 확인',tag:'금전'},
-    {text:'공사비 변경(증액) 발생 시 총회 의결 여부 확인',tag:'필수'},
-  ]},
-  8:{label:'착공·시공',items:[
-    {text:'공사 진행 현황 월별 조합 공지 확인',tag:'법령'},
-    {text:'입주자 사전점검 일정 공고 확인',tag:'필수'},
-    {text:'분양 계약서 세부 조항 검토',tag:'법령'},
-    {text:'중도금 대출 일정 및 조건 확인',tag:'금전'},
-  ]},
-  9:{label:'준공·입주',items:[
-    {text:'사전 점검 시 하자 목록 서면으로 조합·시공사에 통보',tag:'필수'},
-    {text:'등기 이전 서류 준비 (취득세 납부 기한 60일)',tag:'법령'},
-    {text:'청산금 확인 및 수령·납부',tag:'금전'},
-    {text:'하자보수 청구 기간(5~10년) 내 하자 발생 기록 보관',tag:'법령'},
-    {text:'관리단 구성 및 첫 입주자 대표회의 참석',tag:'총회'},
-  ]},
-};
-
-const CL_TAG_STYLE={
-  '필수':'background:#FAECE7;color:#993C1D;',
-  '법령':'background:#EFF6FF;color:#1D4ED8;',
-  '금전':'background:#ECFDF5;color:#065F46;',
-  '총회':'background:#EDE9FE;color:#6D28D9;'
-};
-
-function getClChecks(projId){
-  try{return JSON.parse(localStorage.getItem('cl_'+projId)||'{}');}catch(e){return{};}
-}
-
-function clProgressBar(done,total){
-  const pct=total?Math.round(Math.min(done,total)/total*100):0;
-  return`<div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px;background:var(--gray-50);border-radius:var(--r);">
-    <span style="font-size:12px;color:var(--gray-500);flex:1;"><span style="font-weight:600;color:var(--gray-900);">${done}/${total}</span>개 완료</span>
-    <div style="width:80px;height:4px;background:var(--gray-200);border-radius:2px;overflow:hidden;"><div style="height:100%;border-radius:2px;background:#059669;width:${pct}%;transition:width .3s;"></div></div>
-  </div>`;
-}
-
-function renderChecklist(score,projId){
-  const data=CHECKLIST_DATA[score];
-  if(!data)return'<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">현재 단계 데이터 없음</div>';
-  const checks=getClChecks(projId);
-  if(data.subs){
-    let idx=0;
-    const sections=data.subs.map(sub=>{
-      const rows=sub.items.map(item=>{
-        const key=idx+'';const done=!!checks[key];
-        const lawHtml=item.law?`<span style="font-size:10px;color:var(--blue);margin-left:2px;">⚖ ${item.law}</span>`:'';
-        const r=`<div class="cl-item${done?' cl-done':''}" onclick="toggleCl(${projId},${idx})">
-          <div class="cl-box">${done?'✓':''}</div>
-          <div style="flex:1;">
-            <div class="cl-text">${item.text}</div>
-            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:2px;">
-              <span class="cl-tag" style="${CL_TAG_STYLE[item.tag]||''}">${item.tag}</span>${lawHtml}
-            </div>
-          </div>
-        </div>`;
-        idx++;return r;
-      });
-      return`<div style="font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:.05em;text-transform:uppercase;margin:10px 0 5px;">${sub.subLabel}</div>${rows.join('')}`;
-    });
-    const done=Object.values(checks).filter(Boolean).length;
-    return`<div class="cl-wrap">${sections.join('')}${clProgressBar(Math.min(done,idx),idx)}</div>`;
-  }
-  const items=data.items;
-  const rows=items.map((item,i)=>{
-    const done=!!checks[i+''];
-    const lawHtml=item.law?`<span style="font-size:10px;color:var(--blue);margin-left:2px;">⚖ ${item.law}</span>`:'';
-    return`<div class="cl-item${done?' cl-done':''}" onclick="toggleCl(${projId},${i})">
-      <div class="cl-box">${done?'✓':''}</div>
-      <div style="flex:1;">
-        <div class="cl-text">${item.text}</div>
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:2px;">
-          <span class="cl-tag" style="${CL_TAG_STYLE[item.tag]||''}">${item.tag}</span>${lawHtml}
-        </div>
-      </div>
-    </div>`;
+// ── 조합원 권리 탭 전환 ──
+function switchRTab(idx, el) {
+  document.querySelectorAll('.rtab-panel').forEach((p,i) => {
+    p.style.display = i === idx ? 'block' : 'none';
   });
-  const done=Object.values(checks).filter(Boolean).length;
-  return`<div class="cl-wrap">${rows.join('')}${clProgressBar(Math.min(done,items.length),items.length)}</div>`;
-}
-
-function toggleCl(projId,idx){
-  const checks=getClChecks(projId);
-  checks[idx+'']= !checks[idx+''];
-  try{localStorage.setItem('cl_'+projId,JSON.stringify(checks));}catch(e){}
-  const proj=myProjects.find(p=>p.id===projId);
-  if(proj)renderProjectDetail(proj);
+  document.querySelectorAll('.rtab-btn').forEach(b => {
+    b.style.color = 'var(--gray-400)';
+    b.style.borderBottomColor = 'transparent';
+    b.style.fontWeight = '600';
+  });
+  el.style.color = 'var(--blue)';
+  el.style.borderBottomColor = 'var(--blue)';
 }
 
 
