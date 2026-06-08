@@ -386,6 +386,31 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   .kpi-val{font-size:20px;}
   .page-h{flex-direction:column;gap:8px;align-items:flex-start;}
 }
+
+/* ── 마이 대시보드 체크리스트 ── */
+.cl-wrap{display:flex;flex-direction:column;gap:0;}
+.cl-section-label{font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:.05em;text-transform:uppercase;padding:8px 0 4px;margin-top:4px;}
+.cl-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--gray-100);background:#fff;cursor:pointer;transition:background .1s;margin-bottom:4px;}
+.cl-item:hover{background:var(--blue-light);border-color:var(--blue-mid);}
+.cl-item.cl-done{opacity:.55;}
+.cl-item.cl-done .cl-text{text-decoration:line-through;color:var(--gray-400);}
+.cl-box{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--gray-300);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px;}
+.cl-item.cl-done .cl-box{background:var(--blue);border-color:var(--blue);}
+.cl-text{font-size:12.5px;color:var(--gray-800);line-height:1.5;flex:1;}
+.cl-meta{display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap;}
+.cl-tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;font-weight:600;}
+.cl-tag-urgent{background:#FAECE7;color:#993C1D;}
+.cl-tag-legal{background:#EFF6FF;color:#1D4ED8;}
+.cl-tag-money{background:#ECFDF5;color:#065F46;}
+.cl-tag-meeting{background:#EDE9FE;color:#6D28D9;}
+.cl-law{font-size:10px;color:var(--gray-400);}
+.cl-progress{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 12px;background:var(--gray-50);border-radius:var(--r);border:1px solid var(--gray-100);}
+.cl-prog-text{font-size:12px;color:var(--gray-500);flex:1;}
+.cl-prog-text span{font-weight:600;color:var(--gray-900);}
+.cl-prog-bar{width:90px;height:5px;background:var(--gray-200);border-radius:3px;overflow:hidden;}
+.cl-prog-fill{height:100%;border-radius:3px;background:#059669;transition:width .3s;}
+.cl-alert{margin-bottom:10px;padding:10px 13px;background:#FEF2F2;border-radius:var(--r);border-left:3px solid var(--red);font-size:12px;color:#991B1B;line-height:1.6;}
+.cl-tip{margin-bottom:10px;padding:10px 13px;background:var(--green-bg);border-radius:var(--r);border-left:3px solid var(--green);font-size:12px;color:#065F46;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -1767,6 +1792,19 @@ function renderProjectDetail(proj){
       </div>
       <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">사업추진 일정</div>
       ${scheduleHtml}
+
+      <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--gray-100);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:600;color:var(--gray-700);display:flex;align-items:center;gap:6px;">
+            <span style="display:inline-block;width:2.5px;height:13px;border-radius:2px;background:var(--blue);"></span>
+            단계별 조합원 체크리스트
+            <span style="font-size:10px;font-weight:400;color:var(--gray-400);">${stageScore ? SN[stageScore]+'('+stageScore+'단계)' : '단계 정보 없음'}</span>
+          </div>
+          <span style="font-size:10px;color:var(--blue);cursor:pointer;" onclick="sw('rights',document.querySelector('[data-tab=\'rights\']'))">법령 상세 보기 →</span>
+        </div>
+        ${stageScore ? renderChecklist(stageScore, proj.id) : '<div style="font-size:12px;color:var(--gray-400);">구역 단계 정보를 불러올 수 없습니다</div>'}
+      </div>
+
       <div style="margin-top:14px;">
         <div style="font-size:11px;font-weight:600;color:var(--gray-600);margin-bottom:6px;">📝 내 메모 <span style="font-size:10px;color:var(--gray-400);font-weight:400;">(조합 공지, 특이사항 자유 입력)</span></div>
         <textarea id="projMemo_${proj.id}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;font-family:var(--font);resize:vertical;min-height:80px;outline:none;box-sizing:border-box;" placeholder="조합에서 공지한 일정, 특이사항 등을 자유롭게 메모하세요...">${proj.memo||''}</textarea>
@@ -2116,6 +2154,269 @@ function switchRTab(idx, el) {
   });
   el.style.color = 'var(--blue)';
   el.style.borderBottomColor = 'var(--blue)';
+}
+
+
+// ════════════════════════════════
+// 마이 대시보드 × 단계별 체크리스트
+// ════════════════════════════════
+const CL_DATA = {
+  1: {
+    label: '추진위원회 단계',
+    alert: null,
+    tip: '추진위원회 구성에 동의하면 조합설립에 동의한 것으로 간주됩니다. 신중히 결정하세요.',
+    items: [
+      {text:'추진위원장 선출 공고 및 구성 확인', tag:'legal', law:'도시정비법 제31조'},
+      {text:'추진위원회 운영규정 열람 신청', tag:'legal', law:'도시정비법 제34조'},
+      {text:'동의서 제출 전 권리가액 추정 자료 요청', tag:'money', law:null},
+      {text:'조합원 동의 요건 충족 여부 확인 (면적·소유자 수)', tag:'legal', law:null},
+      {text:'추진위원 결격사유 해당 여부 확인', tag:'urgent', law:'도시정비법 제43조'},
+      {text:'인근 재개발 사례 수익률 비교 검토', tag:'money', law:null},
+    ]
+  },
+  2: {
+    label: '추진위원회 단계',
+    alert: null,
+    tip: '추진위원회 구성에 동의하면 조합설립에 동의한 것으로 간주됩니다.',
+    items: [
+      {text:'추진위원장 선출 공고 및 구성 확인', tag:'legal', law:'도시정비법 제31조'},
+      {text:'추진위원회 운영규정 열람 신청', tag:'legal', law:'도시정비법 제34조'},
+      {text:'동의서 제출 전 권리가액 추정 자료 요청', tag:'money', law:null},
+      {text:'조합원 동의 요건 충족 여부 확인', tag:'legal', law:null},
+      {text:'추진위원 결격사유 해당 여부 확인', tag:'urgent', law:'도시정비법 제43조'},
+    ]
+  },
+  3: {
+    label: '조합설립 단계',
+    alert: '조합설립 동의는 최초 동의일부터 30일까지만 철회 가능합니다. 창립총회 후에는 철회 불가.',
+    tip: null,
+    items: [
+      {text:'창립총회 소집 공고 날짜 확인 (개최 14일 전 공고 의무)', tag:'urgent', law:'도시정비법 시행령 제27조'},
+      {text:'창립총회 참석 또는 위임장 제출', tag:'meeting', law:null},
+      {text:'조합 정관 열람 신청 및 이상 조항 확인', tag:'legal', law:'도시정비법 제40조'},
+      {text:'조합원 명부 열람·등사 신청', tag:'legal', law:'도시정비법 제124조'},
+      {text:'조합임원 이력·자격 결격사유 확인', tag:'urgent', law:'도시정비법 제43조'},
+      {text:'분담금 초기 추정액 서면 통보 요청', tag:'money', law:'도시정비법 제35조'},
+      {text:'조합설립인가일부터 30일 이내 등기 여부 확인', tag:'legal', law:'도시정비법 제38조'},
+    ]
+  },
+  4: {
+    label: '사업시행인가 단계',
+    alert: null,
+    tip: '사업시행계획서에 이주대책·세입자 대책·석면 철거계획이 포함되어야 합니다.',
+    items: [
+      {text:'사업시행계획서 공람 신청 (공람 기간 30일)', tag:'urgent', law:'도시정비법 제52조'},
+      {text:'내 물건 건축계획 포함 여부 확인', tag:'money', law:null},
+      {text:'이주 시기·이주비 조건 사전 확인', tag:'money', law:'도시정비법 제61조'},
+      {text:'분담금 추정액 증가 시 이의신청 기간 확인', tag:'legal', law:null},
+      {text:'조합 총회 개최 여부 모니터링 (사업시행계획서 과반수 의결 확인)', tag:'meeting', law:'도시정비법 제45조'},
+      {text:'시공사 선정 과정 경쟁입찰 여부 확인', tag:'urgent', law:'도시정비법 제29조'},
+      {text:'사업시행계획인가 신청일부터 60일 이내 결정 확인', tag:'legal', law:'도시정비법 제50조'},
+    ]
+  },
+  5: {
+    label: '관리처분인가 단계 ⭐',
+    alert: '분양신청을 통지일로부터 30일~60일 이내에 해야 합니다. 기간 내 미신청 시 현금청산 대상이 됩니다!',
+    tip: null,
+    subs: [
+      {
+        label: '분양신청',
+        items: [
+          {text:'분양통지 수령 확인 (사업시행인가 고시 후 90일 이내)', tag:'urgent', law:'도시정비법 제72조'},
+          {text:'분양신청서 기한 내 제출 (통지일부터 30일~60일)', tag:'urgent', law:'도시정비법 제72조'},
+          {text:'분양 신청 내역 서면 확인 보관', tag:'money', law:null},
+        ]
+      },
+      {
+        label: '관리처분계획',
+        items: [
+          {text:'감정평가액 통보서 수령 및 인근 시세 비교', tag:'urgent', law:'도시정비법 제74조'},
+          {text:'감정평가 이의신청 기간 내 신청 (필요 시)', tag:'legal', law:null},
+          {text:'관리처분계획 공람 신청 (30일 이상)', tag:'legal', law:'도시정비법 제78조'},
+          {text:'총회 개최 1개월 전 분담금 추산액 문서 통지 여부 확인', tag:'meeting', law:'도시정비법 제74조'},
+          {text:'조합원 총회 참석 (관리처분계획 과반수 의결 확인)', tag:'meeting', law:'도시정비법 제45조'},
+          {text:'이주비 대출 조건 및 지급 시기 확인', tag:'money', law:null},
+        ]
+      }
+    ]
+  },
+  6: {
+    label: '이주·철거 단계',
+    alert: '관리처분인가 이전 철거는 불법입니다 (도시정비법 제81조). 이주비는 법정 기한 내 지급 의무.',
+    tip: null,
+    subs: [
+      {
+        label: '이주',
+        items: [
+          {text:'이주 지원금 지급 시기 및 금액 서면 확인', tag:'money', law:null},
+          {text:'이주비 확정 후 임시 거주지 계약 진행', tag:'urgent', law:null},
+          {text:'이사 완료 후 명도 확인서 수령', tag:'legal', law:'도시정비법 제81조'},
+          {text:'세입자 이주 완료 여부 확인 (임대인일 경우)', tag:'urgent', law:null},
+          {text:'주거이전비 수령 확인 (소유자 2개월분·세입자 4개월분)', tag:'money', law:'공익사업법 시행규칙 제54조'},
+        ]
+      },
+      {
+        label: '철거 — 법령 확인',
+        items: [
+          {text:'관리처분인가 완료 후 철거 진행 여부 확인 (인가 전 철거 불가)', tag:'urgent', law:'도시정비법 제81조②'},
+          {text:'철거계획서 내 석면 현황·처리계획 포함 여부 확인', tag:'legal', law:'도시정비법 제52조①13호'},
+          {text:'석면 함유 건축자재 현황 및 철거·처리계획 공문 수령', tag:'urgent', law:'도시정비법 시행령 제47조②'},
+          {text:'철거 전 물건조서·사진·영상자료 작성·보관 여부 확인', tag:'legal', law:'도시정비법 시행령 제72조①'},
+          {text:'철거허가 신청 또는 신고 완료 여부 확인', tag:'legal', law:'건축물관리법 제30조①'},
+        ]
+      },
+      {
+        label: '착공 준비',
+        items: [
+          {text:'착공신고서 및 첨부서류 제출 여부 확인', tag:'legal', law:'건축법 제21조①'},
+          {text:'시공보증서 제출 여부 시장·군수등 확인', tag:'legal', law:'도시정비법 제82조②'},
+          {text:'공사 착수 기한 내 시작 여부 확인 (승인일로부터 5년 이내)', tag:'urgent', law:'주택법 제16조①'},
+        ]
+      }
+    ]
+  },
+  7: {
+    label: '착공·시공 단계',
+    alert: null,
+    tip: '공사비 증액이 발생하면 반드시 총회 의결을 거쳐야 합니다.',
+    items: [
+      {text:'공사 진행 현황 월별 조합 공지 확인', tag:'legal', law:null},
+      {text:'공사비 변경(증액) 발생 시 총회 의결 여부 확인', tag:'urgent', law:'도시정비법 제45조'},
+      {text:'입주자 사전점검 일정 공고 확인', tag:'urgent', law:null},
+      {text:'분양 계약서 세부 조항 검토', tag:'legal', law:null},
+      {text:'중도금 대출 일정 및 조건 확인', tag:'money', law:null},
+    ]
+  },
+  8: {
+    label: '착공·시공 단계',
+    alert: null,
+    tip: '준공인가 전에도 기준 충족 시 사용 허가 신청 가능합니다.',
+    items: [
+      {text:'공사 진행 현황 월별 조합 공지 확인', tag:'legal', law:null},
+      {text:'공사비 변경(증액) 발생 시 총회 의결 여부 확인', tag:'urgent', law:'도시정비법 제45조'},
+      {text:'입주자 사전점검 일정 공고 확인', tag:'urgent', law:null},
+      {text:'분양 계약서 세부 조항 검토', tag:'legal', law:null},
+      {text:'중도금 대출 일정 및 조건 확인', tag:'money', law:null},
+    ]
+  },
+  9: {
+    label: '준공·입주 단계',
+    alert: null,
+    tip: '청산금 수령 권리는 이전고시일 다음 날부터 5년간만 행사 가능합니다.',
+    items: [
+      {text:'사전 점검 시 하자 목록 서면으로 조합·시공사에 통보', tag:'urgent', law:null},
+      {text:'이전고시 다음 날 소유권 취득 확인', tag:'legal', law:'도시정비법 제86조'},
+      {text:'등기 이전 서류 준비 및 취득세 납부 (취득일로부터 60일)', tag:'urgent', law:null},
+      {text:'청산금 확인 및 수령·납부 (이전고시 후 5년 이내)', tag:'money', law:'도시정비법 제90조'},
+      {text:'하자보수 청구 기간(5~10년) 내 하자 발생 기록 보관', tag:'legal', law:null},
+      {text:'관리단 구성 및 첫 입주자 대표회의 참석', tag:'meeting', law:null},
+    ]
+  },
+};
+
+const CL_TAG_CLASS = {
+  urgent: 'cl-tag cl-tag-urgent',
+  legal:  'cl-tag cl-tag-legal',
+  money:  'cl-tag cl-tag-money',
+  meeting:'cl-tag cl-tag-meeting',
+};
+const CL_TAG_LABEL = {urgent:'필수', legal:'법령', money:'금전', meeting:'총회'};
+
+function getClChecks(projId) {
+  try { return JSON.parse(localStorage.getItem('cl_' + projId) || '{}'); } catch(e) { return {}; }
+}
+
+function clProgressBar(done, total) {
+  const pct = total ? Math.round(Math.min(done, total) / total * 100) : 0;
+  return `<div class="cl-progress">
+    <span class="cl-prog-text"><span>${done}/${total}</span>개 완료</span>
+    <div class="cl-prog-bar"><div class="cl-prog-fill" style="width:${pct}%;"></div></div>
+    <span style="font-size:11px;color:${pct===100?'var(--green)':'var(--gray-400)'};">${pct}%</span>
+  </div>`;
+}
+
+function renderOneItem(projId, idx, item) {
+  const checks = getClChecks(projId);
+  const done = !!checks[String(idx)];
+  const lawHtml = item.law ? `<span class="cl-law">⚖ ${item.law}</span>` : '';
+  return `<div class="cl-item${done ? ' cl-done' : ''}" onclick="toggleCl(${projId}, ${idx}, this)">
+    <div class="cl-box">${done ? '✓' : ''}</div>
+    <div style="flex:1;">
+      <div class="cl-text">${item.text}</div>
+      <div class="cl-meta">
+        <span class="${CL_TAG_CLASS[item.tag]}">${CL_TAG_LABEL[item.tag]}</span>
+        ${lawHtml}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderChecklist(stageScore, projId) {
+  const data = CL_DATA[stageScore];
+  if (!data) return `<div style="font-size:12px;color:var(--gray-400);padding:12px 0;">현재 단계(${stageScore}단계) 체크리스트 데이터 없음</div>`;
+
+  const checks = getClChecks(projId);
+  let html = '';
+  let totalCount = 0;
+
+  // 경고/팁 박스
+  if (data.alert) html += `<div class="cl-alert">⚠ ${data.alert}</div>`;
+  if (data.tip)   html += `<div class="cl-tip">💡 ${data.tip}</div>`;
+
+  if (data.subs) {
+    // 소섹션 구조 (5단계, 6단계)
+    let globalIdx = 0;
+    data.subs.forEach(sub => {
+      html += `<div class="cl-section-label">${sub.subLabel || sub.label}</div>`;
+      sub.items.forEach(item => {
+        html += renderOneItem(projId, globalIdx, item);
+        globalIdx++;
+      });
+    });
+    totalCount = globalIdx;
+  } else {
+    // 단순 목록
+    data.items.forEach((item, i) => {
+      html += renderOneItem(projId, i, item);
+    });
+    totalCount = data.items.length;
+  }
+
+  const done = Object.values(checks).filter(Boolean).length;
+  html += clProgressBar(Math.min(done, totalCount), totalCount);
+  return `<div class="cl-wrap" id="clWrap_${projId}">${html}</div>`;
+}
+
+function toggleCl(projId, idx, el) {
+  const checks = getClChecks(projId);
+  const key = String(idx);
+  checks[key] = !checks[key];
+  try { localStorage.setItem('cl_' + projId, JSON.stringify(checks)); } catch(e) {}
+  // DOM 직접 업데이트 (re-render 없이 빠르게)
+  const item = el;
+  const box = item.querySelector('.cl-box');
+  const txt = item.querySelector('.cl-text');
+  if (checks[key]) {
+    item.classList.add('cl-done');
+    box.textContent = '✓';
+  } else {
+    item.classList.remove('cl-done');
+    box.textContent = '';
+  }
+  // 진행률 업데이트
+  const wrap = document.getElementById('clWrap_' + projId);
+  if (wrap) {
+    const allItems = wrap.querySelectorAll('.cl-item');
+    const total = allItems.length;
+    const doneCount = wrap.querySelectorAll('.cl-item.cl-done').length;
+    const pct = total ? Math.round(doneCount / total * 100) : 0;
+    const prog = wrap.querySelector('.cl-prog-fill');
+    const progText = wrap.querySelector('.cl-prog-text span');
+    const progPct = wrap.querySelector('.cl-progress span:last-child');
+    if (prog) prog.style.width = pct + '%';
+    if (progText) progText.textContent = doneCount + '/' + total;
+    if (progPct) { progPct.textContent = pct + '%'; progPct.style.color = pct===100?'var(--green)':'var(--gray-400)'; }
+  }
 }
 
 
