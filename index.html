@@ -688,7 +688,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🏦 기준금리</div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
     <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">한국은행 기준금리</div><span class="kpi-icon">%</span></div><div class="kpi-val c-blue" id="ecosRate">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosRateDate">로딩 중</span><span class="kpi-tag" id="ecosRateTag">...</span></div></div>
-    <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">건설공사비지수 (COPI)</div><span class="kpi-icon">🏗</span></div><div class="kpi-val c-orange" id="ecosPpi">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosPpiDate">로딩 중</span><span class="kpi-tag" id="ecosPpiTag">...</span></div></div>
+    <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">건설공사비지수 (KICT)</div><span class="kpi-icon">🏗</span></div><div class="kpi-val c-orange" id="ecosPpi">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosPpiDate">로딩 중</span><span class="kpi-tag" id="ecosPpiTag">...</span></div></div>
     <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">사업 지연 구역 비율</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="ecosDelay">—</div><div class="kpi-foot"><span class="kpi-sub">redev_timeline 기반</span><span class="kpi-tag t-dn">실데이터</span></div></div>
   </div>
   <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🌐 글로벌 지표</div>
@@ -700,7 +700,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
     <div class="card"><div class="card-h"><div class="card-title">기준금리 추이</div><span class="bdg bdg-blue">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="rateChart"></canvas></div></div>
-    <div class="card"><div class="card-h"><div class="card-title">건설공사비지수 추이</div><span class="bdg bdg-orange">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
+    <div class="card"><div class="card-h"><div class="card-title">건설공사비지수 추이 (KICT)</div><span class="bdg bdg-orange">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
   </div>
 </div>
 
@@ -2165,9 +2165,9 @@ async function loadRisk(){
     document.getElementById('ecosRateDate').textContent=rate.date.replace(/(\d{4})(\d{2})/,'$1년 $2월');
     const rateTag=document.getElementById('ecosRateTag');if(rateTag){rateTag.textContent=rateChange>=0?'▲'+rateChange.toFixed(2):'▼'+Math.abs(rateChange).toFixed(2);rateTag.className='kpi-tag '+(rateChange>=0?'t-dn':'t-up');}
     // 건설공사비지수 (COPI) — ppi 필드 재활용 (서버에서 COPI 또는 PPI 반환)
-    document.getElementById('ecosPpi').textContent=ppi.current.toFixed(1);
+    document.getElementById('ecosPpi').textContent=ppi.current.toFixed(2);
     document.getElementById('ecosPpiDate').textContent=ppi.date.replace(/(\d{4})(\d{2})/,'$1년 $2월')+' 기준';
-    const ppiTag=document.getElementById('ecosPpiTag');if(ppiTag){ppiTag.textContent=(ppi.yoy>=0?'YoY +':'YoY ')+ppi.yoy.toFixed(1)+'%';ppiTag.className='kpi-tag '+(ppi.yoy>=0?'t-dn':'t-up');}
+    const ppiTag=document.getElementById('ecosPpiTag');if(ppiTag){ppiTag.textContent=(ppi.yoy>=0?'YoY +':'YoY ')+ppi.yoy.toFixed(2)+'%';ppiTag.className='kpi-tag '+(ppi.yoy>=0?'t-dn':'t-up');}
     const delayRate=ALERTS.length>0?Math.round(ALERTS.filter(a=>a.stuck>=6).length/Math.max(Object.values(SD).reduce((a,b)=>a+b,0),1)*100*10)/10:0;
     document.getElementById('ecosDelay').textContent=delayRate+'%';
     // 글로벌 지표 — 실패 시 '데이터 없음' 표시 (빈값 아닌 명시적 표시)
