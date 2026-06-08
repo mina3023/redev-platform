@@ -700,7 +700,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
     <div class="card"><div class="card-h"><div class="card-title">기준금리 추이</div><span class="bdg bdg-blue">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="rateChart"></canvas></div></div>
-    <div class="card"><div class="card-h"><div class="card-title">건설공사비지수 추이 (KICT)</div><span class="bdg bdg-orange">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
+    <div class="card"><div class="card-h"><div class="card-title">건설공사비지수 추이 (KICT)</div><span class="bdg bdg-orange">한국건설기술연구원</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
   </div>
 </div>
 
@@ -2166,7 +2166,7 @@ async function loadRisk(){
     const rateTag=document.getElementById('ecosRateTag');if(rateTag){rateTag.textContent=rateChange>=0?'▲'+rateChange.toFixed(2):'▼'+Math.abs(rateChange).toFixed(2);rateTag.className='kpi-tag '+(rateChange>=0?'t-dn':'t-up');}
     // 건설공사비지수 (COPI) — ppi 필드 재활용 (서버에서 COPI 또는 PPI 반환)
     document.getElementById('ecosPpi').textContent=ppi.current.toFixed(2);
-    document.getElementById('ecosPpiDate').textContent=ppi.date.replace(/(\d{4})(\d{2})/,'$1년 $2월')+' 기준';
+    document.getElementById('ecosPpiDate').textContent=ppi.date.replace(/(\d{4})(\d{2})/,'$1년 $2월')+' 기준 · KICT';
     const ppiTag=document.getElementById('ecosPpiTag');if(ppiTag){ppiTag.textContent=(ppi.yoy>=0?'YoY +':'YoY ')+ppi.yoy.toFixed(2)+'%';ppiTag.className='kpi-tag '+(ppi.yoy>=0?'t-dn':'t-up');}
     const delayRate=ALERTS.length>0?Math.round(ALERTS.filter(a=>a.stuck>=6).length/Math.max(Object.values(SD).reduce((a,b)=>a+b,0),1)*100*10)/10:0;
     document.getElementById('ecosDelay').textContent=delayRate+'%';
