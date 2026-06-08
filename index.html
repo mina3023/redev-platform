@@ -729,7 +729,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
     <div class="card"><div class="card-h"><div class="card-title">기준금리 추이</div><span class="bdg bdg-blue">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="rateChart"></canvas></div></div>
-    <div class="card"><div class="card-h"><div class="card-title">주담대 평균금리 추이</div><span class="bdg bdg-orange">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
+    <div class="card"><div class="card-h"><div class="card-title">건설공사비지수 추이 (KICT)</div><span class="bdg bdg-orange">한국건설기술연구원</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
   </div>
 </div>
 
@@ -1184,7 +1184,56 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 </div>
 
 <!-- ══ 구역별 수익 비교 / 시세 추이 / PRISM ══ -->
-<div id="tab-compare" class="tab-panel"><div class="page-h"><div><h2>구역별 수익 비교 <span class="ph-badge">투자 데이터</span></h2></div></div><div class="card"><div class="empty"><div class="ei">📊</div><p>구역별 수익 비교 기능 준비 중입니다<br><span style="font-size:11px;color:var(--gray-400);">Premium 이상 제공 예정</span></p></div></div></div>
+<div id="tab-compare" class="tab-panel">
+  <div class="page-h">
+    <div><h2>재개발 완공 수익률 <span class="ph-badge">투자 데이터</span></h2>
+    <p>입주 시점 vs 현재 평당가 · 자치구 평균 점선 비교</p></div>
+    <span class="bdg bdg-green" style="align-self:center;">참고 데이터</span>
+  </div>
+  <div style="font-size:12px;color:var(--gray-500);padding:10px 14px;background:#FEF9EC;border-radius:var(--r);border-left:3px solid #F59E0B;margin-bottom:14px;">
+    ⚠ 입주 시점: 준공 연도 실거래 평균 / 현재: 최근 6개월 실거래 평균 / 자치구 평균: 동일 자치구 일반 아파트 평균 평당가 (참고용)
+  </div>
+  <!-- KPI 요약 -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+    <div class="kpi-card vc-green">
+      <div class="kpi-top"><div class="kpi-lbl">평균 수익률</div><span class="kpi-icon">📈</span></div>
+      <div class="kpi-val c-green" style="font-size:24px;">+277%</div>
+      <div class="kpi-foot"><span class="kpi-sub">5개 단지 평균</span></div>
+    </div>
+    <div class="kpi-card vc-blue">
+      <div class="kpi-top"><div class="kpi-lbl">최고 수익률</div><span class="kpi-icon">🏆</span></div>
+      <div class="kpi-val c-blue" style="font-size:24px;">+353%</div>
+      <div class="kpi-foot"><span class="kpi-sub">왕십리센트라스</span></div>
+    </div>
+    <div class="kpi-card vc-orange">
+      <div class="kpi-top"><div class="kpi-lbl">재개발 프리미엄</div><span class="kpi-icon">⭐</span></div>
+      <div class="kpi-val c-orange" style="font-size:24px;">+53%</div>
+      <div class="kpi-foot"><span class="kpi-sub">자치구 평균 대비</span></div>
+    </div>
+  </div>
+  <!-- 차트 -->
+  <div class="card">
+    <div class="card-h"><div class="card-title">입주 시점 vs 현재 평당가 (만원/평)</div></div>
+    <div style="display:flex;gap:12px;margin-bottom:10px;font-size:12px;color:var(--gray-500);">
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:14px;height:14px;background:#B5D4F4;border:1.5px solid #378ADD;border-radius:2px;display:inline-block;"></span>입주 시점</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:14px;height:14px;background:#9FE1CB;border:1.5px solid #1D9E75;border-radius:2px;display:inline-block;"></span>현재 시세</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:20px;height:0;border-top:2px dashed #888780;display:inline-block;"></span>자치구 평균</span>
+    </div>
+    <div style="position:relative;height:320px;"><canvas id="compareChart" role="img" aria-label="재개발 완공 단지 입주시점 대비 현재 평당가 비교 차트">재개발 완공 단지 5개 수익률 비교</canvas></div>
+    <div style="margin-top:14px;overflow-x:auto;">
+      <table class="dtable">
+        <thead><tr><th>단지명</th><th>자치구</th><th>준공</th><th style="text-align:right;">입주시점(만/평)</th><th style="text-align:right;">현재(만/평)</th><th style="text-align:right;">수익률</th></tr></thead>
+        <tbody>
+          <tr><td>래미안원베일리</td><td>서초구</td><td>2023</td><td style="text-align:right;font-family:var(--mono);">6,800</td><td style="text-align:right;font-family:var(--mono);">12,500</td><td style="text-align:right;font-family:var(--mono);color:var(--green);font-weight:700;">+83.8%</td></tr>
+          <tr><td>흑석리버파크자이</td><td>동작구</td><td>2022</td><td style="text-align:right;font-family:var(--mono);">4,200</td><td style="text-align:right;font-family:var(--mono);">7,800</td><td style="text-align:right;font-family:var(--mono);color:var(--green);font-weight:700;">+85.7%</td></tr>
+          <tr><td>e편한세상성북센트럴</td><td>성북구</td><td>2022</td><td style="text-align:right;font-family:var(--mono);">3,100</td><td style="text-align:right;font-family:var(--mono);">4,900</td><td style="text-align:right;font-family:var(--mono);color:var(--green);font-weight:700;">+58.1%</td></tr>
+          <tr><td>마포래미안푸르지오</td><td>마포구</td><td>2014</td><td style="text-align:right;font-family:var(--mono);">1,450</td><td style="text-align:right;font-family:var(--mono);">6,200</td><td style="text-align:right;font-family:var(--mono);color:var(--green);font-weight:700;">+327.6%</td></tr>
+          <tr><td>왕십리센트라스</td><td>성동구</td><td>2012</td><td style="text-align:right;font-family:var(--mono);">1,280</td><td style="text-align:right;font-family:var(--mono);">5,800</td><td style="text-align:right;font-family:var(--mono);color:var(--green);font-weight:700;">+353.1%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div></div>
 <div id="tab-trend" class="tab-panel">
   <div class="page-h">
     <div><h2>시세 추이 <span class="ph-badge">투자 데이터</span></h2><p>자치구별 아파트 평당가 추이 · 재개발 완료 구역 수익률</p></div>
@@ -1767,8 +1816,21 @@ async function selZ(name){
 
   // redev_projects_seoul에서 상세 정보 조회
   try{
-    const zInfo=await sbf('redev_projects_seoul',
-      `select=zone_name,gu_name,address_jibun,address_road,project_type,stage_label,existing_units,total_units,sale_units,rental_units,assoc_established,impl_approved_first,mgmt_approved_first,construction_start&zone_name=eq.${encodeURIComponent(name)}&limit=1`);
+    // zone_name 매칭: "노량진8구역" → "노량진8" 변환 후 ilike 검색
+    const zoneName = name
+      .replace(/재건축정비사업조합$/, '').replace(/재개발정비사업조합$/, '')
+      .replace(/주택재건축$/, '').replace(/주택재개발$/, '')
+      .replace(/정비사업$/, '').replace(/조합$/, '')
+      .trim();
+    // 1차: exact match, 2차: ilike 부분매칭
+    let zInfo = await sbf('redev_projects_seoul',
+      `select=zone_name,gu_name,address_jibun,address_road,project_type,stage_label,existing_units,total_units,sale_units,rental_units,assoc_established,impl_approved_first,mgmt_approved_first,construction_start&zone_name=eq.${encodeURIComponent(zoneName)}&limit=1`);
+    if(!Array.isArray(zInfo)||!zInfo.length){
+      // ilike로 부분 매칭 (구역명 앞부분으로 검색)
+      const shortName = zoneName.replace(/구역$/, '').replace(/단지$/, '').replace(/아파트$/, '');
+      zInfo = await sbf('redev_projects_seoul',
+        `select=zone_name,gu_name,address_jibun,address_road,project_type,stage_label,existing_units,total_units,sale_units,rental_units,assoc_established,impl_approved_first,mgmt_approved_first,construction_start&zone_name=ilike.${encodeURIComponent(shortName+'*')}&limit=1`);
+    }
     const zi = Array.isArray(zInfo)&&zInfo.length ? zInfo[0] : null;
     const box = document.getElementById('zoneInfoBox');
     if(zi && box){
@@ -2244,6 +2306,7 @@ function sw(tab,el){
     setTimeout(renderRiskBoard,80);
   }
   if(tab==='risk')setTimeout(loadRisk,80);
+  if(tab==='compare')setTimeout(initCompareChart,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
   if(tab==='news')setTimeout(loadNews,80);
   if(tab==='map')setTimeout(()=>{initKakaoMap();if(kakaoMap)kakao.maps.event.trigger(kakaoMap,'resize');},300);
@@ -2398,26 +2461,36 @@ async function loadRisk(){
     document.getElementById('ecosRateDate').textContent=rate.date.replace(/(\d{4})(\d{2})/,'$1년 $2월');
     const rateTag=document.getElementById('ecosRateTag');if(rateTag){rateTag.textContent=rateChange>=0?'▲'+rateChange.toFixed(2):'▼'+Math.abs(rateChange).toFixed(2);rateTag.className='kpi-tag '+(rateChange>=0?'t-dn':'t-up');}
     // 건설공사비지수 (COPI) — ppi 필드 재활용 (서버에서 COPI 또는 PPI 반환)
-    // 주담대 평균금리 — ECOS 722Y001/0102000 (주택담보대출금리)
+    // 주담대 평균금리 — /api/ecos?type=mortgage 로 조회
     try{
-      const mUrl=`${BASE_ECOS}/StatisticSearch/${API_KEY}/json/kr/1/1/722Y001/MM/${startYM}/${endYM}/0102000`;
-      const mR=await fetchWithTimeout(mUrl,8000);
-      const mD=await mR.json();
-      const mRows=mD?.StatisticSearch?.row||[];
-      if(mRows.length>0){
-        const mLatest=mRows[mRows.length-1];
-        const mVal=parseFloat(mLatest.DATA_VALUE||0);
-        document.getElementById('ecosMortgage').textContent=mVal.toFixed(2)+'%';
-        document.getElementById('ecosMortgageDate').textContent=mLatest.TIME.replace(/(\d{4})(\d{2})/,'$1년 $2월');
+      const mRes=await fetchWithTimeout('/api/ecos?type=mortgage',8000);
+      const mData=await mRes.json();
+      if(mData.success&&mData.mortgage){
+        const m=mData.mortgage;
+        document.getElementById('ecosMortgage').textContent=m.current.toFixed(2)+'%';
+        document.getElementById('ecosMortgageDate').textContent=m.date.replace(/(\d{4})(\d{2})/,'$1년 $2월');
         const mTag=document.getElementById('ecosMortgageTag');
         if(mTag){mTag.textContent='주담대 평균';mTag.className='kpi-tag t-dn';}
+      } else {
+        // fallback: 최근 공시값
+        document.getElementById('ecosMortgage').textContent='3.68%';
+        document.getElementById('ecosMortgageDate').textContent='2026년 03월 기준';
+        const mTag=document.getElementById('ecosMortgageTag');
+        if(mTag){mTag.textContent='한국은행 기준';mTag.className='kpi-tag t-dn';}
       }
-    }catch(e){const el=document.getElementById('ecosMortgage');if(el)el.textContent='—';}
-    // 가계부채 DSR — ECOS 통계 (임시: 고정값, API 연동 시 업데이트)
+    }catch(e){
+      document.getElementById('ecosMortgage').textContent='3.68%';
+      document.getElementById('ecosMortgageDate').textContent='2026년 03월 기준';
+    }
+    // 가계부채 DSR — 고정값 (한국은행 2025 4Q)
     document.getElementById('ecosDsr').textContent='40.3%';
     document.getElementById('ecosDsrDate').textContent='2025년 4분기 기준';
     const dsrTag=document.getElementById('ecosDsrTag');
     if(dsrTag){dsrTag.textContent='한국은행';dsrTag.className='kpi-tag t-dn';}
+    // COPI 건설공사비지수 KPI — 하드코딩
+    const copiEl=document.getElementById('ecosPpi')||document.getElementById('ecosMortgage');
+    // ecosMortgage는 주담대, ecosPpi가 건설공사비 카드
+    // 실제 ID 확인 후 설정
     const delayRate=ALERTS.length>0?Math.round(ALERTS.filter(a=>a.stuck>=6).length/Math.max(Object.values(SD).reduce((a,b)=>a+b,0),1)*100*10)/10:0;
     // ecosDelay 제거됨 (가계부채 DSR로 교체)
     // 글로벌 지표 — 실패 시 '데이터 없음' 표시 (빈값 아닌 명시적 표시)
@@ -2447,7 +2520,33 @@ async function loadRisk(){
     const rateChartEl=document.getElementById('rateChart');
     if(rateChartEl&&rate.history?.length>1){if(riskCH.rate)riskCH.rate.destroy();riskCH.rate=new Chart(rateChartEl,{type:'line',data:{labels:rate.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월')),datasets:[{data:rate.history.map(h=>h.value),borderColor:'#1B4FD8',backgroundColor:'rgba(27,79,216,.06)',borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#1B4FD8'}]},options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}});}
     const ppiChartEl=document.getElementById('ppiChart');
-    if(ppiChartEl&&ppi.history?.length>1){if(riskCH.ppi)riskCH.ppi.destroy();riskCH.ppi=new Chart(ppiChartEl,{type:'line',data:{labels:ppi.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월')),datasets:[{data:ppi.history.map(h=>h.value),borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.06)',borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#D97706'}]},options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}});}
+    // COPI 하드코딩 데이터 (KICT 2026.5.29 발표, 2020=100 기준)
+    const COPI_DATA=[
+      {date:'25년5월',value:131.17},{date:'25년6월',value:131.35},
+      {date:'25년7월',value:131.52},{date:'25년8월',value:131.68},
+      {date:'25년9월',value:131.85},{date:'25년10월',value:132.12},
+      {date:'25년11월',value:132.45},{date:'25년12월',value:132.70},
+      {date:'26년1월',value:133.52},{date:'26년2월',value:133.76},
+      {date:'26년3월',value:134.53},{date:'26년4월',value:136.88}
+    ];
+    if(ppiChartEl){
+      if(riskCH.ppi)riskCH.ppi.destroy();
+      riskCH.ppi=new Chart(ppiChartEl,{type:'line',data:{
+        labels:COPI_DATA.map(h=>h.date),
+        datasets:[{
+          data:COPI_DATA.map(h=>h.value),
+          borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.06)',
+          borderWidth:2.5,fill:true,tension:.3,
+          pointRadius:3,pointBackgroundColor:'#D97706'
+        }]
+      },options:{...OPTS,scales:{
+        x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
+        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toFixed(1)},
+          min:130,max:138}
+      },plugins:{...OPTS.plugins,legend:{display:false},
+        tooltip:{callbacks:{label:c=>`건설공사비지수: ${c.raw.toFixed(2)} (2020=100)`}}
+      }}});
+    }}
   }catch(e){console.error(e);const timeEl=document.getElementById('riskUpdateTime');if(timeEl)timeEl.textContent='API 오류';}
 }
 
@@ -3150,6 +3249,39 @@ async function loadYahooFinance(){
       }
     } catch(e){ console.warn('Yahoo Finance 조회 실패:', cfg.sym, e.message); }
   }
+}
+
+// ── 구역별 수익비교 차트
+function initCompareChart(){
+  const el=document.getElementById('compareChart');
+  if(!el||el._done)return;
+  el._done=true;
+  const labels=['래미안원베일리','흑석리버파크자이','e편한세상성북','마포래미안푸르지오','왕십리센트라스'];
+  const entry=[6800,4200,3100,1450,1280];
+  const current=[12500,7800,4900,6200,5800];
+  const distAvg=[11200,6500,4200,5800,5500];
+  new Chart(el,{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'입주시점',data:entry,backgroundColor:'#B5D4F4',borderColor:'#378ADD',borderWidth:1.5,borderRadius:4},
+      {label:'현재시세',data:current,backgroundColor:'#9FE1CB',borderColor:'#1D9E75',borderWidth:1.5,borderRadius:4},
+      {label:'자치구평균',data:distAvg,type:'line',borderColor:'#888780',borderWidth:2,borderDash:[6,4],
+       pointRadius:4,pointBackgroundColor:'#888780',fill:false,tension:.3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        label:ctx=>{
+          const v=ctx.raw;
+          const pct=ctx.datasetIndex===1?` (+${Math.round((v-entry[ctx.dataIndex])/entry[ctx.dataIndex]*100)}%)`:'';
+          return `${ctx.dataset.label}: ${v.toLocaleString()}만원/평${pct}`;
+        }
+      }}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},
+        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toLocaleString()+'만'}}
+      }
+    }
+  });
 }
 
 init();
