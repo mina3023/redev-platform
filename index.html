@@ -532,7 +532,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="sb-item" data-tab="investor" onclick="sw('investor',this)"><span class="sb-icon">💰</span>수익 계산기</div>
     <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
     <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
-    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 현황</div>
+    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 현황 <span style="font-size:9px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:3px;margin-left:2px;">PRO</span></div>
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
@@ -2120,7 +2120,30 @@ function sw(tab,el){
   if(tab==='investor')setTimeout(calcSim,80);
   if(tab==='trade')setTimeout(loadTrade,80);
   if(tab==='trend')setTimeout(loadTrend,80);
-  if(tab==='riskboard')setTimeout(renderRiskBoard,80);
+  if(tab==='riskboard'){
+    const tier=currentProfile?.tier||'free';
+    if(!['premium','black','b2b'].includes(tier)){
+      // 프리미엄 미달 → 잠금 화면 표시
+      const tabEl2=document.getElementById('tab-riskboard');
+      if(tabEl2){
+        tabEl2.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;">
+          <div style="font-size:48px;">🔒</div>
+          <div style="font-size:20px;font-weight:700;color:var(--gray-900);">프리미엄 전용 기능</div>
+          <div style="font-size:14px;color:var(--gray-500);text-align:center;line-height:1.8;">
+            조합 리스크 현황은 <strong>Premium</strong> 이상 구독자만 열람 가능합니다.<br>
+            사업 지연·언론 보도 기반 객관적 데이터로 투자를 판단하세요.
+          </div>
+          <button onclick="openAuth()" style="padding:12px 28px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;">
+            Premium 업그레이드 →
+          </button>
+          <div style="font-size:11px;color:var(--gray-400);">월 49,900원 · 조합원 전용</div>
+        </div>`;
+        tabEl2.classList.add('active');
+      }
+      return;
+    }
+    setTimeout(renderRiskBoard,80);
+  }
   if(tab==='risk')setTimeout(loadRisk,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
   if(tab==='news')setTimeout(loadNews,80);
@@ -2831,6 +2854,91 @@ const GRADE_META = {
 let rbPage = 1;
 const RB_PAGE_SIZE = 20;
 
+// 구역별 뉴스 실시간 조회 캐시
+const newsCache = {};
+
+async function fetchZoneNews(zoneName) {
+  if (newsCache[zoneName]) return newsCache[zoneName];
+  try {
+    const res = await fetch(`/api/risk-news?zone=${encodeURIComponent(zoneName)}`);
+    const data = await res.json();
+    if (data.success) {
+      newsCache[zoneName] = data;
+      // RISK_DATA 해당 구역 뉴스 수치 업데이트
+      const idx = RISK_DATA.findIndex(d => d[0] === zoneName);
+      if (idx !== -1) {
+        RISK_DATA[idx][4] = data.general;
+        RISK_DATA[idx][5] = data.lawsuit;
+        // 등급 재산정 (뉴스 기반)
+        RISK_DATA[idx][6] = calcNewsGrade(RISK_DATA[idx][3], RISK_DATA[idx][7], data.lawsuit, data.general);
+      }
+    }
+    return data;
+  } catch(e) { return null; }
+}
+
+function calcNewsGrade(delay, stagnant, lawsuit, general) {
+  if ((lawsuit >= 3 && stagnant) || (lawsuit >= 2 && stagnant && delay >= 24)) return 'CRISIS';
+  if (lawsuit >= 2 || (lawsuit >= 1 && stagnant) || (stagnant && delay >= 24)) return 'DANGER';
+  if (general >= 4 || lawsuit >= 1 || stagnant) return 'CAUTION';
+  if (general >= 1 || delay >= 6) return 'WATCH';
+  return 'SAFE';
+}
+
+// 구역 상세 뉴스 패널 표시
+async function showZoneNews(zoneName, el) {
+  // 기존 패널 제거
+  document.querySelectorAll('.zone-news-panel').forEach(p => p.remove());
+  // 로딩 패널
+  const panel = document.createElement('tr');
+  panel.className = 'zone-news-panel';
+  panel.innerHTML = `<td colspan="8" style="background:var(--gray-50);padding:14px 20px;">
+    <div style="font-size:12px;color:var(--gray-400);">🔍 ${zoneName} 뉴스 조회 중...</div>
+  </td>`;
+  el.parentNode.insertAfter ? el.parentNode.insertAfter(panel, el) : el.after(panel);
+
+  const data = await fetchZoneNews(zoneName);
+  if (!data || !data.success) {
+    panel.innerHTML = `<td colspan="8" style="background:var(--gray-50);padding:14px 20px;">
+      <div style="font-size:12px;color:var(--gray-400);">뉴스 조회 실패 (네이버 API 키 확인 필요)</div>
+    </td>`;
+    return;
+  }
+
+  const lawItems = (data.lawsuitItems||[]).slice(0,3);
+  const genItems = (data.generalItems||[]).slice(0,3);
+  const lawHtml  = lawItems.length
+    ? lawItems.map(i=>`<a href="${i.link}" target="_blank" style="display:block;padding:5px 0;text-decoration:none;border-bottom:1px solid var(--gray-100);">
+        <span style="font-size:11px;font-weight:600;color:var(--red);">[소송·수사]</span>
+        <span style="font-size:12px;color:var(--gray-900);margin-left:6px;">${i.title}</span>
+        <span style="font-size:10px;color:var(--gray-400);margin-left:8px;">${new Date(i.pubDate).toLocaleDateString('ko-KR')}</span>
+      </a>`).join('')
+    : '<div style="font-size:12px;color:var(--gray-400);padding:5px 0;">소송·수사 관련 기사 없음</div>';
+
+  const genHtml = genItems.length
+    ? genItems.map(i=>`<a href="${i.link}" target="_blank" style="display:block;padding:5px 0;text-decoration:none;border-bottom:1px solid var(--gray-100);">
+        <span style="font-size:11px;font-weight:600;color:var(--orange);">[분쟁·지연]</span>
+        <span style="font-size:12px;color:var(--gray-900);margin-left:6px;">${i.title}</span>
+        <span style="font-size:10px;color:var(--gray-400);margin-left:8px;">${new Date(i.pubDate).toLocaleDateString('ko-KR')}</span>
+      </a>`).join('')
+    : '<div style="font-size:12px;color:var(--gray-400);padding:5px 0;">분쟁·지연 관련 기사 없음</div>';
+
+  panel.innerHTML = `<td colspan="8" style="background:var(--blue-light);padding:14px 20px;border-left:3px solid var(--blue);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-size:13px;font-weight:700;color:var(--gray-900);">📰 ${zoneName} — 최근 1년 언론 보도</span>
+      <span style="font-size:11px;color:var(--gray-400);">소송·수사 ${data.lawsuit}건 / 분쟁·지연 ${data.general}건 / 기준일 오늘</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:6px;">⚖ 소송·수사 보도 (${lawItems.length}건)</div>${lawHtml}</div>
+      <div><div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px;">📢 분쟁·지연 보도 (${genItems.length}건)</div>${genHtml}</div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--gray-400);">
+      * 네이버뉴스 API 기반 · 조회 시점: ${new Date().toLocaleString('ko-KR')}
+      <button onclick="this.closest('tr').remove()" style="margin-left:12px;border:none;background:none;cursor:pointer;color:var(--gray-400);font-size:11px;">✕ 닫기</button>
+    </div>
+  </td>`;
+}
+
 function renderRiskBoard() {
   const guF    = document.getElementById('rbGuFilter')?.value || 'all';
   const gradeF = document.getElementById('rbGradeFilter')?.value || 'all';
@@ -2871,7 +2979,7 @@ function renderRiskBoard() {
     const newsStr  = general ? `${general}건` : '-';
     const lawStr   = lawsuit ? `<span style="color:var(--red);font-weight:600;">${lawsuit}건</span>` : '-';
     const badge    = `<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:${meta.bg};color:${meta.color};">${meta.icon} ${meta.label}</span>`;
-    return `<tr>
+    return `<tr style="cursor:pointer;" onclick="showZoneNews('${nm}', this)" title="클릭하면 최신 뉴스를 조회합니다">
       <td>${badge}</td>
       <td style="font-weight:600;color:var(--gray-900);">${nm}</td>
       <td>${gu}</td>
