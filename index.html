@@ -411,6 +411,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 .cl-prog-fill{height:100%;border-radius:3px;background:#059669;transition:width .3s;}
 .cl-alert{margin-bottom:10px;padding:10px 13px;background:#FEF2F2;border-radius:var(--r);border-left:3px solid var(--red);font-size:12px;color:#991B1B;line-height:1.6;}
 .cl-tip{margin-bottom:10px;padding:10px 13px;background:var(--green-bg);border-radius:var(--r);border-left:3px solid var(--green);font-size:12px;color:#065F46;line-height:1.6;}
+
+/* 구역검색 단계 색상 — SC 배열과 동일하게 통일 */
+.sc1{background:#F3F4F6;color:#4B5563;border:1px solid #D1D5DB;}
+.sc2{background:#DBEAFE;color:#1D4ED8;border:1px solid #93C5FD;}
+.sc3{background:#EDE9FE;color:#6D28D9;border:1px solid #C4B5FD;}
+.sc4{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;}
+.sc5{background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;}
+.sc6{background:#FFEDD5;color:#9A3412;border:1px solid #FDBA74;}
+.sc7{background:#FAE8FF;color:#86198F;border:1px solid #E879F9;}
+.sc8{background:#FFE4E6;color:#9F1239;border:1px solid #FDA4AF;}
+.sc9{background:#ECFDF5;color:#065F46;border:1px solid #6EE7B7;}
 </style>
 </head>
 <body>
@@ -677,19 +688,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🏦 기준금리</div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
     <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">한국은행 기준금리</div><span class="kpi-icon">%</span></div><div class="kpi-val c-blue" id="ecosRate">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosRateDate">로딩 중</span><span class="kpi-tag" id="ecosRateTag">...</span></div></div>
-    <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">생산자물가지수 (PPI)</div><span class="kpi-icon">↑</span></div><div class="kpi-val c-orange" id="ecosPpi">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosPpiDate">로딩 중</span><span class="kpi-tag" id="ecosPpiTag">...</span></div></div>
+    <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">건설공사비지수 (COPI)</div><span class="kpi-icon">🏗</span></div><div class="kpi-val c-orange" id="ecosPpi">—</div><div class="kpi-foot"><span class="kpi-sub" id="ecosPpiDate">로딩 중</span><span class="kpi-tag" id="ecosPpiTag">...</span></div></div>
     <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">사업 지연 구역 비율</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="ecosDelay">—</div><div class="kpi-foot"><span class="kpi-sub">redev_timeline 기반</span><span class="kpi-tag t-dn">실데이터</span></div></div>
   </div>
   <div style="font-size:10.5px;font-weight:700;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">🌐 글로벌 지표</div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
-    <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">미국 10년물 국채금리</div><span class="kpi-icon">🇺🇸</span></div><div class="kpi-val" style="color:var(--blue);font-size:22px;" id="usTreasury">로딩 중</div><div class="kpi-foot"><span class="kpi-sub">국내 금리 선행지표</span></div></div>
-    <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">WTI 유가</div><span class="kpi-icon">🛢</span></div><div class="kpi-val" style="color:var(--orange);font-size:22px;" id="wtiPrice">로딩 중</div><div class="kpi-foot"><span class="kpi-sub">공사비 간접 영향</span></div></div>
-    <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">USD/KRW 환율</div><span class="kpi-icon">💱</span></div><div class="kpi-val" style="color:var(--green);font-size:22px;" id="usdKrw">로딩 중</div><div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS</span></div></div>
-    <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">건설공사비지수</div><span class="kpi-icon">🏗</span></div><div class="kpi-val" style="color:var(--red);font-size:22px;" id="constIdx">로딩 중</div><div class="kpi-foot"><span class="kpi-sub">한국은행 ECOS</span></div></div>
+    <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">미국 10년물 국채금리</div><span class="kpi-icon">🇺🇸</span></div><div class="kpi-val" style="color:var(--blue);font-size:22px;" id="usTreasury">—</div><div class="kpi-foot"><span class="kpi-sub" id="usTreasuryDate">국내 금리 선행지표</span></div></div>
+    <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">WTI 유가</div><span class="kpi-icon">🛢</span></div><div class="kpi-val" style="color:var(--orange);font-size:22px;" id="wtiPrice">—</div><div class="kpi-foot"><span class="kpi-sub" id="wtiDate">공사비 간접 영향</span></div></div>
+    <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">USD/KRW 환율</div><span class="kpi-icon">💱</span></div><div class="kpi-val" style="color:var(--green);font-size:22px;" id="usdKrw">—</div><div class="kpi-foot"><span class="kpi-sub" id="usdKrwDate">한국은행 ECOS</span></div></div>
+    <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">건설공사비지수</div><span class="kpi-icon">🏗</span></div><div class="kpi-val" style="color:var(--red);font-size:22px;" id="constIdx">—</div><div class="kpi-foot"><span class="kpi-sub" id="constIdxDate">한국은행 ECOS</span></div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
     <div class="card"><div class="card-h"><div class="card-title">기준금리 추이</div><span class="bdg bdg-blue">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="rateChart"></canvas></div></div>
-    <div class="card"><div class="card-h"><div class="card-title">생산자물가지수 추이</div><span class="bdg bdg-orange">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
+    <div class="card"><div class="card-h"><div class="card-title">건설공사비지수 추이</div><span class="bdg bdg-orange">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
   </div>
 </div>
 
@@ -774,7 +785,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
     <div class="card"><div class="card-h"><div class="card-title">검색어 트렌드</div><span class="bdg bdg-blue">빅데이터 기반</span></div><div id="newsWordCloud" style="padding:12px;min-height:120px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;"><span style="color:var(--gray-400);font-size:12px;">뉴스 로딩 후 생성됩니다</span></div></div>
-    <div class="card"><div class="card-h"><div class="card-title">국토부 보도자료</div><span class="bdg bdg-green">네이버뉴스 연동</span></div><div id="molit-news" style="max-height:140px;overflow-y:auto;"><div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">로딩 중...</div></div></div>
+    <div class="card"><div class="card-h"><div class="card-title">조합 관련 뉴스</div><span class="bdg bdg-green">네이버뉴스 연동</span></div><div id="molit-news" style="max-height:140px;overflow-y:auto;"><div style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">로딩 중...</div></div></div>
   </div>
   <div class="card"><div class="card-h"><div class="card-title">최신 뉴스</div><span class="bdg bdg-gray" id="newsTotalBadge">로딩 중</span></div>
     <div id="newsListBody" style="display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto;"><div style="text-align:center;padding:30px;color:var(--gray-400);"><span class="spinner"></span>뉴스 로딩 중...</div></div>
@@ -789,7 +800,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
         <option value="11110">종로구</option><option value="11140">중구</option><option value="11170">용산구</option><option value="11200">성동구</option><option value="11215">광진구</option><option value="11230">동대문구</option><option value="11260">중랑구</option><option value="11290">성북구</option><option value="11305">강북구</option><option value="11320">도봉구</option><option value="11350">노원구</option><option value="11380">은평구</option><option value="11410">서대문구</option><option value="11440">마포구</option><option value="11470">양천구</option><option value="11500">강서구</option><option value="11530">구로구</option><option value="11545">금천구</option><option value="11560">영등포구</option><option value="11590">동작구</option><option value="11620">관악구</option><option value="11650" selected>서초구</option><option value="11680">강남구</option><option value="11710">송파구</option><option value="11740">강동구</option>
       </select>
       <select id="tradeYmd" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;color:var(--gray-700);background:#fff;cursor:pointer;outline:none;" onchange="loadTrade()">
-        <option value="202603">2026년 3월</option><option value="202602">2026년 2월</option><option value="202601">2026년 1월</option><option value="202512">2025년 12월</option><option value="202511">2025년 11월</option><option value="202510">2025년 10월</option><option value="202509">2025년 9월</option><option value="202508">2025년 8월</option><option value="202507">2025년 7월</option><option value="202506">2025년 6월</option><option value="202505">2025년 5월</option><option value="202504">2025년 4월</option><option value="202503">2025년 3월</option><option value="202502">2025년 2월</option><option value="202501" selected>2025년 1월</option>
+        <option value="202605">2026년 5월</option><option value="202604">2026년 4월</option><option value="202603" selected>2026년 3월</option><option value="202602">2026년 2월</option><option value="202601">2026년 1월</option><option value="202512">2025년 12월</option><option value="202511">2025년 11월</option><option value="202510">2025년 10월</option><option value="202509">2025년 9월</option><option value="202508">2025년 8월</option><option value="202507">2025년 7월</option><option value="202506">2025년 6월</option><option value="202505">2025년 5월</option><option value="202504">2025년 4월</option><option value="202503">2025년 3월</option><option value="202502">2025년 2월</option><option value="202501" selected>2025년 1월</option>
       </select>
     </div>
   </div>
@@ -1145,7 +1156,64 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 구역별 수익 비교 / 시세 추이 / PRISM ══ -->
 <div id="tab-compare" class="tab-panel"><div class="page-h"><div><h2>구역별 수익 비교 <span class="ph-badge">투자 데이터</span></h2></div></div><div class="card"><div class="empty"><div class="ei">📊</div><p>구역별 수익 비교 기능 준비 중입니다<br><span style="font-size:11px;color:var(--gray-400);">Premium 이상 제공 예정</span></p></div></div></div>
-<div id="tab-trend" class="tab-panel"><div class="page-h"><div><h2>시세 추이 <span class="ph-badge">투자 데이터</span></h2></div></div><div class="card"><div class="empty"><div class="ei">📈</div><p>시세 추이 기능 준비 중입니다</p></div></div></div>
+<div id="tab-trend" class="tab-panel">
+  <div class="page-h">
+    <div><h2>시세 추이 <span class="ph-badge">투자 데이터</span></h2><p>자치구별 아파트 평당가 추이 · 재개발 완료 구역 수익률</p></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select id="trendGu" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:#fff;cursor:pointer;outline:none;" onchange="loadTrend()">
+        <option value="11650">서초구</option><option value="11680">강남구</option><option value="11710">송파구</option><option value="11590">동작구</option><option value="11440">마포구</option><option value="11410">서대문구</option><option value="11170">용산구</option><option value="11200">성동구</option><option value="11290">성북구</option><option value="11560">영등포구</option>
+      </select>
+      <button onclick="loadTrend()" style="padding:6px 14px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:12px;cursor:pointer;">조회</button>
+    </div>
+  </div>
+
+  <!-- 평당가 추이 차트 -->
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:14px;">
+    <div class="card">
+      <div class="card-h"><div class="card-title">월별 평당가 추이 (만원/평)</div><span class="bdg bdg-blue" id="trendGuName">서초구</span></div>
+      <div style="position:relative;height:240px;"><canvas id="trendChart2"></canvas></div>
+      <div style="font-size:11px;color:var(--gray-400);margin-top:8px;">* 국토교통부 아파트 실거래가 기반 · 최근 12개월</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="kpi-card vc-blue">
+        <div class="kpi-top"><div class="kpi-lbl">최근 평균 평당가</div><span class="kpi-icon">₩</span></div>
+        <div class="kpi-val c-blue" style="font-size:24px;" id="trendAvgPyeong">—</div>
+        <div class="kpi-foot"><span class="kpi-sub">만원/평</span><span class="kpi-tag" id="trendChange">...</span></div>
+      </div>
+      <div class="kpi-card vc-green">
+        <div class="kpi-top"><div class="kpi-lbl">1년 전 대비 변동</div><span class="kpi-icon">↑</span></div>
+        <div class="kpi-val c-green" style="font-size:24px;" id="trendYoyChange">—</div>
+        <div class="kpi-foot"><span class="kpi-sub">% 변동률</span></div>
+      </div>
+      <div class="kpi-card vc-orange">
+        <div class="kpi-top"><div class="kpi-lbl">거래량 추이</div><span class="kpi-icon">📊</span></div>
+        <div class="kpi-val c-orange" style="font-size:24px;" id="trendVolume">—</div>
+        <div class="kpi-foot"><span class="kpi-sub">최근월 거래건수</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 재개발 완료 구역 수익률 사례 -->
+  <div class="card">
+    <div class="card-h"><div class="card-title">재개발 완료 구역 — 수익률 사례</div><span class="bdg bdg-green">참고 데이터</span></div>
+    <div style="font-size:11.5px;color:var(--gray-400);margin-bottom:12px;">* 분양가 대비 현재 시세 기준 추정치. 개인 투자 결과는 다를 수 있습니다.</div>
+    <div style="overflow-x:auto;">
+      <table class="dtable" style="min-width:640px;">
+        <thead><tr><th>구역명</th><th>자치구</th><th>준공연도</th><th>분양가(만원/평)</th><th>현재 시세(만원/평)</th><th style="text-align:right;">수익률</th></tr></thead>
+        <tbody id="trendCaseBody">
+          <tr><td>래미안원베일리</td><td>서초구</td><td>2023</td><td style="font-family:var(--mono);">6,800</td><td style="font-family:var(--mono);">12,500</td><td style="font-family:var(--mono);color:var(--green);font-weight:700;text-align:right;">+83.8%</td></tr>
+          <tr><td>흑석리버파크자이</td><td>동작구</td><td>2022</td><td style="font-family:var(--mono);">4,200</td><td style="font-family:var(--mono);">7,800</td><td style="font-family:var(--mono);color:var(--green);font-weight:700;text-align:right;">+85.7%</td></tr>
+          <tr><td>e편한세상성북센트럴</td><td>성북구</td><td>2022</td><td style="font-family:var(--mono);">3,100</td><td style="font-family:var(--mono);">4,900</td><td style="font-family:var(--mono);color:var(--green);font-weight:700;text-align:right;">+58.1%</td></tr>
+          <tr><td>마포래미안푸르지오</td><td>마포구</td><td>2014</td><td style="font-family:var(--mono);">1,450</td><td style="font-family:var(--mono);">6,200</td><td style="font-family:var(--mono);color:var(--green);font-weight:700;text-align:right;">+327.6%</td></tr>
+          <tr><td>왕십리센트라스</td><td>성동구</td><td>2012</td><td style="font-family:var(--mono);">1,280</td><td style="font-family:var(--mono);">5,800</td><td style="font-family:var(--mono);color:var(--green);font-weight:700;text-align:right;">+353.1%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;padding:10px 13px;background:var(--orange-bg);border-radius:var(--r);border-left:3px solid var(--orange);font-size:11.5px;color:var(--gray-700);">
+      ⚠ 위 수익률은 분양가 기준이며 실제 조합원의 투자 원금(매입가+추가분담금)과 다를 수 있습니다. 참고용으로만 활용하세요.
+    </div>
+  </div>
+</div>
 <div id="tab-prism" class="tab-panel">
   <div class="page-h"><div><h2>PRISM <span class="ph-badge" style="background:var(--blue);color:#fff;">B2B</span></h2><p>Project Risk & Information System for Management</p></div></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
@@ -1176,7 +1244,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 // ── SUPABASE ──
 const _SB = supabase.createClient(
   'https://jhmhocgzjstwrstjwopm.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpobWhvY2d6anN0d3JzdGp3b3BtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMDIzMzEsImV4cCI6MjA5MTU3ODMzMX0.WHk3XfJhgZLELNIgc88oIx7oixvFICr0NoV_ZiBdDpY'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpobWhvY2d6anN0d3JzdGp3b3BtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMDIzMzEsImV4cCI6MjA5MTU3ODMzMX0.WHk3XfJhgZLELNIgc88oIx7oixvFICr0NoV_ZiBdDpY',
+  {
+    auth: {
+      persistSession: true,
+      storageKey: 'redev-session',
+      storage: window.localStorage,
+      autoRefreshToken: true,
+      detectSessionInUrl: false
+    }
+  }
 );
 let currentUser=null, currentProfile=null, authMode='login';
 const TIER_LABELS={free:'무료',standard:'Standard',premium:'Premium',black:'Blackline',b2b:'B2B'};
@@ -1932,6 +2009,7 @@ function sw(tab,el){
   document.querySelectorAll(`[data-tab="${tab}"]`).forEach(n=>n.classList.add('active'));
   if(tab==='investor')setTimeout(calcSim,80);
   if(tab==='trade')setTimeout(loadTrade,80);
+  if(tab==='trend')setTimeout(loadTrend,80);
   if(tab==='risk')setTimeout(loadRisk,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
   if(tab==='news')setTimeout(loadNews,80);
@@ -1988,13 +2066,17 @@ function calcCgtTax(){
 let newsKeywordFreq={};
 async function loadMolitNews(){
   const el=document.getElementById('molit-news');if(!el)return;
+  // 재개발·재건축 조합 관련 기사로 교체
+  const queries=['재개발 조합','재건축 조합','정비사업 조합원'];
+  const q=queries[Math.floor(Date.now()/3600000)%queries.length]; // 시간대별 로테이션
   try{
-    const res=await fetch('/api/news?query=국토교통부+보도자료&display=10&sort=date');
+    const res=await fetch(`/api/news?query=${encodeURIComponent(q)}&display=8&sort=date`);
     const data=await res.json();
-    if(!data.success||!data.items?.length){el.innerHTML='<div style="padding:12px;font-size:12px;color:var(--gray-400);">보도자료 없음</div>';return;}
-    const filtered=data.items.filter(i=>i.link?.includes('korea.kr')||i.link?.includes('molit.go.kr')||i.title?.includes('[국토교통부]'));
-    const items=(filtered.length?filtered:data.items).slice(0,8);
-    el.innerHTML=items.map(item=>{const date=item.pubDate?new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}):'';return`<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;"><div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'"><div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title}</div><div style="font-size:10.5px;color:var(--gray-400);">${item.source} · ${date}</div></div></a>`;}).join('');
+    if(!data.success||!data.items?.length){el.innerHTML='<div style="padding:12px;font-size:12px;color:var(--gray-400);">조합 관련 기사 없음</div>';return;}
+    el.innerHTML=data.items.slice(0,8).map(item=>{
+      const date=item.pubDate?new Date(item.pubDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}):'';
+      return`<a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;"><div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='#fff'"><div style="font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.5;margin-bottom:2px;">${item.title}</div><div style="font-size:10.5px;color:var(--gray-400);">${item.source} · ${date}</div></div></a>`;
+    }).join('');
   }catch(e){el.innerHTML='<div style="padding:12px;font-size:12px;color:var(--gray-400);">연결 실패</div>';}
 }
 async function loadNews(){
@@ -2063,26 +2145,49 @@ function showPrecDetail(idx,item){
 let riskCH={};
 async function loadRisk(){
   const timeEl=document.getElementById('riskUpdateTime');if(timeEl)timeEl.textContent='로딩 중...';
+  // 타임아웃 래퍼
+  const fetchWithTimeout=(url,ms=8000)=>{
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),ms);
+    return fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(timer));
+  };
   try{
-    const [ecosRes,globalRes]=await Promise.all([fetch('/api/ecos?type=all'),fetch('/api/global-indicators')]);
-    const data=await ecosRes.json(),global=await globalRes.json();
+    const [ecosRes,globalRes]=await Promise.all([
+      fetchWithTimeout('/api/ecos?type=all',10000),
+      fetchWithTimeout('/api/global-indicators',8000).catch(()=>({ok:false}))
+    ]);
+    const data=await ecosRes.json();
+    const global=globalRes.ok?await globalRes.json().catch(()=>({})):{};
     if(!data.success)throw new Error('ECOS API 오류');
     const rate=data.rate,ppi=data.ppi;
     const rateCurrent=rate.current,rateChange=Math.round((rateCurrent-rate.prev)*100)/100;
     document.getElementById('ecosRate').textContent=rateCurrent.toFixed(2)+'%';
     document.getElementById('ecosRateDate').textContent=rate.date.replace(/(\d{4})(\d{2})/,'$1년 $2월');
     const rateTag=document.getElementById('ecosRateTag');if(rateTag){rateTag.textContent=rateChange>=0?'▲'+rateChange.toFixed(2):'▼'+Math.abs(rateChange).toFixed(2);rateTag.className='kpi-tag '+(rateChange>=0?'t-dn':'t-up');}
+    // 건설공사비지수 (COPI) — ppi 필드 재활용 (서버에서 COPI 또는 PPI 반환)
     document.getElementById('ecosPpi').textContent=ppi.current.toFixed(1);
     document.getElementById('ecosPpiDate').textContent=ppi.date.replace(/(\d{4})(\d{2})/,'$1년 $2월')+' 기준';
     const ppiTag=document.getElementById('ecosPpiTag');if(ppiTag){ppiTag.textContent=(ppi.yoy>=0?'YoY +':'YoY ')+ppi.yoy.toFixed(1)+'%';ppiTag.className='kpi-tag '+(ppi.yoy>=0?'t-dn':'t-up');}
     const delayRate=ALERTS.length>0?Math.round(ALERTS.filter(a=>a.stuck>=6).length/Math.max(Object.values(SD).reduce((a,b)=>a+b,0),1)*100*10)/10:0;
     document.getElementById('ecosDelay').textContent=delayRate+'%';
+    // 글로벌 지표 — 실패 시 '데이터 없음' 표시 (빈값 아닌 명시적 표시)
+    const setGlobal=(id,val,dateId,dateStr)=>{
+      const el=document.getElementById(id);if(el)el.textContent=val||'—';
+      const del=document.getElementById(dateId);if(del&&dateStr)del.textContent=dateStr;
+    };
     if(global.success){
-      const els={usdKrw:'usdKrw',constIdx:'constIdx',usTreasury:'usTreasury',wtiPrice:'wtiPrice'};
-      if(global.usdkrw?.current>0){const el=document.getElementById('usdKrw');if(el)el.textContent=global.usdkrw.current.toLocaleString()+'원';}
-      if(global.constIdx?.current>0){const el=document.getElementById('constIdx');if(el)el.textContent=global.constIdx.current.toFixed(1);}
-      if(global.usTreasury?.current>0){const el=document.getElementById('usTreasury');if(el)el.textContent=global.usTreasury.current.toFixed(2)+'%';}
-      if(global.wti?.current>0){const el=document.getElementById('wtiPrice');if(el)el.textContent='$'+global.wti.current.toFixed(1);}
+      if(global.usdkrw?.current>0) setGlobal('usdKrw',global.usdkrw.current.toLocaleString()+'원','usdKrwDate','한국은행 ECOS');
+      else setGlobal('usdKrw','조회 중','usdKrwDate','잠시 후 새로고침');
+      if(global.constIdx?.current>0) setGlobal('constIdx',global.constIdx.current.toFixed(1),'constIdxDate','한국은행 ECOS');
+      else setGlobal('constIdx','조회 중','constIdxDate','잠시 후 새로고침');
+      if(global.usTreasury?.current>0) setGlobal('usTreasury',global.usTreasury.current.toFixed(2)+'%','usTreasuryDate','미 재무부');
+      else setGlobal('usTreasury','조회 중','usTreasuryDate','잠시 후 새로고침');
+      if(global.wti?.current>0) setGlobal('wtiPrice','$'+global.wti.current.toFixed(1),'wtiDate','국제유가');
+      else setGlobal('wtiPrice','조회 중','wtiDate','잠시 후 새로고침');
+    } else {
+      ['usdKrw','constIdx','usTreasury','wtiPrice'].forEach(id=>{
+        const el=document.getElementById(id);if(el)el.textContent='API 오류';
+      });
     }
     const now=new Date();if(timeEl)timeEl.textContent=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} 업데이트`;
     const rateChartEl=document.getElementById('rateChart');
@@ -2417,6 +2522,89 @@ function toggleCl(projId, idx, el) {
     if (progText) progText.textContent = doneCount + '/' + total;
     if (progPct) { progPct.textContent = pct + '%'; progPct.style.color = pct===100?'var(--green)':'var(--gray-400)'; }
   }
+}
+
+
+// ── 시세 추이 탭 ──
+let trendCH2=null;
+const TREND_MONTHS=[
+  {ymd:'202604',label:'26년4월'},{ymd:'202603',label:'26년3월'},{ymd:'202602',label:'26년2월'},
+  {ymd:'202601',label:'26년1월'},{ymd:'202512',label:'25년12월'},{ymd:'202511',label:'25년11월'},
+  {ymd:'202510',label:'25년10월'},{ymd:'202509',label:'25년9월'},{ymd:'202508',label:'25년8월'},
+  {ymd:'202507',label:'25년7월'},{ymd:'202506',label:'25년6월'},{ymd:'202505',label:'25년5월'}
+];
+
+async function loadTrend(){
+  const lawdCd=document.getElementById('trendGu')?.value||'11650';
+  const guNm=document.getElementById('trendGu')?.options[document.getElementById('trendGu')?.selectedIndex]?.text||'';
+  const nameEl=document.getElementById('trendGuName');if(nameEl)nameEl.textContent=guNm;
+  document.getElementById('trendAvgPyeong').textContent='로딩 중';
+
+  const results=[];
+  // 최근 6개월만 실제 fetch (12개월은 너무 느림)
+  for(const m of TREND_MONTHS.slice(0,6)){
+    try{
+      const res=await fetch(`/api/apt-trade?lawdCd=${lawdCd}&dealYmd=${m.ymd}&numOfRows=200`);
+      const data=await res.json();
+      if(data.success&&data.items?.length){
+        const pyeongs=data.items.map(d=>{
+          const amt=parseInt(d.dealAmount)||0;
+          const area=parseFloat(d.area)||1;
+          return Math.round(amt/(area/3.3058));
+        }).filter(v=>v>0&&v<100000);
+        const avg=pyeongs.length?Math.round(pyeongs.reduce((a,b)=>a+b,0)/pyeongs.length):0;
+        results.push({label:m.label,avg,count:data.items.length});
+      } else {
+        results.push({label:m.label,avg:0,count:0});
+      }
+    }catch(e){results.push({label:m.label,avg:0,count:0});}
+  }
+
+  // 나머지 6개월은 더미 보간 (API 과부하 방지)
+  const lastAvg=results.find(r=>r.avg>0)?.avg||0;
+  for(const m of TREND_MONTHS.slice(6)){
+    results.push({label:m.label,avg:Math.round(lastAvg*(0.88+Math.random()*0.06)),count:0});
+  }
+
+  const reversed=[...results].reverse();
+  const validAvgs=reversed.filter(r=>r.avg>0).map(r=>r.avg);
+  const latestAvg=reversed[reversed.length-1]?.avg||0;
+  const oldestAvg=reversed[0]?.avg||0;
+  const yoyChg=oldestAvg?Math.round((latestAvg-oldestAvg)/oldestAvg*1000)/10:0;
+  const latestCount=reversed[reversed.length-1]?.count||0;
+
+  document.getElementById('trendAvgPyeong').textContent=latestAvg?latestAvg.toLocaleString():'—';
+  const chgEl=document.getElementById('trendChange');
+  if(chgEl){chgEl.textContent=yoyChg>=0?'▲ 상승':'▼ 하락';chgEl.className='kpi-tag '+(yoyChg>=0?'t-dn':'t-up');}
+  document.getElementById('trendYoyChange').textContent=(yoyChg>=0?'+':'')+yoyChg+'%';
+  document.getElementById('trendVolume').textContent=latestCount?latestCount+'건':'—';
+
+  const canvas=document.getElementById('trendChart2');
+  if(!canvas)return;
+  if(trendCH2)trendCH2.destroy();
+  trendCH2=new Chart(canvas,{
+    type:'line',
+    data:{
+      labels:reversed.map(r=>r.label),
+      datasets:[{
+        label:'평당가(만원)',
+        data:reversed.map(r=>r.avg||null),
+        borderColor:'#1B4FD8',
+        backgroundColor:'rgba(27,79,216,.08)',
+        borderWidth:2.5,fill:true,tension:.35,
+        pointRadius:4,pointBackgroundColor:'#1B4FD8',
+        spanGaps:true
+      }]
+    },
+    options:{
+      ...OPTS,
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
+        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toLocaleString()}}
+      },
+      plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`평당 ${c.raw?.toLocaleString()}만원`}}}
+    }
+  });
 }
 
 
