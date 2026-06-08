@@ -650,41 +650,59 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
       <div class="sl-i"><div class="sl-dot" style="background:#059669;"></div>준공</div>
     </div>
     <!-- 구역 상세 정보 -->
-    <div id="zoneInfoBox" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--gray-100);">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
-        <div class="kpi-card" style="padding:10px;">
-          <div class="kpi-lbl">기존 가구수</div>
-          <div class="kpi-val c-blue" style="font-size:20px;" id="ziExisting">—</div>
-          <div class="kpi-foot"><span class="kpi-sub">가구</span></div>
-        </div>
-        <div class="kpi-card" style="padding:10px;">
-          <div class="kpi-lbl">총 공급세대</div>
-          <div class="kpi-val c-green" style="font-size:20px;" id="ziTotal">—</div>
-          <div class="kpi-foot"><span class="kpi-sub">세대</span></div>
-        </div>
-        <div class="kpi-card" style="padding:10px;">
-          <div class="kpi-lbl">분양세대</div>
-          <div class="kpi-val c-orange" style="font-size:20px;" id="ziSale">—</div>
-          <div class="kpi-foot"><span class="kpi-sub">세대</span></div>
-        </div>
-        <div class="kpi-card" style="padding:10px;">
-          <div class="kpi-lbl">임대세대</div>
-          <div class="kpi-val" style="font-size:20px;color:var(--gray-600);" id="ziRental">—</div>
-          <div class="kpi-foot"><span class="kpi-sub">세대</span></div>
-        </div>
+    <div id="zoneInfoBox" style="display:none;margin-top:16px;padding-top:16px;border-top:2px solid var(--blue-mid);">
+      <!-- 헤더 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="display:inline-block;width:3px;height:16px;border-radius:2px;background:var(--blue);"></span>
+        <span style="font-size:12px;font-weight:700;color:var(--gray-700);">서울시 공개 정보</span>
+        <span style="font-size:10px;color:var(--gray-400);">2026년 3월 기준</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+
+      <!-- 주소 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
         <div style="padding:10px 12px;background:var(--gray-50);border-radius:var(--r);border:1px solid var(--gray-100);">
           <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:4px;">📍 지번주소</div>
-          <div style="font-size:12px;color:var(--gray-800);" id="ziJibun">—</div>
+          <div style="font-size:12px;color:var(--gray-800);line-height:1.5;" id="ziJibun">—</div>
         </div>
         <div style="padding:10px 12px;background:var(--gray-50);border-radius:var(--r);border:1px solid var(--gray-100);">
           <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:4px;">🏠 도로명주소</div>
-          <div style="font-size:12px;color:var(--gray-800);" id="ziRoad">—</div>
+          <div style="font-size:12px;color:var(--gray-800);line-height:1.5;" id="ziRoad">—</div>
         </div>
       </div>
-      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;" id="ziDates"></div>
-      <div style="margin-top:6px;font-size:11px;color:var(--gray-400);">* 서울시 정비사업 추진현황 2026년 3월 기준</div>
+
+      <!-- 공급 물량 KPI -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+        <div class="kpi-card" style="padding:10px;text-align:center;">
+          <div class="kpi-lbl" style="font-size:10px;">기존 가구</div>
+          <div class="kpi-val c-blue" style="font-size:18px;margin:4px 0;" id="ziExisting">—</div>
+          <div style="font-size:10px;color:var(--gray-400);">가구</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;text-align:center;">
+          <div class="kpi-lbl" style="font-size:10px;">총 공급</div>
+          <div class="kpi-val c-green" style="font-size:18px;margin:4px 0;" id="ziTotal">—</div>
+          <div style="font-size:10px;color:var(--gray-400);">세대</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;text-align:center;">
+          <div class="kpi-lbl" style="font-size:10px;">분양</div>
+          <div class="kpi-val c-orange" style="font-size:18px;margin:4px 0;" id="ziSale">—</div>
+          <div style="font-size:10px;color:var(--gray-400);">세대</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;text-align:center;">
+          <div class="kpi-lbl" style="font-size:10px;">임대</div>
+          <div class="kpi-val" style="font-size:18px;margin:4px 0;color:var(--gray-600);" id="ziRental">—</div>
+          <div style="font-size:10px;color:var(--gray-400);">세대</div>
+        </div>
+      </div>
+
+      <!-- 인가 일정 타임라인 -->
+      <div style="margin-bottom:8px;">
+        <div style="font-size:10px;font-weight:700;color:var(--gray-500);margin-bottom:8px;letter-spacing:.05em;">📅 단계별 인가 날짜</div>
+        <div id="ziDates" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+      </div>
+
+      <div style="font-size:10px;color:var(--gray-400);margin-top:4px;">
+        출처: 서울시 정비사업 추진현황 (2026년 3월 기준) · 서울 정비몽땅
+      </div>
     </div>
   </div>
   <div class="ai-wrap">
@@ -1888,10 +1906,17 @@ async function selZ(name){
       if(zi.impl_approved_first)  dates.push({label:'사업시행',date:zi.impl_approved_first});
       if(zi.mgmt_approved_first)  dates.push({label:'관리처분',date:zi.mgmt_approved_first});
       if(zi.construction_start)   dates.push({label:'착공',date:zi.construction_start});
-      document.getElementById('ziDates').innerHTML=dates.map(d=>
-        `<span style="font-size:11px;padding:3px 8px;border-radius:var(--r);background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-mid);">
-          <strong>${d.label}</strong> ${d.date.slice(0,7)}
-        </span>`).join('');
+      const DATE_COLORS={
+        '구역지정':'#9CA3AF','추진위':'#1D4ED8','조합설립':'#6D28D9',
+        '사업시행':'#065F46','관리처분':'#92400E','착공':'#86198F'
+      };
+      document.getElementById('ziDates').innerHTML=dates.map(d=>{
+        const c=DATE_COLORS[d.label]||'var(--blue)';
+        return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 12px;border-radius:var(--r);background:${c}11;border:1px solid ${c}44;min-width:72px;">
+          <span style="font-size:9px;font-weight:700;color:${c};margin-bottom:2px;">${d.label}</span>
+          <span style="font-size:12px;font-weight:600;color:var(--gray-800);">${d.date.slice(0,7).replace('-','.')}</span>
+        </div>`;
+      }).join('');
     } else if(box){
       box.style.display='none';
     }
@@ -1900,11 +1925,16 @@ async function selZ(name){
   const [fy,fq]=firstPeriod.split('-').map(Number),[ly,lq]=lastPeriod.split('-').map(Number);
   const dynPeriods=[];
   for(let y=fy;y<=ly;y++)for(const q of['03','06','09','12']){const pStr=`${y}-${String(q).padStart(2,'0')}`;if(y===fy&&Number(q)<fq)continue;if(y===ly&&Number(q)>lq)break;dynPeriods.push(pStr);}
-  const pm={};recs.forEach(r=>pm[r.period]=parseInt(r.stage_score)||0);
+  // stage_score 숫자 변환 (문자열/정수 모두 대응)
+  const pm={};
+  recs.forEach(r=>{
+    const sc=Number(r.stage_score);
+    if(sc>0&&sc<=9) pm[r.period]=sc;
+  });
   const cols='130px '+dynPeriods.map(()=>'1fr').join(' ');
   document.getElementById('tlGrid').innerHTML=
     `<div class="tl-hrow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm" style="font-size:9.5px;color:var(--gray-400);padding:5px 10px;">기간</div>${dynPeriods.map(p=>`<div class="tl-cell" style="padding:5px 0;"><div class="tl-plbl">${p.slice(2).replace('-','Q')}</div></div>`).join('')}</div>
-    <div class="tl-drow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm">${name.length>14?name.slice(0,14)+'…':name}</div>${dynPeriods.map(p=>{const sc=parseInt(pm[p])||0;const color=SC[sc]||'transparent';return sc?`<div class="tl-cell"><div class="tl-dot" style="background:${color};border-color:${color};" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`:`<div class="tl-cell"><div class="tl-mt"></div></div>`;}).join('')}</div>`;
+    <div class="tl-drow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm">${name.length>14?name.slice(0,14)+'…':name}</div>${dynPeriods.map(p=>{const sc=pm[p]||0;const color=SC[sc];return sc&&color?`<div class="tl-cell"><div class="tl-dot" style="background:${color};border-color:${color};" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`:`<div class="tl-cell"><div class="tl-mt"></div></div>`;}).join('')}</div>`;
   const ctx=recs.slice(-5).map(r=>`${r.period}: ${r.stage}(${r.stage_score}단계)`).join(', ');
   document.getElementById('aiMsgs').innerHTML=`<div class="ai-msg bot"><strong>[${name}]</strong> 최근 이력: ${ctx}<br><br>이 구역에 대해 질문하거나 분석을 요청하세요.</div>`;
   if(!ALL.find(r=>r.project_name===name))ALL=[...ALL,...recs];
