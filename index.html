@@ -1533,9 +1533,10 @@ async function init(){await Promise.all([loadAll(),detectAlerts(),loadZoneCoords
 
 async function loadAll(){
   try{
-    const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period');
+    // is_completed=false 필터 → 준공 완료 사업장 제외
+    const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period,is_completed,is_suspended&is_completed=eq.false');
     if(!Array.isArray(zones)||!zones.length)return;
-    ALL=zones.map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period}));
+    ALL=zones.map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period,is_completed:z.is_completed,is_suspended:z.is_suspended}));
     const tot=zones.length;
     document.getElementById('kpiTot').textContent=tot.toLocaleString();
     document.getElementById('sbTot').textContent=tot.toLocaleString();
@@ -1558,7 +1559,7 @@ async function detectAlerts(){
   try{
     let all=[],offset=0;
     while(true){
-      const chunk=await sbf('redev_timeline',`select=gu_name,project_name,stage,period,stage_score&limit=1000&offset=${offset}&order=project_name,period`);
+      const chunk=await sbf('redev_timeline',`select=gu_name,project_name,stage,period,stage_score,is_completed&is_completed=eq.false&limit=1000&offset=${offset}&order=project_name,period`);
       if(!Array.isArray(chunk)||!chunk.length)break;
       all=[...all,...chunk];
       if(chunk.length<1000)break;
