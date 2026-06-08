@@ -2314,7 +2314,7 @@ async function sendAI(){
 }
 
 // ── 탭 전환 ──
-function sw(tab,el){
+async function sw(tab,el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   const tabEl=document.getElementById('tab-'+tab);if(tabEl)tabEl.classList.add('active');
   document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
@@ -2323,6 +2323,15 @@ function sw(tab,el){
   if(tab==='trade')setTimeout(loadTrade,80);
   if(tab==='trend')setTimeout(loadTrend,80);
   if(tab==='riskboard'){
+    // loadProfile이 완료될 때까지 최대 2초 대기
+    if(currentUser && !currentProfile){
+      await new Promise(resolve=>{
+        let tries=0;
+        const check=setInterval(()=>{
+          if(currentProfile||++tries>20){clearInterval(check);resolve();}
+        },100);
+      });
+    }
     const tier=currentProfile?.tier||'free';
     if(!['premium','black','b2b'].includes(tier)){
       // 프리미엄 미달 → 잠금 화면 표시
