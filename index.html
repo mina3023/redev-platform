@@ -532,6 +532,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="sb-item" data-tab="investor" onclick="sw('investor',this)"><span class="sb-icon">💰</span>수익 계산기</div>
     <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
     <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
+    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 현황</div>
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
@@ -1214,6 +1215,115 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     </div>
   </div>
 </div>
+<div id="tab-riskboard" class="tab-panel">
+  <div class="page-h">
+    <div>
+      <h2>조합 리스크 현황 <span class="ph-badge">투자 참고</span></h2>
+      <p>사업 지연·언론 보도 기반 객관적 데이터 · 투자 판단 참고용</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select id="rbGuFilter" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:#fff;outline:none;" onchange="renderRiskBoard()">
+        <option value="all">전체 자치구</option>
+        <option value="강남구">강남구</option><option value="강동구">강동구</option>
+        <option value="강북구">강북구</option><option value="강서구">강서구</option>
+        <option value="관악구">관악구</option><option value="광진구">광진구</option>
+        <option value="구로구">구로구</option><option value="금천구">금천구</option>
+        <option value="노원구">노원구</option><option value="도봉구">도봉구</option>
+        <option value="동대문구">동대문구</option><option value="동작구">동작구</option>
+        <option value="마포구">마포구</option><option value="서대문구">서대문구</option>
+        <option value="서초구">서초구</option><option value="성동구">성동구</option>
+        <option value="성북구">성북구</option><option value="송파구">송파구</option>
+        <option value="양천구">양천구</option><option value="영등포구">영등포구</option>
+        <option value="용산구">용산구</option><option value="은평구">은평구</option>
+        <option value="종로구">종로구</option><option value="중구">중구</option>
+        <option value="중랑구">중랑구</option>
+      </select>
+      <select id="rbGradeFilter" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:#fff;outline:none;" onchange="renderRiskBoard()">
+        <option value="all">전체 등급</option>
+        <option value="CRISIS">⚫ CRISIS</option>
+        <option value="DANGER">🔴 DANGER</option>
+        <option value="CAUTION">🟠 CAUTION</option>
+        <option value="WATCH">🟡 WATCH</option>
+        <option value="SAFE">🟢 SAFE</option>
+        <option value="SUSPENDED">⚪ 일시중단</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 면책 고지 -->
+  <div style="margin-bottom:14px;padding:11px 14px;background:#FEF9EC;border-radius:var(--r);border-left:3px solid #F59E0B;font-size:12px;color:#78350F;line-height:1.7;">
+    ⚠ 이 자료는 <strong>사업 지연 기간·언론 보도 건수</strong> 등 공개 데이터 기반 참고 지표입니다.
+    특정 조합·조합장에 대한 법적 판단이 아니며, <strong>투자 의사결정의 보조 자료</strong>로만 활용하세요.
+    출처: 서울시 정비사업 추진현황(25년 12월), 네이버뉴스 API
+  </div>
+
+  <!-- KPI 요약 -->
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px;" id="rbKpiRow">
+    <div class="kpi-card" style="text-align:center;padding:10px 6px;">
+      <div style="font-size:18px;margin-bottom:2px;">⚫</div>
+      <div class="kpi-val c-red" style="font-size:20px;" id="rbCntCrisis">-</div>
+      <div class="kpi-lbl" style="font-size:10px;">CRISIS</div>
+    </div>
+    <div class="kpi-card" style="text-align:center;padding:10px 6px;">
+      <div style="font-size:18px;margin-bottom:2px;">🔴</div>
+      <div class="kpi-val c-red" style="font-size:20px;" id="rbCntDanger">-</div>
+      <div class="kpi-lbl" style="font-size:10px;">DANGER</div>
+    </div>
+    <div class="kpi-card" style="text-align:center;padding:10px 6px;">
+      <div style="font-size:18px;margin-bottom:2px;">🟠</div>
+      <div class="kpi-val c-orange" style="font-size:20px;" id="rbCntCaution">-</div>
+      <div class="kpi-lbl" style="font-size:10px;">CAUTION</div>
+    </div>
+    <div class="kpi-card" style="text-align:center;padding:10px 6px;">
+      <div style="font-size:18px;margin-bottom:2px;">🟡</div>
+      <div class="kpi-val c-orange" style="font-size:20px;" id="rbCntWatch">-</div>
+      <div class="kpi-lbl" style="font-size:10px;">WATCH</div>
+    </div>
+    <div class="kpi-card" style="text-align:center;padding:10px 6px;">
+      <div style="font-size:18px;margin-bottom:2px;">🟢</div>
+      <div class="kpi-val c-green" style="font-size:20px;" id="rbCntSafe">-</div>
+      <div class="kpi-lbl" style="font-size:10px;">SAFE</div>
+    </div>
+    <div class="kpi-card" style="text-align:center;padding:10px 6px;">
+      <div style="font-size:18px;margin-bottom:2px;">⚪</div>
+      <div class="kpi-val" style="font-size:20px;color:var(--gray-500);" id="rbCntSus">-</div>
+      <div class="kpi-lbl" style="font-size:10px;">일시중단</div>
+    </div>
+  </div>
+
+  <!-- 리스크 테이블 -->
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="overflow-x:auto;">
+      <table class="dtable" style="min-width:700px;">
+        <thead>
+          <tr>
+            <th style="width:36px;">등급</th>
+            <th>구역명</th>
+            <th>자치구</th>
+            <th>단계</th>
+            <th style="text-align:right;">사업 지연</th>
+            <th style="text-align:right;">언론 보도</th>
+            <th style="text-align:right;">소송·수사 보도</th>
+            <th>데이터 기준</th>
+          </tr>
+        </thead>
+        <tbody id="rbTableBody">
+          <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--gray-400);font-size:12px;">로딩 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="rbPaging" style="display:flex;justify-content:center;gap:6px;padding:12px;"></div>
+  </div>
+
+  <div style="margin-top:10px;font-size:11px;color:var(--gray-400);line-height:1.8;">
+    * 사업 지연: 현재 단계 인가일 기준 경과 개월 / 단계별 기준 초과 시 표시<br>
+    * 언론 보도: 최근 1년 네이버뉴스 기준 (분쟁·지연·갈등 키워드)<br>
+    * 소송·수사 보도: 고소·횡령·배임·수사·기소 키워드 포함 기사<br>
+    * 출처: 서울시 정비사업 추진현황(2025년 12월 기준)
+  </div>
+</div>
+
+
 <div id="tab-prism" class="tab-panel">
   <div class="page-h"><div><h2>PRISM <span class="ph-badge" style="background:var(--blue);color:#fff;">B2B</span></h2><p>Project Risk & Information System for Management</p></div></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
@@ -2010,6 +2120,7 @@ function sw(tab,el){
   if(tab==='investor')setTimeout(calcSim,80);
   if(tab==='trade')setTimeout(loadTrade,80);
   if(tab==='trend')setTimeout(loadTrend,80);
+  if(tab==='riskboard')setTimeout(renderRiskBoard,80);
   if(tab==='risk')setTimeout(loadRisk,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
   if(tab==='news')setTimeout(loadNews,80);
@@ -2627,6 +2738,162 @@ async function loadGlobalFallback(){
   }catch(e){console.log('환율 폴백 실패',e);}
 }
 
+
+// ════════════════════════════════════════════════════
+// 조합 리스크 현황 데이터 + 렌더링
+// 출처: 서울시 정비사업 추진현황(25년12월) + 뉴스 데이터
+// ════════════════════════════════════════════════════
+
+const RISK_DATA = [
+  // [구역명, 자치구, 단계, 지연개월, 일반언론, 소송언론, 등급, 기준초과여부]
+  // ⚫ CRISIS
+  ['노량진5구역','동작구','관리처분인가',27,15,8,'CRISIS',true],
+  ['한남3구역','용산구','관리처분인가',27,18,4,'CRISIS',true],
+  ['장위3','성북구','추진위원회',255,6,1,'CRISIS',true],
+  ['흑석2구역','동작구','조합설립인가',51,5,1,'CRISIS',true],
+  ['홍제3(재촉)','서대문구','추진위원회',231,4,1,'CRISIS',true],
+  ['강변강서아파트','용산구','조합설립인가',392,3,1,'CRISIS',true],
+  ['북아현3구역','서대문구','사업시행인가',171,3,1,'CRISIS',true],
+  ['신반포7차','서초구','조합설립인가',276,4,0,'CRISIS',true],
+  ['도곡삼익','강남구','추진위원회',264,3,0,'CRISIS',true],
+  ['신반포2차','서초구','조합설립인가',61,3,0,'CRISIS',true],
+  ['안암1','성북구','조합설립인가',330,2,0,'CRISIS',true],
+  ['방배삼호','서초구','추진위원회',246,2,0,'CRISIS',true],
+  ['중산시범아파트','용산구','추진위원회',245,2,0,'CRISIS',true],
+  ['상계5','노원구','건축심의',198,2,0,'CRISIS',true],
+  ['양평13','영등포구','사업시행인가',188,2,0,'CRISIS',true],
+  ['용두구역6지구','동대문구','구역지정',310,0,0,'CRISIS',true],
+  ['용두구역7지구','동대문구','구역지정',310,0,0,'CRISIS',true],
+  ['압구정6구역','강남구','조합설립인가',279,0,0,'CRISIS',true],
+  ['이촌1','용산구','추진위원회',226,0,0,'CRISIS',true],
+  ['용두1-1','동대문구','구역지정',223,0,0,'CRISIS',true],
+  ['후암1','용산구','추진위원회',224,0,0,'CRISIS',true],
+  ['수색3','은평구','구역지정',211,0,0,'CRISIS',true],
+  ['수색5','은평구','구역지정',211,0,0,'CRISIS',true],
+  ['동소문2','성북구','조합설립인가',213,0,0,'CRISIS',true],
+  ['왕궁아파트','용산구','조합설립인가',204,0,0,'CRISIS',true],
+  ['여의도미성아파트','영등포구','추진위원회',195,0,0,'CRISIS',true],
+  ['청화아파트','용산구','추진위원회',192,0,0,'CRISIS',true],
+  ['신정3-1','양천구','추진위원회',180,0,0,'CRISIS',true],
+  ['수색1','은평구','조합설립인가',185,0,0,'CRISIS',true],
+  ['종로6가','종로구','구역지정',163,0,0,'CRISIS',true],
+  ['망우1(염광아파트)','중랑구','조합설립인가',163,0,0,'CRISIS',true],
+  ['사직2','종로구','사업시행인가',159,0,0,'CRISIS',true],
+  ['신정3-2','양천구','추진위원회',160,0,0,'CRISIS',true],
+  ['한강로','용산구','건축심의',146,0,0,'CRISIS',true],
+  ['신촌지역(마포)4-5','마포구','구역지정',136,0,0,'CRISIS',true],
+  // 🔴 DANGER
+  ['신당8구역','중구','관리처분인가',19,12,5,'DANGER',false],
+  ['은마아파트','강남구','조합설립인가',27,8,1,'DANGER',true],
+  ['흑석1구역','동작구','조합설립인가',45,5,1,'DANGER',true],
+  ['홍제3','서대문구','관리처분인가',41,4,1,'DANGER',true],
+  ['장위15','성북구','조합설립인가',45,3,1,'DANGER',true],
+  ['수색8','은평구','관리처분인가',43,3,0,'DANGER',true],
+  ['장안평중고차매매센터','성동구','건축심의',34,3,0,'DANGER',true],
+  ['전농12','동대문구','조합설립인가',47,2,0,'DANGER',true],
+  ['봉천13','관악구','조합설립인가',46,2,0,'DANGER',true],
+  ['신반포19차25차','서초구','조합설립인가',45,2,0,'DANGER',true],
+  ['마천1','송파구','조합설립인가',43,2,0,'DANGER',true],
+  ['마포로1-34','마포구','건축심의',35,2,0,'DANGER',true],
+  ['가재울7','서대문구','조합설립인가',40,2,0,'DANGER',true],
+  ['중곡아파트','광진구','조합설립인가',41,0,0,'DANGER',true],
+  ['양동-8-1,6','중구','관리처분인가',41,0,0,'DANGER',true],
+  ['양동-11,12','중구','관리처분인가',41,0,0,'DANGER',true],
+  ['정비창전면3','용산구','조합설립인가',40,0,0,'DANGER',true],
+  ['제기4','동대문구','관리처분인가',40,0,0,'DANGER',true],
+  ['무교다동-16','중구','건축심의',33,0,0,'DANGER',true],
+  ['흑석11구역','동작구','관리처분인가',30,5,1,'DANGER',true],
+  // 🟠 CAUTION
+  ['미성크로바','송파구','착공',47,5,1,'CAUTION',false],
+  ['서울가든빌라','구로구','구역지정',21,0,0,'CAUTION',true],
+  ['광희동1가일원','중구','구역지정',20,0,0,'CAUTION',true],
+  ['공덕7','마포구','구역지정',19,0,0,'CAUTION',true],
+  ['세운2','종로구','구역지정',18,0,0,'CAUTION',true],
+  ['신길역세권','영등포구','건축심의',22,0,0,'CAUTION',true],
+  ['삼환가락','송파구','사업시행인가',22,0,0,'CAUTION',true],
+  ['삼호가든5차','서초구','건축심의',22,0,0,'CAUTION',true],
+  ['상봉10','중랑구','추진위원회',23,0,0,'CAUTION',true],
+  ['시흥1','금천구','구역지정',17,0,0,'CAUTION',true],
+  // ⚪ SUSPENDED (일시중단 주요 사례)
+  ['강북5구역','강북구','조합설립인가',49,0,0,'SUSPENDED',false],
+  ['강북3구역','강북구','사업시행인가',14,0,0,'SUSPENDED',false],
+];
+
+const GRADE_META = {
+  CRISIS:    {icon:'⚫', label:'CRISIS',    color:'#991B1B', bg:'#FEF2F2'},
+  DANGER:    {icon:'🔴', label:'DANGER',    color:'#9A3412', bg:'#FFF7ED'},
+  CAUTION:   {icon:'🟠', label:'CAUTION',  color:'#92400E', bg:'#FFFBEB'},
+  WATCH:     {icon:'🟡', label:'WATCH',    color:'#78350F', bg:'#FEFCE8'},
+  SAFE:      {icon:'🟢', label:'SAFE',     color:'#065F46', bg:'#ECFDF5'},
+  SUSPENDED: {icon:'⚪', label:'일시중단', color:'#6B7280', bg:'#F9FAFB'},
+};
+
+let rbPage = 1;
+const RB_PAGE_SIZE = 20;
+
+function renderRiskBoard() {
+  const guF    = document.getElementById('rbGuFilter')?.value || 'all';
+  const gradeF = document.getElementById('rbGradeFilter')?.value || 'all';
+
+  let data = RISK_DATA.filter(d => {
+    if (guF !== 'all' && d[1] !== guF) return false;
+    if (gradeF !== 'all' && d[6] !== gradeF) return false;
+    return true;
+  });
+
+  // KPI 업데이트
+  const counts = {CRISIS:0,DANGER:0,CAUTION:0,WATCH:0,SAFE:0,SUSPENDED:0};
+  RISK_DATA.forEach(d => { if(counts[d[6]] !== undefined) counts[d[6]]++; });
+  document.getElementById('rbCntCrisis').textContent  = counts.CRISIS;
+  document.getElementById('rbCntDanger').textContent  = counts.DANGER;
+  document.getElementById('rbCntCaution').textContent = counts.CAUTION;
+  document.getElementById('rbCntWatch').textContent   = counts.WATCH;
+  document.getElementById('rbCntSafe').textContent    = counts.SAFE;
+  document.getElementById('rbCntSus').textContent     = counts.SUSPENDED;
+
+  // 등급 정렬 순서
+  const GORDER = {SUSPENDED:0,CRISIS:1,DANGER:2,CAUTION:3,WATCH:4,SAFE:5};
+  data.sort((a,b) => (GORDER[a[6]]||9)-(GORDER[b[6]]||9) || (b[3]||0)-(a[3]||0));
+
+  // 페이징
+  const total = data.length;
+  const totalPages = Math.max(1, Math.ceil(total / RB_PAGE_SIZE));
+  if (rbPage > totalPages) rbPage = 1;
+  const slice = data.slice((rbPage-1)*RB_PAGE_SIZE, rbPage*RB_PAGE_SIZE);
+
+  const tbody = document.getElementById('rbTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = slice.map(d => {
+    const [nm, gu, stage, delay, general, lawsuit, grade, stagnant] = d;
+    const meta = GRADE_META[grade] || GRADE_META.SAFE;
+    const delayStr = delay ? `${delay}개월${stagnant ? ' ⚠' : ''}` : '-';
+    const newsStr  = general ? `${general}건` : '-';
+    const lawStr   = lawsuit ? `<span style="color:var(--red);font-weight:600;">${lawsuit}건</span>` : '-';
+    const badge    = `<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:${meta.bg};color:${meta.color};">${meta.icon} ${meta.label}</span>`;
+    return `<tr>
+      <td>${badge}</td>
+      <td style="font-weight:600;color:var(--gray-900);">${nm}</td>
+      <td>${gu}</td>
+      <td style="color:var(--gray-600);">${stage}</td>
+      <td style="text-align:right;font-family:var(--mono);${stagnant?'color:var(--red);font-weight:600;':''}">${delayStr}</td>
+      <td style="text-align:right;font-family:var(--mono);">${newsStr}</td>
+      <td style="text-align:right;font-family:var(--mono);">${lawStr}</td>
+      <td style="font-size:11px;color:var(--gray-400);">서울시 25.12 · 뉴스API</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:20px;font-size:12px;color:var(--gray-400);">해당 조건의 사업장이 없습니다</td></tr>';
+
+  // 페이징 버튼
+  const paging = document.getElementById('rbPaging');
+  if (paging) {
+    const btns = [];
+    for (let i=1; i<=totalPages; i++) {
+      const active = i===rbPage;
+      btns.push(`<button onclick="rbPage=${i};renderRiskBoard();" style="padding:4px 10px;border:1px solid ${active?'var(--blue)':'var(--border)'};border-radius:var(--r);background:${active?'var(--blue)':'#fff'};color:${active?'#fff':'var(--gray-700)'};font-size:12px;cursor:pointer;">${i}</button>`);
+    }
+    paging.innerHTML = `<span style="font-size:12px;color:var(--gray-500);margin-right:8px;">총 ${total}개</span>` + btns.join('');
+  }
+}
 
 init();
 </script>
