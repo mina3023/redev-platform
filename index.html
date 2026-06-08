@@ -523,7 +523,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="sb-item" data-tab="investor" onclick="sw('investor',this)"><span class="sb-icon">💰</span>수익 계산기</div>
     <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
     <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
-    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 현황 <span style="font-size:9px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:3px;margin-left:2px;">프리미엄</span></div>
+    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 <span style="font-size:9px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:3px;margin-left:2px;">프리미엄</span></div>
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
@@ -728,7 +728,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">원자재 ETF (DJP)</div><span class="kpi-icon">⛏</span></div><div class="kpi-val" style="color:var(--red);font-size:22px;" id="constIdx">—</div><div class="kpi-foot"><span class="kpi-sub" id="constIdxDate">iShares Bloomberg</span></div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-    <div class="card"><div class="card-h"><div class="card-title">기준금리 추이</div><span class="bdg bdg-blue">한국은행 ECOS</span></div><div class="cw2" style="height:190px;"><canvas id="rateChart"></canvas></div></div>
+    <div class="card"><div class="card-h">
+  <div class="card-title">기준금리 · 주담대금리 추이</div>
+  <span class="bdg bdg-blue">한국은행 ECOS</span>
+</div>
+<div style="display:flex;gap:12px;margin-bottom:8px;font-size:11px;color:var(--gray-500);">
+  <span style="display:flex;align-items:center;gap:4px;">
+    <span style="width:16px;height:2.5px;background:#1B4FD8;display:inline-block;border-radius:2px;"></span>기준금리
+  </span>
+  <span style="display:flex;align-items:center;gap:4px;">
+    <span style="width:16px;height:2.5px;background:#D97706;display:inline-block;border-radius:2px;border-top:2px dashed #D97706;height:0;"></span>주담대금리
+  </span>
+</div>
+<div class="cw2" style="height:200px;"><canvas id="rateChart"></canvas></div></div>
     <div class="card"><div class="card-h"><div class="card-title">건설공사비지수 추이 (KICT)</div><span class="bdg bdg-orange">한국건설기술연구원</span></div><div class="cw2" style="height:190px;"><canvas id="ppiChart"></canvas></div></div>
   </div>
 </div>
@@ -1295,7 +1307,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div id="tab-riskboard" class="tab-panel">
   <div class="page-h">
     <div>
-      <h2>조합 리스크 현황 <span class="ph-badge">투자 참고</span></h2>
+      <h2>조합 리스크 <span class="ph-badge">투자 참고</span></h2>
       <p>사업 지연·언론 보도 기반 객관적 데이터 · 투자 판단 참고용</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
@@ -1435,7 +1447,6 @@ const _SB = supabase.createClient(
   {
     auth: {
       persistSession: true,
-      storageKey: 'redev-session',
       autoRefreshToken: true,
       detectSessionInUrl: false
     }
@@ -1558,17 +1569,7 @@ async function authSubmit(){
       // 로그인 성공 — 세션 명시적 저장
       currentUser = data.user;
       currentProfile = {id:data.user.id, email:data.user.email, tier:'free'};
-      // 세션을 localStorage에 강제 저장
-      if(data.session){
-        try{
-          localStorage.setItem('redev-session', JSON.stringify({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-            expires_at: data.session.expires_at,
-            user: data.user
-          }));
-        } catch(e){}
-      }
+      // 세션은 Supabase SDK가 자동 관리
       document.getElementById('authOverlay').style.display='none';
       document.getElementById('authErr').style.display='none';
       btn.textContent='로그인';btn.disabled=false;
@@ -1808,7 +1809,12 @@ async function searchZ(q){
     const res=await sbf('redev_timeline',query);
     if(!Array.isArray(res)||!res.length){el.innerHTML='<div class="empty"><div class="ei">◎</div><p>검색 결과 없음</p></div>';return;}
     const lm={};res.forEach(r=>{if(!lm[r.project_name]||r.period>lm[r.project_name].period)lm[r.project_name]=r;});
-    const results=Object.values(lm);
+    // 중복 제거: 짧은 이름이 긴 이름의 앞부분인 경우 짧은 것 우선 (수색6 + 수색6구역 → 수색6만)
+    const allNames=Object.keys(lm);
+    const filtered=allNames.filter(nm=>{
+      return !allNames.some(other=>other!==nm && nm.startsWith(other) && lm[other].gu_name===lm[nm].gu_name);
+    });
+    const results=filtered.map(k=>lm[k]);
     el.innerHTML=results.map(r=>`<div class="sr-row" id="sr-${encodeURIComponent(r.project_name)}" onclick="selZ('${r.project_name.replace(/'/g,"\\'")}')"><div class="sr-gu">${r.gu_name.replace('구','')}</div><div class="sr-name">${r.project_name}</div><span class="sr-pill sc${r.stage_score}">${r.stage||'?'}</span><div class="sr-sc">${r.stage_score}단계</div></div>`).join('');
     if(results.length===1)selZ(results[0].project_name);
   }catch(e){el.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>검색 오류</p></div>`;}
@@ -2553,7 +2559,38 @@ async function loadRisk(){
     }
     const now=new Date();if(timeEl)timeEl.textContent=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} 업데이트`;
     const rateChartEl=document.getElementById('rateChart');
-    if(rateChartEl&&rate.history?.length>1){if(riskCH.rate)riskCH.rate.destroy();riskCH.rate=new Chart(rateChartEl,{type:'line',data:{labels:rate.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월')),datasets:[{data:rate.history.map(h=>h.value),borderColor:'#1B4FD8',backgroundColor:'rgba(27,79,216,.06)',borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#1B4FD8'}]},options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}});}
+    if(rateChartEl&&rate.history?.length>1){
+      if(riskCH.rate)riskCH.rate.destroy();
+      // 주담대금리 하드코딩 데이터 (한국은행 기준, 최근 1년)
+      const MORTGAGE_DATA=[
+        {date:'202505',value:3.72},{date:'202506',value:3.68},{date:'202507',value:3.65},
+        {date:'202508',value:3.61},{date:'202509',value:3.58},{date:'202510',value:3.55},
+        {date:'202511',value:3.52},{date:'202512',value:3.50},{date:'202601',value:3.48},
+        {date:'202602',value:3.45},{date:'202603',value:3.42},{date:'202604',value:3.40}
+      ];
+      const labels=rate.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월'));
+      // 주담대 레이블과 맞추기
+      const mMap={};MORTGAGE_DATA.forEach(m=>mMap[m.date]=m.value);
+      const mValues=rate.history.map(h=>mMap[h.date]||null);
+      riskCH.rate=new Chart(rateChartEl,{
+        type:'line',
+        data:{labels,datasets:[
+          {label:'기준금리',data:rate.history.map(h=>h.value),
+           borderColor:'#1B4FD8',backgroundColor:'rgba(27,79,216,.06)',
+           borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#1B4FD8'},
+          {label:'주담대금리',data:mValues,
+           borderColor:'#D97706',backgroundColor:'transparent',
+           borderWidth:2,borderDash:[5,3],fill:false,tension:.3,
+           pointRadius:3,pointBackgroundColor:'#D97706',spanGaps:true}
+        ]},
+        options:{...OPTS,scales:{
+          x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
+          y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toFixed(2)+'%'}}
+        },plugins:{...OPTS.plugins,legend:{display:false},
+          tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw?.toFixed(2)}%`}}
+        }}
+      });
+    }
     const ppiChartEl=document.getElementById('ppiChart');
     // COPI 하드코딩 데이터 (KICT 2026.5.29 발표, 2020=100 기준)
     const COPI_DATA=[
