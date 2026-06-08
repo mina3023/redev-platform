@@ -1661,13 +1661,11 @@ async function init(){await Promise.all([loadAll(),detectAlerts(),loadZoneCoords
 async function loadAll(){
   try{
     // is_completed=false 필터 → 준공 완료 사업장 제외
-    // is_completed 컬럼이 뷰에 없을 수 있으므로 일단 전체 조회 후 클라이언트 필터
-    const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period');
+    // is_completed=false 필터 — 준공 완료 938개 제외
+    const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period&is_completed=eq.false');
     if(!Array.isArray(zones)||!zones.length)return;
-    // 준공(stage_score=9) 제외는 클라이언트에서 처리
-    const activeZones=zones.filter(z=>z.stage_score!==9);
-    ALL=activeZones.map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period}));
-    const tot=activeZones.length;
+    ALL=zones.map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period}));
+    const tot=zones.length;
     document.getElementById('kpiTot').textContent=tot.toLocaleString();
     document.getElementById('sbTot').textContent=tot.toLocaleString();
     document.getElementById('kpiTotSub').textContent='총 '+tot.toLocaleString()+'개 구역';
@@ -2582,8 +2580,8 @@ async function loadRisk(){
           min:130,max:138}
       },plugins:{...OPTS.plugins,legend:{display:false},
         tooltip:{callbacks:{label:c=>`건설공사비지수: ${c.raw.toFixed(2)} (2020=100)`}}
-      }}});
-    }}
+      }}}); 
+    }
   }catch(e){console.error(e);const timeEl=document.getElementById('riskUpdateTime');if(timeEl)timeEl.textContent='API 오류';}
 }
 
