@@ -1258,13 +1258,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   </div>
 
   <!-- 평당가 추이 차트 -->
-  <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:14px;">
+  <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:14px;">
     <div class="card">
       <div class="card-h"><div class="card-title">월별 평당가 추이 (만원/평)</div><span class="bdg bdg-blue" id="trendGuName">서초구</span></div>
       <div style="position:relative;height:240px;"><canvas id="trendChart2"></canvas></div>
       <div style="font-size:11px;color:var(--gray-400);margin-top:8px;">* 최근 6개월: 국토교통부 실거래가 실데이터 · 이전 6개월: 보간 추정치</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
       <div class="kpi-card vc-blue">
         <div class="kpi-top"><div class="kpi-lbl">최근 평균 평당가</div><span class="kpi-icon">₩</span></div>
         <div class="kpi-val c-blue" style="font-size:24px;" id="trendAvgPyeong">—</div>
@@ -1900,11 +1900,11 @@ async function selZ(name){
   const [fy,fq]=firstPeriod.split('-').map(Number),[ly,lq]=lastPeriod.split('-').map(Number);
   const dynPeriods=[];
   for(let y=fy;y<=ly;y++)for(const q of['03','06','09','12']){const pStr=`${y}-${String(q).padStart(2,'0')}`;if(y===fy&&Number(q)<fq)continue;if(y===ly&&Number(q)>lq)break;dynPeriods.push(pStr);}
-  const pm={};recs.forEach(r=>pm[r.period]=r.stage_score);
+  const pm={};recs.forEach(r=>pm[r.period]=parseInt(r.stage_score)||0);
   const cols='130px '+dynPeriods.map(()=>'1fr').join(' ');
   document.getElementById('tlGrid').innerHTML=
     `<div class="tl-hrow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm" style="font-size:9.5px;color:var(--gray-400);padding:5px 10px;">기간</div>${dynPeriods.map(p=>`<div class="tl-cell" style="padding:5px 0;"><div class="tl-plbl">${p.slice(2).replace('-','Q')}</div></div>`).join('')}</div>
-    <div class="tl-drow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm">${name.length>14?name.slice(0,14)+'…':name}</div>${dynPeriods.map(p=>{const sc=pm[p];const color=SC[sc]||'transparent';return sc?`<div class="tl-cell"><div class="tl-dot" style="background:${color};border-color:${color};" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`:`<div class="tl-cell"><div class="tl-mt"></div></div>`;}).join('')}</div>`;
+    <div class="tl-drow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm">${name.length>14?name.slice(0,14)+'…':name}</div>${dynPeriods.map(p=>{const sc=parseInt(pm[p])||0;const color=SC[sc]||'transparent';return sc?`<div class="tl-cell"><div class="tl-dot" style="background:${color};border-color:${color};" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`:`<div class="tl-cell"><div class="tl-mt"></div></div>`;}).join('')}</div>`;
   const ctx=recs.slice(-5).map(r=>`${r.period}: ${r.stage}(${r.stage_score}단계)`).join(', ');
   document.getElementById('aiMsgs').innerHTML=`<div class="ai-msg bot"><strong>[${name}]</strong> 최근 이력: ${ctx}<br><br>이 구역에 대해 질문하거나 분석을 요청하세요.</div>`;
   if(!ALL.find(r=>r.project_name===name))ALL=[...ALL,...recs];
