@@ -1172,7 +1172,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="card">
       <div class="card-h"><div class="card-title">월별 평당가 추이 (만원/평)</div><span class="bdg bdg-blue" id="trendGuName">서초구</span></div>
       <div style="position:relative;height:240px;"><canvas id="trendChart2"></canvas></div>
-      <div style="font-size:11px;color:var(--gray-400);margin-top:8px;">* 국토교통부 아파트 실거래가 기반 · 최근 12개월</div>
+      <div style="font-size:11px;color:var(--gray-400);margin-top:8px;">* 최근 6개월: 국토교통부 실거래가 실데이터 · 이전 6개월: 보간 추정치</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div class="kpi-card vc-blue">
@@ -2186,8 +2186,10 @@ async function loadRisk(){
       else setGlobal('wtiPrice','조회 중','wtiDate','잠시 후 새로고침');
     } else {
       ['usdKrw','constIdx','usTreasury','wtiPrice'].forEach(id=>{
-        const el=document.getElementById(id);if(el)el.textContent='API 오류';
+        const el=document.getElementById(id);if(el)el.textContent='조회 중';
       });
+      // global-indicators API 직접 폴백: 환율은 ECOS에서 직접 시도
+      loadGlobalFallback();
     }
     const now=new Date();if(timeEl)timeEl.textContent=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} 업데이트`;
     const rateChartEl=document.getElementById('rateChart');
@@ -2605,6 +2607,24 @@ async function loadTrend(){
       plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`평당 ${c.raw?.toLocaleString()}만원`}}}
     }
   });
+}
+
+
+// 글로벌 지표 ECOS 직접 폴백
+async function loadGlobalFallback(){
+  const ECOS_KEY='sample'; // Vercel 환경변수 없으면 sample 키로 제한적 조회
+  try{
+    // 환율 (원/달러) — ECOS 731Y001
+    const usdRes=await fetch(`https://ecos.bok.or.kr/api/StatisticSearch/${ECOS_KEY}/json/kr/1/1/731Y001/MM/202505/202506/0000001`);
+    const usdData=await usdRes.json();
+    const usdVal=usdData?.StatisticSearch?.row?.[0]?.DATA_VALUE;
+    if(usdVal){
+      const el=document.getElementById('usdKrw');
+      if(el)el.textContent=parseFloat(usdVal).toLocaleString()+'원';
+      const del=document.getElementById('usdKrwDate');
+      if(del)del.textContent='한국은행 ECOS';
+    }
+  }catch(e){console.log('환율 폴백 실패',e);}
 }
 
 
