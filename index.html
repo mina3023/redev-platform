@@ -161,7 +161,7 @@ input,select,textarea{font-family:var(--font);}
 .stg-tbl td:first-child{font-weight:600;color:var(--gray-900);}
 .pw{background:var(--gray-100);height:4px;border-radius:2px;overflow:hidden;width:80px;}
 .pf{height:100%;border-radius:2px;}
-.sc1{background:#F3F4F6;color:#9CA3AF;}.sc2{background:#DBEAFE;color:#1D4ED8;}.sc3{background:#EDE9FE;color:#6D28D9;}.sc4{background:#D1FAE5;color:#065F46;}.sc5{background:#FEF3C7;color:#92400E;}.sc6{background:#FFEDD5;color:#9A3412;}.sc7{background:#FAE8FF;color:#86198F;}.sc8{background:#FFE4E6;color:#9F1239;}.sc9{background:#D1FAE5;color:#065F46;}
+.sc1{background:#F3F4F6;color:#6B7280;border:1.5px solid #9CA3AF;}.sc2{background:#DBEAFE;color:#1D4ED8;border:1.5px solid #1D4ED8;}.sc3{background:#EDE9FE;color:#6D28D9;border:1.5px solid #6D28D9;}.sc4{background:#D1FAE5;color:#065F46;border:1.5px solid #065F46;}.sc5{background:#FEF3C7;color:#92400E;border:1.5px solid #92400E;}.sc6{background:#FFEDD5;color:#9A3412;border:1.5px solid #9A3412;}.sc7{background:#FAE8FF;color:#86198F;border:1.5px solid #86198F;}.sc8{background:#FFE4E6;color:#9F1239;border:1.5px solid #9F1239;}.sc9{background:#ECFDF5;color:#059669;border:1.5px solid #059669;}
 
 /* ── COMMON ── */
 .page-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
@@ -412,16 +412,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 .cl-alert{margin-bottom:10px;padding:10px 13px;background:#FEF2F2;border-radius:var(--r);border-left:3px solid var(--red);font-size:12px;color:#991B1B;line-height:1.6;}
 .cl-tip{margin-bottom:10px;padding:10px 13px;background:var(--green-bg);border-radius:var(--r);border-left:3px solid var(--green);font-size:12px;color:#065F46;line-height:1.6;}
 
-/* 구역검색 단계 색상 — SC 배열과 동일하게 통일 */
-.sc1{background:#F3F4F6;color:#4B5563;border:1px solid #D1D5DB;}
-.sc2{background:#DBEAFE;color:#1D4ED8;border:1px solid #93C5FD;}
-.sc3{background:#EDE9FE;color:#6D28D9;border:1px solid #C4B5FD;}
-.sc4{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;}
-.sc5{background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;}
-.sc6{background:#FFEDD5;color:#9A3412;border:1px solid #FDBA74;}
-.sc7{background:#FAE8FF;color:#86198F;border:1px solid #E879F9;}
-.sc8{background:#FFE4E6;color:#9F1239;border:1px solid #FDA4AF;}
-.sc9{background:#ECFDF5;color:#065F46;border:1px solid #6EE7B7;}
+/* sc 색상은 위에서 통합 정의 */
 </style>
 </head>
 <body>
@@ -532,7 +523,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="sb-item" data-tab="investor" onclick="sw('investor',this)"><span class="sb-icon">💰</span>수익 계산기</div>
     <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
     <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
-    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 현황 <span style="font-size:9px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:3px;margin-left:2px;">PRO</span></div>
+    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 현황 <span style="font-size:9px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:3px;margin-left:2px;">프리미엄</span></div>
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
@@ -1631,7 +1622,7 @@ async function detectAlerts(){
 function drawDistHBar(){
   const sorted=Object.entries(DD).sort((a,b)=>b[1]-a[1]);const max=sorted[0]?.[1]||1;
   document.getElementById('distHBar').innerHTML=sorted.map(([nm,ct],i)=>
-    `<div class="dist-row"><div class="d-rk ${i<3?'t':''}">${i+1}</div><div class="d-nm">${nm.replace('구','')}</div><div class="d-bw"><div class="d-bf" style="width:${Math.round(ct/max*100)}%;"></div></div><div class="d-ct">${ct}</div></div>`).join('');
+    `<div class="dist-row"><div class="d-rk ${i<3?'t':''}">${i+1}</div><div class="d-nm">${nm}</div><div class="d-bw"><div class="d-bf" style="width:${Math.round(ct/max*100)}%;"></div></div><div class="d-ct">${ct}</div></div>`).join('');
 }
 function drawDonut(){
   const vals=Object.values(SD),tot=vals.reduce((a,b)=>a+b,0)||1;
@@ -2173,13 +2164,13 @@ function sw(tab,el){
           <div style="font-size:48px;">🔒</div>
           <div style="font-size:20px;font-weight:700;color:var(--gray-900);">프리미엄 전용 기능</div>
           <div style="font-size:14px;color:var(--gray-500);text-align:center;line-height:1.8;">
-            조합 리스크 현황은 <strong>Premium</strong> 이상 구독자만 열람 가능합니다.<br>
+            조합 리스크 현황은 <strong>프리미엄(Premium)</strong> 이상 구독자만 열람 가능합니다.<br>
             사업 지연·언론 보도 기반 객관적 데이터로 투자를 판단하세요.
           </div>
           <button onclick="openAuth()" style="padding:12px 28px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;">
-            Premium 업그레이드 →
+            프리미엄 업그레이드 →
           </button>
-          <div style="font-size:11px;color:var(--gray-400);">월 49,900원 · 조합원 전용</div>
+          <div style="font-size:11px;color:var(--gray-400);">월 49,900원 · Premium 이상</div>
         </div>`;
         tabEl2.classList.add('active');
       }
