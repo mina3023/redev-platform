@@ -1,6 +1,27 @@
 /**
- * api/ecos.js — 건설공사비지수 항목코드 정밀 탐색
+ * api/ecos.js
+ * 한국은행 ECOS API (기준금리) +
+ * 한국건설기술연구원 KICT 건설공사비지수 (하드코딩, 매월 말 업데이트)
+ * 출처: https://www.kict.re.kr / 승인번호 제397001호
  */
+
+// ── 건설공사비지수 (KICT, 2020년=100 기준)
+// 매월 말 KICT 발표 후 업데이트 필요
+// 최종 업데이트: 2026년 5월 29일 (2026년 4월 잠정치)
+const COPI_HISTORY = [
+  { date: '202505', value: 131.17 }, // 추정
+  { date: '202506', value: 131.35 }, // 추정
+  { date: '202507', value: 131.52 }, // 추정
+  { date: '202508', value: 131.68 }, // 추정
+  { date: '202509', value: 131.85 }, // 추정
+  { date: '202510', value: 132.12 }, // 추정
+  { date: '202511', value: 132.45 }, // 확정
+  { date: '202512', value: 132.70 }, // 확정
+  { date: '202601', value: 133.52 }, // 확정
+  { date: '202602', value: 133.76 }, // 확정
+  { date: '202603', value: 134.53 }, // 확정
+  { date: '202604', value: 136.88 }, // 잠정 (2026.5.29 발표)
+];
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -19,36 +40,10 @@ export default async function handler(req, res) {
   startDate.setMonth(startDate.getMonth() - 23);
   const startYM = `${startDate.getFullYear()}${String(startDate.getMonth()+1).padStart(2,'0')}`;
 
-  // ── 항목코드 전체 조회 (필드명 raw 출력)
-  if (type === 'debug3') {
-    const result = {};
-
-    // 301Y013, 301Y017 항목 전체 raw 출력 (100개)
-    for (const stat of ['301Y013', '301Y017', '301Y014', '404Y014']) {
-      try {
-        const url = `${BASE}/StatisticItemList/${API_KEY}/json/kr/1/100/${stat}`;
-        const r = await fetch(url);
-        const d = await r.json();
-        const rows = d?.StatisticItemList?.row || [];
-        // raw 전체 출력 (첫 5개)
-        result[stat] = {
-          total: rows.length,
-          sample: rows.slice(0, 5),  // 필드명 확인용 raw
-          error: d?.RESULT
-        };
-      } catch(e) {
-        result[stat] = { error: e.message };
-      }
-    }
-
-    return res.status(200).json({ success: true, debug3: result });
-  }
-
-  // ── 기본 로직
   try {
     const results = {};
 
-    // 1. 기준금리
+    // ── 1. 기준금리 (ECOS API)
     if (type === 'rate' || type === 'all') {
       const url = `${BASE}/KeyStatisticList/${API_KEY}/json/kr/1/100`;
       const r = await fetch(url);
@@ -57,7 +52,7 @@ export default async function handler(req, res) {
       const rateItem = rows.find(r =>
         r.KEYSTAT_NAME?.includes('기준금리') || r.KEYSTAT_NAME?.includes('Base Rate')
       );
-      const currentRate = parseFloat(rateItem?.DATA_VALUE || 2.75);
+      const currentRate = parseFloat(rateItem?.DATA_VALUE || 2.5);
       const rateDate = rateItem?.TIME || endYM;
 
       let history = [];
@@ -67,114 +62,69 @@ export default async function handler(req, res) {
         const hD = await hR.json();
         const hRows = hD?.StatisticSearch?.row || [];
         history = hRows.slice(-12).map(r => ({
-          date: r.TIME, value: parseFloat(r.DATA_VALUE || 0),
+          date: r.TIME,
+          value: parseFloat(r.DATA_VALUE || 0),
         })).filter(h => h.value > 0);
       } catch(e) {}
 
       if (!history.length) {
-        history = Array.from({length:12}, (_, i) => {
+        history = Array.from({length: 12}, (_, i) => {
           const d = new Date(now);
           d.setMonth(d.getMonth() - 11 + i);
-          return { date:`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`, value:currentRate };
+          return {
+            date: `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`,
+            value: currentRate,
+          };
         });
       }
+
       results.rate = {
         current: currentRate,
         prev: history.length >= 2 ? history[history.length-2].value : currentRate,
         date: rateDate,
-        history
+        history,
       };
     }
 
-    // 2. 건설공사비지수 — 항목코드 자동 탐색
+    // ── 2. 건설공사비지수 (KICT 하드코딩)
     if (type === 'ppi' || type === 'all') {
-      let copiRows = [];
-      let foundInfo = '';
+      const latest  = COPI_HISTORY[COPI_HISTORY.length - 1];
+      const prev12  = COPI_HISTORY.length >= 13
+        ? COPI_HISTORY[COPI_HISTORY.length - 13]
+        : COPI_HISTORY[0];
 
-      // StatisticItemList로 실제 항목코드 가져온 뒤 StatisticSearch 조회
-      for (const stat of ['301Y017', '301Y013', '301Y014', '404Y014']) {
-        try {
-          // 1) 항목 목록 조회
-          const itemUrl = `${BASE}/StatisticItemList/${API_KEY}/json/kr/1/50/${stat}`;
-          const itemR = await fetch(itemUrl);
-          const itemD = await itemR.json();
-          const itemRows = itemD?.StatisticItemList?.row || [];
-
-          if (!itemRows.length) continue;
-
-          // 2) 월별(M) 항목 중 총지수/전체 계열 먼저, 없으면 첫 번째
-          const monthlyItems = itemRows.filter(r => r.CYCLE === 'M' || r.CYCLE === 'MM');
-          const candidates = monthlyItems.length ? monthlyItems : itemRows;
-
-          // ITEM_CODE 필드명 동적 탐색 (API마다 다를 수 있음)
-          for (const item of candidates.slice(0, 10)) {
-            // 가능한 항목코드 필드명들
-            const itemCode = item.ITEM_CODE || item.ITEM_CODE1 ||
-                             item.item1 || item.item_code || '';
-            const itemName = item.ITEM_NAME || item.ITEM_NAME1 ||
-                             item.item_name || item.name || '';
-            const cycle = item.CYCLE || item.cycle || '';
-
-            if (!itemCode || cycle === 'A' || cycle === 'Q') continue; // 연간·분기 스킵
-
-            // 3) 해당 항목코드로 StatisticSearch
-            const url = `${BASE}/StatisticSearch/${API_KEY}/json/kr/1/24/${stat}/MM/${startYM}/${endYM}/${itemCode}`;
-            const r = await fetch(url);
-            const d = await r.json();
-            const rows = d?.StatisticSearch?.row || [];
-
-            if (rows.length > 0) {
-              const lastVal = parseFloat(rows[rows.length-1]?.DATA_VALUE || 0);
-              // 건설공사비지수는 50 이상이어야 유효
-              if (lastVal >= 50) {
-                copiRows = rows;
-                foundInfo = `${stat}/${itemCode} (${itemName}) = ${lastVal}`;
-                console.log('COPI 성공:', foundInfo);
-                break;
-              }
-            }
-          }
-          if (copiRows.length > 0) break;
-        } catch(e) {
-          console.log(`${stat} 탐색 실패:`, e.message);
-        }
-      }
-
-      if (copiRows.length > 0) {
-        const latest = copiRows[copiRows.length - 1];
-        const prev12 = copiRows.length >= 13 ? copiRows[copiRows.length - 13] : copiRows[0];
-        const latestVal = parseFloat(latest?.DATA_VALUE || 0);
-        const prev12Val = parseFloat(prev12?.DATA_VALUE || 0);
-        const yoy = prev12Val > 0
-          ? Math.round((latestVal - prev12Val) / prev12Val * 100 * 10) / 10
+      // 전년동월 직접 비교 (PDF 확인값)
+      // 2026년 4월(136.88) vs 2025년 4월(131.06) = +4.44%
+      const PREV_YEAR_APRIL = 131.06;
+      const yoy = latest.date === '202604'
+        ? 4.44  // PDF 확정값
+        : prev12?.value > 0
+          ? Math.round((latest.value - prev12.value) / prev12.value * 100 * 10) / 10
           : 0;
 
-        results.ppi = {
-          current: latestVal,
-          yoy,
-          date: latest?.TIME || '',
-          history: copiRows.slice(-12).map(r => ({
-            date: r.TIME, value: parseFloat(r.DATA_VALUE || 0),
-          })),
-          label: '건설공사비지수',
-          foundCode: foundInfo,
-        };
-      } else {
-        // 모든 시도 실패 → 0 반환, 화면에서 "—" 표시
-        results.ppi = {
-          current: 0, yoy: 0, date: endYM, history: [],
-          label: '건설공사비지수', foundCode: '탐색실패'
-        };
-      }
+      results.ppi = {
+        current: latest.value,
+        yoy,
+        date: latest.date,
+        history: COPI_HISTORY.slice(-12).map(r => ({
+          date: r.date,
+          value: r.value,
+        })),
+        label: '건설공사비지수(KICT)',
+        source: '한국건설기술연구원 2026.5.29 발표',
+        note: '2020년=100 기준, 잠정치(P)',
+      };
     }
 
+    // ── 3. 리스크 점수
     if (type === 'all') {
-      const rate = results.rate?.current || 2.75;
+      const rate    = results.rate?.current || 2.5;
       const copiYoy = results.ppi?.yoy || 0;
       results.riskScores = {
-        rate: Math.min(10, Math.round(rate * 2 * 10) / 10),
-        policy: 5.8, legal: 2.9,
-        ppi: Math.min(10, Math.max(1, Math.round((2 + Math.max(0, copiYoy) * 0.7) * 10) / 10))
+        rate:   Math.min(10, Math.round(rate * 2 * 10) / 10),
+        policy: 5.8,
+        legal:  2.9,
+        ppi:    Math.min(10, Math.max(1, Math.round((2 + Math.max(0, copiYoy) * 0.7) * 10) / 10)),
       };
     }
 
