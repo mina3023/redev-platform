@@ -161,7 +161,7 @@ input,select,textarea{font-family:var(--font);}
 .stg-tbl td:first-child{font-weight:600;color:var(--gray-900);}
 .pw{background:var(--gray-100);height:4px;border-radius:2px;overflow:hidden;width:80px;}
 .pf{height:100%;border-radius:2px;}
-.sc1{background:#F3F4F6;color:#6B7280;border:1.5px solid #9CA3AF;}.sc2{background:#DBEAFE;color:#1D4ED8;border:1.5px solid #1D4ED8;}.sc3{background:#EDE9FE;color:#6D28D9;border:1.5px solid #6D28D9;}.sc4{background:#D1FAE5;color:#065F46;border:1.5px solid #065F46;}.sc5{background:#FEF3C7;color:#92400E;border:1.5px solid #92400E;}.sc6{background:#FFEDD5;color:#9A3412;border:1.5px solid #9A3412;}.sc7{background:#FAE8FF;color:#86198F;border:1.5px solid #86198F;}.sc8{background:#FFE4E6;color:#9F1239;border:1.5px solid #9F1239;}.sc9{background:#ECFDF5;color:#059669;border:1.5px solid #059669;}
+.sc1{background:#F3F4F6;color:#6B7280;border:1.5px solid #9CA3AF;}.sc2{background:#DBEAFE;color:#1D4ED8;border:1.5px solid #1D4ED8;}.sc3{background:#EDE9FE;color:#6D28D9;border:1.5px solid #6D28D9;}.sc4{background:#E0F2FE;color:#0369A1;border:1.5px solid #0369A1;}.sc5{background:#D1FAE5;color:#065F46;border:1.5px solid #065F46;}.sc6{background:#FEF3C7;color:#92400E;border:1.5px solid #92400E;}.sc7{background:#FEF9C3;color:#B45309;border:1.5px solid #B45309;}.sc8{background:#1E3A5F22;color:#1E3A5F;border:1.5px solid #1E3A5F;}.sc9{background:#ECFDF5;color:#059669;border:1.5px solid #059669;}
 
 /* ── COMMON ── */
 .page-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
@@ -642,11 +642,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
       <div class="sl-i"><div class="sl-dot" style="background:#9CA3AF;"></div>구역지정</div>
       <div class="sl-i"><div class="sl-dot" style="background:#1D4ED8;"></div>추진위</div>
       <div class="sl-i"><div class="sl-dot" style="background:#6D28D9;"></div>조합설립</div>
+      <div class="sl-i"><div class="sl-dot" style="background:#0369A1;"></div>건축심의</div>
       <div class="sl-i"><div class="sl-dot" style="background:#065F46;"></div>사업시행</div>
       <div class="sl-i"><div class="sl-dot" style="background:#92400E;"></div>관리처분</div>
-      <div class="sl-i"><div class="sl-dot" style="background:#9A3412;"></div>이주</div>
-      <div class="sl-i"><div class="sl-dot" style="background:#86198F;"></div>착공</div>
-      <div class="sl-i"><div class="sl-dot" style="background:#9F1239;"></div>분양</div>
+      <div class="sl-i"><div class="sl-dot" style="background:#B45309;"></div>이주</div>
+      <div class="sl-i"><div class="sl-dot" style="background:#1E3A5F;"></div>착공</div>
       <div class="sl-i"><div class="sl-dot" style="background:#059669;"></div>준공</div>
     </div>
     <!-- 구역 상세 정보 -->
@@ -1639,8 +1639,8 @@ function openUpgrade(){closeUserMenu2();alert('플랜 업그레이드는 결제 
 // ── DATA ──
 const SB='https://jhmhocgzjstwrstjwopm.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpobWhvY2d6anN0d3JzdGp3b3BtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMDIzMzEsImV4cCI6MjA5MTU3ODMzMX0.WHk3XfJhgZLELNIgc88oIx7oixvFICr0NoV_ZiBdDpY';
-const SN=['','구역지정','추진위','조합설립','사업시행','관리처분','이주','착공','분양','준공'];
-const SC=['','#9CA3AF','#1D4ED8','#6D28D9','#065F46','#92400E','#9A3412','#86198F','#9F1239','#059669'];
+const SN=['','구역지정','추진위','조합설립','건축심의','사업시행','관리처분','이주','착공','준공'];
+const SC=['','#9CA3AF','#1D4ED8','#6D28D9','#0369A1','#065F46','#92400E','#B45309','#1E3A5F','#059669'];
 const PERIODS=[];
 for(let y=2017;y<=2025;y++)for(let q of['03','06','09','12']){if(y===2025&&+q>12)break;PERIODS.push(`${y}-${q}`);}
 let ALL=[],ALERTS=[],SD={},DD={},CH={};
@@ -1908,7 +1908,8 @@ async function selZ(name){
       if(zi.construction_start)   dates.push({label:'착공',date:zi.construction_start});
       const DATE_COLORS={
         '구역지정':'#9CA3AF','추진위':'#1D4ED8','조합설립':'#6D28D9',
-        '사업시행':'#065F46','관리처분':'#92400E','착공':'#86198F'
+        '건축심의':'#0369A1','사업시행':'#065F46','관리처분':'#92400E',
+        '이주':'#B45309','착공':'#1E3A5F'
       };
       document.getElementById('ziDates').innerHTML=dates.map(d=>{
         const c=DATE_COLORS[d.label]||'var(--blue)';
