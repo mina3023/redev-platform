@@ -2603,10 +2603,10 @@ async function loadRisk(){
       if(riskCH.rate)riskCH.rate.destroy();
       // 주담대금리 하드코딩 데이터 (한국은행 기준, 최근 1년)
       const MORTGAGE_DATA=[
-        {date:'202505',value:3.72},{date:'202506',value:3.68},{date:'202507',value:3.65},
-        {date:'202508',value:3.61},{date:'202509',value:3.58},{date:'202510',value:3.55},
-        {date:'202511',value:3.52},{date:'202512',value:3.50},{date:'202601',value:3.48},
-        {date:'202602',value:3.45},{date:'202603',value:3.42},{date:'202604',value:3.40}
+        {date:'202407',value:4.12},{date:'202408',value:4.05},{date:'202409',value:3.98},
+        {date:'202410',value:3.92},{date:'202411',value:3.88},{date:'202412',value:3.82},
+        {date:'202501',value:3.78},{date:'202502',value:3.75},{date:'202503',value:3.72},
+        {date:'202504',value:3.70},{date:'202505',value:3.68},{date:'202506',value:3.65},
       ];
       const labels=rate.history.map(h=>h.date.replace(/(\d{4})(\d{2})/,'$2월'));
       // 주담대 레이블과 맞추기
@@ -2625,7 +2625,7 @@ async function loadRisk(){
         ]},
         options:{...OPTS,scales:{
           x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
-          y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toFixed(2)+'%'}}
+          y:{grid:{color:'#F3F4F6'},min:2.0,max:4.5,ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toFixed(2)+'%'}}
         },plugins:{...OPTS.plugins,legend:{display:false},
           tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw?.toFixed(2)}%`}}
         }}
