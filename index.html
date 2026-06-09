@@ -1314,6 +1314,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   </div>
 </div></div>
 <div id="tab-trend" class="tab-panel">
+  <div style="max-width:1100px;margin:0 auto;">
   <div class="page-h">
     <div><h2>시세 추이 <span class="ph-badge">투자 데이터</span></h2><p>자치구별 아파트 평당가 추이 · 재개발 완료 구역 수익률</p></div>
     <div style="display:flex;gap:8px;align-items:center;">
@@ -1371,6 +1372,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     </div>
   </div>
 </div>
+  </div>
 <div id="tab-riskboard" class="tab-panel">
   <div class="page-h">
     <div>
@@ -2429,14 +2431,24 @@ async function sw(tab,el){
     loadTrend();
   },80);
   if(tab==='riskboard'){
-    // loadProfile이 완료될 때까지 최대 2초 대기
-    if(currentUser && !currentProfile){
+    // 세션 복원 + loadProfile 완료 대기 (최대 3초)
+    if(!currentProfile){
       await new Promise(resolve=>{
         let tries=0;
         const check=setInterval(()=>{
-          if(currentProfile||++tries>20){clearInterval(check);resolve();}
+          if(currentProfile||++tries>30){clearInterval(check);resolve();}
         },100);
       });
+    }
+    // 여전히 없으면 getSession으로 강제 복원 시도
+    if(!currentProfile){
+      try{
+        const{data:{session}}=await _SB.auth.getSession();
+        if(session?.user){
+          currentUser=session.user;
+          await loadProfile();
+        }
+      }catch(e){}
     }
     const tier=currentProfile?.tier||'free';
     if(!['premium','black','b2b'].includes(tier)){
