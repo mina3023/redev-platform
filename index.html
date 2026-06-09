@@ -650,27 +650,29 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
       <div class="sl-i"><div class="sl-dot" style="background:#059669;"></div>준공</div>
     </div>
     <!-- 구역 상세 정보 -->
-    <div id="zoneInfoBox" style="display:none;margin-top:16px;padding-top:16px;border-top:2px solid var(--blue-mid);">
-      <!-- 헤더 -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+    <div id="zoneInfoBox" style="display:none;margin-top:16px;">
+
+      <!-- 섹션 헤더 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-top:14px;border-top:2px solid var(--blue-mid);">
         <span style="display:inline-block;width:3px;height:16px;border-radius:2px;background:var(--blue);"></span>
         <span style="font-size:12px;font-weight:700;color:var(--gray-700);">서울시 공개 정보</span>
         <span style="font-size:10px;color:var(--gray-400);">2026년 3월 기준</span>
+        <span id="ziStagnantBadge" style="display:none;margin-left:auto;font-size:11px;font-weight:700;color:var(--red);background:#FEF2F2;padding:2px 8px;border-radius:4px;border:1px solid #FECACA;">⚠ 단계 정체</span>
       </div>
 
       <!-- 주소 -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
         <div style="padding:10px 12px;background:var(--gray-50);border-radius:var(--r);border:1px solid var(--gray-100);">
-          <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:4px;">📍 지번주소</div>
+          <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:3px;">📍 지번주소</div>
           <div style="font-size:12px;color:var(--gray-800);line-height:1.5;" id="ziJibun">—</div>
         </div>
         <div style="padding:10px 12px;background:var(--gray-50);border-radius:var(--r);border:1px solid var(--gray-100);">
-          <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:4px;">🏠 도로명주소</div>
+          <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:3px;">🏠 도로명주소</div>
           <div style="font-size:12px;color:var(--gray-800);line-height:1.5;" id="ziRoad">—</div>
         </div>
       </div>
 
-      <!-- 공급 물량 KPI -->
+      <!-- 공급 KPI -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
         <div class="kpi-card" style="padding:10px;text-align:center;">
           <div class="kpi-lbl" style="font-size:10px;">기존 가구</div>
@@ -694,13 +696,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
         </div>
       </div>
 
-      <!-- 인가 일정 타임라인 -->
-      <div style="margin-bottom:8px;">
+      <!-- 단계별 인가 날짜 전체 -->
+      <div style="margin-bottom:6px;">
         <div style="font-size:10px;font-weight:700;color:var(--gray-500);margin-bottom:8px;letter-spacing:.05em;">📅 단계별 인가 날짜</div>
-        <div id="ziDates" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <div id="ziDates" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;"></div>
       </div>
 
-      <div style="font-size:10px;color:var(--gray-400);margin-top:4px;">
+      <div style="font-size:10px;color:var(--gray-400);margin-top:6px;">
         출처: 서울시 정비사업 추진현황 (2026년 3월 기준) · 서울 정비몽땅
       </div>
     </div>
@@ -1902,7 +1904,7 @@ async function selZ(name){
 
   // redev_projects_seoul에서 상세 정보 조회
   try{
-    const ZI_SELECT = 'select=zone_name,gu_name,address_jibun,address_road,project_type,stage_label,existing_units,total_units,sale_units,rental_units,assoc_established,impl_approved_first,mgmt_approved_first,construction_start';
+    const ZI_SELECT = 'select=zone_name,gu_name,address_jibun,address_road,project_type,stage_label,existing_units,total_units,sale_units,rental_units,zone_designated_first,zone_designated_last,committee_date,assoc_established,arch_review,impl_approved_first,impl_approved_last,mgmt_approved_first,mgmt_approved_last,move_out_start,move_out_end,construction_start,delay_months,is_stagnant,over_months';
     const guName = recs[0]?.gu_name || '';
 
     // 핵심 이름 추출: 불필요한 접미어 제거
@@ -1953,23 +1955,34 @@ async function selZ(name){
       document.getElementById('ziJibun').textContent    = zi.address_jibun || '—';
       document.getElementById('ziRoad').textContent     = zi.address_road  || '—';
       // 주요 인가 날짜
-      const dates=[];
-      if(zi.assoc_established)    dates.push({label:'조합설립',date:zi.assoc_established});
-      if(zi.impl_approved_first)  dates.push({label:'사업시행',date:zi.impl_approved_first});
-      if(zi.mgmt_approved_first)  dates.push({label:'관리처분',date:zi.mgmt_approved_first});
-      if(zi.construction_start)   dates.push({label:'착공',date:zi.construction_start});
-      const DATE_COLORS={
-        '구역지정':'#9CA3AF','추진위':'#1D4ED8','조합설립':'#6D28D9',
-        '건축심의':'#0369A1','사업시행':'#065F46','관리처분':'#92400E',
-        '이주':'#B45309','착공':'#1E3A5F'
-      };
-      document.getElementById('ziDates').innerHTML=dates.map(d=>{
-        const c=DATE_COLORS[d.label]||'var(--blue)';
-        return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 12px;border-radius:var(--r);background:${c}11;border:1px solid ${c}44;min-width:72px;">
-          <span style="font-size:9px;font-weight:700;color:${c};margin-bottom:2px;">${d.label}</span>
-          <span style="font-size:12px;font-weight:600;color:var(--gray-800);">${d.date.slice(0,7).replace('-','.')}</span>
+      // 단계별 인가 날짜 전체 표시
+      const DATE_META=[
+        {label:'구역지정(최초)', val:zi.zone_designated_first, color:'#9CA3AF'},
+        {label:'구역지정(최종)', val:zi.zone_designated_last,  color:'#9CA3AF'},
+        {label:'추진위원회',     val:zi.committee_date,        color:'#1D4ED8'},
+        {label:'조합설립인가',   val:zi.assoc_established,     color:'#6D28D9'},
+        {label:'건축심의',       val:zi.arch_review,           color:'#0369A1'},
+        {label:'사업시행(최초)', val:zi.impl_approved_first,   color:'#065F46'},
+        {label:'사업시행(최종)', val:zi.impl_approved_last,    color:'#065F46'},
+        {label:'관리처분(최초)', val:zi.mgmt_approved_first,   color:'#92400E'},
+        {label:'관리처분(최종)', val:zi.mgmt_approved_last,    color:'#92400E'},
+        {label:'이주시작',       val:zi.move_out_start,        color:'#B45309'},
+        {label:'이주종료',       val:zi.move_out_end,          color:'#B45309'},
+        {label:'착공',           val:zi.construction_start,    color:'#1E3A5F'},
+      ];
+      const fmtDate=d=>d?d.slice(0,7).replace('-','.'):'';
+      document.getElementById('ziDates').innerHTML=DATE_META.map(m=>{
+        const dateStr=fmtDate(m.val);
+        const c=m.color;
+        const isEmpty=!dateStr;
+        return `<div style="padding:8px 10px;border-radius:var(--r);background:${isEmpty?'var(--gray-50)':c+'11'};border:1px solid ${isEmpty?'var(--gray-100)':c+'44'};">
+          <div style="font-size:9px;font-weight:700;color:${isEmpty?'var(--gray-300)':c};margin-bottom:3px;white-space:nowrap;">${m.label}</div>
+          <div style="font-size:12px;font-weight:${isEmpty?'400':'600'};color:${isEmpty?'var(--gray-300)':'var(--gray-800)'};">${dateStr||'—'}</div>
         </div>`;
       }).join('');
+      // 정체 배지
+      const stagnantBadge=document.getElementById('ziStagnantBadge');
+      if(stagnantBadge) stagnantBadge.style.display=zi.is_stagnant?'inline':'none';
     } else if(box){
       box.style.display='none';
     }
