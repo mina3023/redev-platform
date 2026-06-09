@@ -1728,15 +1728,16 @@ async function init(){await Promise.all([loadAll(),detectAlerts(),loadZoneCoords
 
 async function loadAll(){
   try{
-    // is_completed=false 필터 → 준공 완료 사업장 제외
-    // is_completed=false 필터 — 준공 완료 938개 제외
-    const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period&is_completed=eq.false');
+    // 전체 조회 (준공 포함) — kpiTot에 전체 수 표시
+    const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period,is_completed');
     if(!Array.isArray(zones)||!zones.length)return;
-    ALL=zones.map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period}));
-    const tot=zones.length;
+    // ALL 배열은 진행 중만 (구역검색·지도용)
+    ALL=zones.filter(z=>!z.is_completed).map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period}));
+    const tot=zones.length;           // 전체 (준공 포함)
+    const totActive=ALL.length;       // 진행 중만
     document.getElementById('kpiTot').textContent=tot.toLocaleString();
     document.getElementById('sbTot').textContent=tot.toLocaleString();
-    document.getElementById('kpiTotSub').textContent='총 '+tot.toLocaleString()+'개 구역';
+    document.getElementById('kpiTotSub').textContent='총 '+tot.toLocaleString()+'개 구역 (진행 중 '+totActive.toLocaleString()+'개)';
     const done=zones.filter(z=>z.stage_score===9).length;
     const active=zones.filter(z=>z.stage_score>=3&&z.stage_score<=8).length;
     document.getElementById('kpiDone').textContent=done.toLocaleString();
