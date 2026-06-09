@@ -777,7 +777,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div id="tab-map" class="tab-panel">
   <div class="page-h"><div><h2>지도 <span class="ph-badge">카카오맵</span></h2><p>서울 정비사업 구역 지도 시각화 · 단계별 필터</p></div>
     <div style="display:flex;gap:8px;align-items:center;">
-      <button onclick="startGeocode()" style="padding:6px 12px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer;" id="geocodeBtn">📍 좌표 자동 변환</button>
+      <button onclick="startGeocode()" style="padding:6px 12px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer;display:none;" id="geocodeBtn">📍 좌표 자동 변환</button>
       <span id="geocodeStatus" style="font-size:11px;color:var(--gray-400);"></span>
     </div>
   </div>
@@ -2134,12 +2134,32 @@ function showMapInfo(name,gu,score,stage){
       <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-400);">자치구</span><span style="font-weight:500;">${gu}</span></div>
       ${alert?`<div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-400);">지연 경보</span><span style="color:var(--red);font-weight:600;">⚠ ${alert.stuck}기간 정체</span></div>`:''}
     </div>`;
-  // 날짜 — 타임라인에서 각 단계 첫 등장 시점 추정
-  const zoneRecs=ALL.filter(r=>r.project_name===name).sort((a,b)=>a.period>b.period?1:-1);
-  const findFirst=(sc)=>{const r=zoneRecs.find(r=>r.stage_score===sc);return r?r.period.replace('-','년 ')+'분기':'—';};
-  document.getElementById('mapDate1').textContent=score>=4?findFirst(4):'미진입';
-  document.getElementById('mapDate2').textContent=score>=5?findFirst(5):'미진입';
-  document.getElementById('mapDate3').textContent=score>=7?findFirst(7):'미진입';
+  // 날짜 — redev_projects_seoul 실제 인가일 조회
+  document.getElementById('mapDate1').textContent='조회 중...';
+  document.getElementById('mapDate2').textContent='조회 중...';
+  document.getElementById('mapDate3').textContent='조회 중...';
+  (async()=>{
+    try{
+      const ZI_SELECT='select=zone_name,assoc_established,impl_approved_first,impl_approved_last,mgmt_approved_first,mgmt_approved_last,construction_start,move_out_start';
+      const guNm=ALL.find(r=>r.project_name===name)?.gu_name||'';
+      const coreName=name.replace(/재건축정비사업조합$|재개발정비사업조합$|정비사업조합$|조합$/,'').replace(/구역$/,'').trim();
+      let zi=await sbf('redev_projects_seoul',`${ZI_SELECT}&zone_name=eq.${encodeURIComponent(coreName)}&gu_name=eq.${encodeURIComponent(guNm)}&limit=1`);
+      if(!Array.isArray(zi)||!zi.length) zi=await sbf('redev_projects_seoul',`${ZI_SELECT}&zone_name=ilike.${encodeURIComponent(coreName)}*&limit=1`);
+      const z=Array.isArray(zi)&&zi.length?zi[0]:null;
+      const fmt=d=>d?d.slice(0,7).replace('-','년 ')+'월':'미확인';
+      document.getElementById('mapDate1').textContent=z?(fmt(z.impl_approved_last||z.impl_approved_first)):'미진입';
+      document.getElementById('mapDate2').textContent=z?(fmt(z.mgmt_approved_last||z.mgmt_approved_first)):'미진입';
+      document.getElementById('mapDate3').textContent=z?(fmt(z.construction_start)):'미진입';
+    }catch(e){
+      ['mapDate1','mapDate2','mapDate3'].forEach(id=>{
+        const zoneRecs=ALL.filter(r=>r.project_name===name).sort((a,b)=>a.period>b.period?1:-1);
+        const findFirst=(sc)=>{const r=zoneRecs.find(r=>r.stage_score===sc);return r?r.period.replace('-','년 ')+'분기':'—';};
+        document.getElementById('mapDate1').textContent=score>=5?findFirst(5):'미진입';
+        document.getElementById('mapDate2').textContent=score>=6?findFirst(6):'미진입';
+        document.getElementById('mapDate3').textContent=score>=8?findFirst(8):'미진입';
+      });
+    }
+  })();
   window._mapSearchName=name;
 }
 
@@ -2390,7 +2410,7 @@ async function sw(tab,el){
   if(tab==='compare')setTimeout(initCompareChart,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
   if(tab==='news')setTimeout(loadNews,80);
-  if(tab==='map')setTimeout(()=>{initKakaoMap();if(kakaoMap)kakao.maps.event.trigger(kakaoMap,'resize');},300);
+  if(tab==='map')setTimeout(()=>{initKakaoMap();if(kakaoMap)kakao.maps.event.trigger(kakaoMap,'resize');setTimeout(()=>{if(window._kakaoReady&&ZONE_ADDRESSES.length>0)startGeocode();},1000);},300);
   if(tab==='mydash')setTimeout(renderMyDash,80);
   if(tab==='tax')setTimeout(()=>{document.getElementById('taxAcq').style.display='block';},80);
   const content=document.querySelector('.content');if(content)content.scrollTop=0;
