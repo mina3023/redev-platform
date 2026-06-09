@@ -963,6 +963,55 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div id="tab-rights" class="tab-panel">
   <div class="page-h"><div><h2>조합원 권리 <span class="ph-badge">법·제도</span></h2><p>재개발사업 절차 · 법령 기반 정보 (찾기쉬운 생활법령정보 2026.05 기준)</p></div></div>
 
+  <!-- 4단계 절차 시각화 -->
+  <div id="rightsStageBanner" style="margin-bottom:20px;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;">
+
+      <!-- 연결선 -->
+      <div style="position:absolute;top:28px;left:12.5%;right:12.5%;height:3px;background:linear-gradient(to right,#1D4ED8,#6D28D9,#065F46,#059669);z-index:0;border-radius:2px;"></div>
+
+      <!-- 1단계: 사업 준비 -->
+      <div onclick="switchRTab(0,null)" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1;" id="rsv0">
+        <div style="width:56px;height:56px;border-radius:50%;background:#1D4ED8;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 8px rgba(29,78,216,.3);transition:transform .2s;" class="rsv-icon">🏙</div>
+        <div style="text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:#1D4ED8;letter-spacing:.05em;">STEP 1</div>
+          <div style="font-size:13px;font-weight:700;color:var(--gray-900);margin-top:2px;">사업 준비</div>
+          <div style="font-size:10px;color:var(--gray-500);margin-top:2px;line-height:1.4;">정비계획 수립<br>추진위 구성</div>
+        </div>
+      </div>
+
+      <!-- 2단계: 조합설립 -->
+      <div onclick="switchRTab(1,null)" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1;" id="rsv1">
+        <div style="width:56px;height:56px;border-radius:50%;background:#6D28D9;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 8px rgba(109,40,217,.3);transition:transform .2s;" class="rsv-icon">🤝</div>
+        <div style="text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:#6D28D9;letter-spacing:.05em;">STEP 2</div>
+          <div style="font-size:13px;font-weight:700;color:var(--gray-900);margin-top:2px;">조합설립</div>
+          <div style="font-size:10px;color:var(--gray-500);margin-top:2px;line-height:1.4;">조합설립 인가<br>건축심의</div>
+        </div>
+      </div>
+
+      <!-- 3단계: 사업시행 -->
+      <div onclick="switchRTab(2,null)" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1;" id="rsv2">
+        <div style="width:56px;height:56px;border-radius:50%;background:#065F46;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 8px rgba(6,95,70,.3);transition:transform .2s;" class="rsv-icon">🏗</div>
+        <div style="text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:#065F46;letter-spacing:.05em;">STEP 3</div>
+          <div style="font-size:13px;font-weight:700;color:var(--gray-900);margin-top:2px;">사업시행</div>
+          <div style="font-size:10px;color:var(--gray-500);margin-top:2px;line-height:1.4;">사업시행·분양<br>관리처분</div>
+        </div>
+      </div>
+
+      <!-- 4단계: 사업완료 -->
+      <div onclick="switchRTab(3,null)" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1;" id="rsv3">
+        <div style="width:56px;height:56px;border-radius:50%;background:#059669;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 8px rgba(5,150,105,.3);transition:transform .2s;" class="rsv-icon">🏠</div>
+        <div style="text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:#059669;letter-spacing:.05em;">STEP 4</div>
+          <div style="font-size:13px;font-weight:700;color:var(--gray-900);margin-top:2px;">사업 완료</div>
+          <div style="font-size:10px;color:var(--gray-500);margin-top:2px;line-height:1.4;">준공·이전고시<br>청산</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 가로 4단계 탭 -->
   <div id="rightsTabNav" style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border);overflow-x:auto;">
     <button class="rtab-btn active" onclick="switchRTab(0,this)" style="padding:10px 18px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--blue);border-bottom:2px solid var(--blue);margin-bottom:-2px;white-space:nowrap;font-family:var(--font);">사업 준비</button>
@@ -2742,8 +2791,27 @@ function switchRTab(idx, el) {
     b.style.borderBottomColor = 'transparent';
     b.style.fontWeight = '600';
   });
-  el.style.color = 'var(--blue)';
-  el.style.borderBottomColor = 'var(--blue)';
+  if(el){
+    el.style.color = 'var(--blue)';
+    el.style.borderBottomColor = 'var(--blue)';
+  } else {
+    // 배너 클릭 시 해당 탭 버튼 활성화
+    const btns = document.querySelectorAll('.rtab-btn');
+    if(btns[idx]){
+      btns[idx].style.color = 'var(--blue)';
+      btns[idx].style.borderBottomColor = 'var(--blue)';
+    }
+  }
+  // 배너 아이콘 활성화 표시
+  const STEP_COLORS = ['#1D4ED8','#6D28D9','#065F46','#059669'];
+  for(let i=0;i<4;i++){
+    const sv = document.getElementById('rsv'+i);
+    const icon = sv?.querySelector('.rsv-icon');
+    if(icon){
+      icon.style.transform = i===idx ? 'scale(1.2)' : 'scale(1)';
+      icon.style.boxShadow = i===idx ? `0 4px 16px ${STEP_COLORS[i]}66` : `0 2px 8px ${STEP_COLORS[i]}33`;
+    }
+  }
 }
 
 
