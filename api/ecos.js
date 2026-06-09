@@ -68,14 +68,15 @@ export default async function handler(req, res) {
       } catch(e) {}
 
       if (!history.length) {
-        history = Array.from({length: 12}, (_, i) => {
-          const d = new Date(now);
-          d.setMonth(d.getMonth() - 11 + i);
-          return {
-            date: `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`,
-            value: currentRate,
-          };
-        });
+        // 실제 한국은행 기준금리 인하 이력 (fallback)
+        history = [
+          {date:'202407',value:3.50},{date:'202408',value:3.50},
+          {date:'202409',value:3.50},{date:'202410',value:3.25},
+          {date:'202411',value:3.00},{date:'202412',value:3.00},
+          {date:'202501',value:3.00},{date:'202502',value:2.75},
+          {date:'202503',value:2.75},{date:'202504',value:2.75},
+          {date:'202505',value:2.50},{date:'202506',value:2.50},
+        ];
       }
 
       results.rate = {
