@@ -549,7 +549,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
       <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 경보</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="kpiAlert">—</div><div class="kpi-foot"><span class="kpi-sub">6기간+ 정체</span><span class="kpi-tag t-dn">즉시 점검</span></div></div>
     </div>
     <div class="db-row2">
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">실데이터</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">진행 중</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 분포</div><span class="bdg bdg-blue">전체</span></div><div class="cc-body"><div class="cw"><canvas id="stageDonut"></canvas></div><div class="stage-leg" id="stageLeg"></div></div></div>
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>분기별 사업 현황</div><span class="bdg bdg-gray">2017~2025</span></div><div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div></div>
     </div>
@@ -1750,10 +1750,10 @@ async function loadAll(){
     document.getElementById('kpiActive').textContent=active.toLocaleString();
     for(let i=1;i<=9;i++)SD[i]=0;
     zones.forEach(z=>{if(z.stage_score)SD[z.stage_score]++;});
-    zones.forEach(z=>{if(!DD[z.gu_name])DD[z.gu_name]=0;DD[z.gu_name]++;});
+    zones.filter(z=>!z.is_completed).forEach(z=>{if(!DD[z.gu_name])DD[z.gu_name]=0;DD[z.gu_name]++;});
     drawDistHBar();drawDonut();drawStageBar();drawStageTable();drawStageTbodyDB();
-    const trend=await sbf('redev_timeline','select=period,stage_score&limit=1000&order=period');
-    if(Array.isArray(trend))drawTrend(trend);
+    const trend=await sbfAll('redev_timeline','select=period,stage_score&order=period');
+    if(Array.isArray(trend)&&trend.length)drawTrend(trend);
   }catch(e){console.error(e);}
 }
 
@@ -1804,7 +1804,25 @@ function drawDonut(){
     `<div class="sl-i"><div class="sl-dot" style="background:${SC[k]};"></div>${SN[k]} <b style="font-family:var(--mono);">${v}</b></div>`).join('');
 }
 function drawTrend(data){
-  const pc={};PERIODS.forEach(p=>pc[p]=0);data.forEach(r=>{if(pc[r.period]!==undefined)pc[r.period]++;});
+  // period 정규화: 'YYYY-Q숫자' → 'YYYY-MM', 'YYYYMM' → 'YYYY-MM' 등 대응
+  function normPeriod(p){
+    if(!p)return null;
+    p=String(p).trim();
+    // YYYY-03/06/09/12 형식 그대로
+    if(/^\d{4}-\d{2}$/.test(p))return p;
+    // YYYYMM 형식
+    if(/^\d{6}$/.test(p))return p.slice(0,4)+'-'+p.slice(4);
+    // YYYY-Q1/Q2/Q3/Q4 형식
+    const qm={Q1:'03',Q2:'06',Q3:'09',Q4:'12','1':'03','2':'06','3':'09','4':'12'};
+    const qMatch=p.match(/^(\d{4})[- _]?Q?(\d)$/i);
+    if(qMatch)return qMatch[1]+'-'+(qm[qMatch[2]]||'03');
+    return null;
+  }
+  const pc={};PERIODS.forEach(p=>pc[p]=0);
+  data.forEach(r=>{
+    const np=normPeriod(r.period);
+    if(np&&pc[np]!==undefined)pc[np]++;
+  });
   if(CH.trend)CH.trend.destroy();
   CH.trend=new Chart(document.getElementById('trendChart'),{type:'line',
     data:{labels:PERIODS.map(p=>p.slice(2).replace('-','Q')),datasets:[{data:PERIODS.map(p=>pc[p]),borderColor:'#1B4FD8',backgroundColor:'rgba(27,79,216,.06)',borderWidth:2,fill:true,tension:.4,pointRadius:0}]},
