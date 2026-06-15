@@ -551,7 +551,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="db-row2">
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">진행 중</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 분포</div><span class="bdg bdg-blue">전체</span></div><div class="cc-body"><div class="cw"><canvas id="stageDonut"></canvas></div><div class="stage-leg" id="stageLeg"></div></div></div>
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>분기별 사업 현황</div><span class="bdg bdg-gray">2017~2025</span></div><div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>분기별 단계 진척 현황</div><span class="bdg bdg-gray">2017~2025</span></div><div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div></div>
     </div>
     <div class="db-row3">
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar" style="background:var(--red);"></span>지연 경보 현황</div><span class="bdg bdg-red" id="alertCountBadge">로딩 중</span></div>
@@ -1750,9 +1750,16 @@ async function loadAll(){
     document.getElementById('kpiActive').textContent=active.toLocaleString();
     for(let i=1;i<=9;i++)SD[i]=0;
     zones.forEach(z=>{if(z.stage_score)SD[z.stage_score]++;});
-    zones.filter(z=>!z.is_completed).forEach(z=>{if(!DD[z.gu_name])DD[z.gu_name]=0;DD[z.gu_name]++;});
+    // 구별 활성도: project_name 중복 제거 후 카운트
+    const seenProj=new Set();
+    zones.filter(z=>!z.is_completed).forEach(z=>{
+      if(!seenProj.has(z.project_name)){
+        seenProj.add(z.project_name);
+        if(!DD[z.gu_name])DD[z.gu_name]=0;DD[z.gu_name]++;
+      }
+    });
     drawDistHBar();drawDonut();drawStageBar();drawStageTable();drawStageTbodyDB();
-    const trend=await sbfAll('redev_timeline','select=period,stage_score&order=period');
+    const trend=await sbfAll('redev_timeline','select=project_name,period,stage_score&order=period');
     if(Array.isArray(trend)&&trend.length)drawTrend(trend);
   }catch(e){console.error(e);}
 }
@@ -1804,24 +1811,35 @@ function drawDonut(){
     `<div class="sl-i"><div class="sl-dot" style="background:${SC[k]};"></div>${SN[k]} <b style="font-family:var(--mono);">${v}</b></div>`).join('');
 }
 function drawTrend(data){
-  // period 정규화: 'YYYY-Q숫자' → 'YYYY-MM', 'YYYYMM' → 'YYYY-MM' 등 대응
+  // period 정규화
   function normPeriod(p){
     if(!p)return null;
     p=String(p).trim();
-    // YYYY-03/06/09/12 형식 그대로
     if(/^\d{4}-\d{2}$/.test(p))return p;
-    // YYYYMM 형식
     if(/^\d{6}$/.test(p))return p.slice(0,4)+'-'+p.slice(4);
-    // YYYY-Q1/Q2/Q3/Q4 형식
     const qm={Q1:'03',Q2:'06',Q3:'09',Q4:'12','1':'03','2':'06','3':'09','4':'12'};
     const qMatch=p.match(/^(\d{4})[- _]?Q?(\d)$/i);
     if(qMatch)return qMatch[1]+'-'+(qm[qMatch[2]]||'03');
     return null;
   }
-  const pc={};PERIODS.forEach(p=>pc[p]=0);
+
+  // 구역별로 분기 순서로 정렬 후 단계가 올라간 건수 집계
+  const byZone={};
   data.forEach(r=>{
     const np=normPeriod(r.period);
-    if(np&&pc[np]!==undefined)pc[np]++;
+    if(!np)return;
+    if(!byZone[r.project_name])byZone[r.project_name]=[];
+    byZone[r.project_name].push({period:np,score:Number(r.stage_score)||0});
+  });
+
+  const pc={};PERIODS.forEach(p=>pc[p]=0);
+  Object.values(byZone).forEach(recs=>{
+    recs.sort((a,b)=>a.period>b.period?1:-1);
+    for(let i=1;i<recs.length;i++){
+      if(recs[i].score>recs[i-1].score && pc[recs[i].period]!==undefined){
+        pc[recs[i].period]++;
+      }
+    }
   });
   if(CH.trend)CH.trend.destroy();
   CH.trend=new Chart(document.getElementById('trendChart'),{type:'line',
