@@ -1820,37 +1820,76 @@ async function loadAll(){
 
 async function detectAlerts(){
   try{
-    let all=[],offset=0;
-    while(true){
-      const chunk=await sbf('redev_timeline',`select=gu_name,project_name,stage,period,stage_score&limit=1000&offset=${offset}&order=project_name,period`);
-      if(!Array.isArray(chunk)||!chunk.length)break;
-      all=[...all,...chunk];
-      if(chunk.length<1000)break;
-      offset+=1000;
-      if(offset>=10000)break;
-    }
-    if(!all.length)return;
-    const zm={};all.forEach(r=>{if(!zm[r.project_name])zm[r.project_name]=[];zm[r.project_name].push(r);});
-    // 단계별 정상 소요 기간 (분기 단위) — 이 기간 초과분만 지연으로 카운트
+    // 단계별 정상 소요기간(분기) 및 기준 인가일 컬럼
     const NORMAL_Q={1:8,2:8,3:12,4:4,5:12,6:8,7:4,8:20};
+    const STAGE_DATE={
+      1:'zone_designated_last',
+      2:'committee_date',
+      3:'assoc_established',
+      4:'arch_review',
+      5:'impl_approved_last',
+      6:'mgmt_approved_last',
+      7:'move_out_start',
+      8:'construction_start'
+    };
+    const STAGE_DATE_FB={ // fallback (최종 없을 시 최초 사용)
+      5:'impl_approved_first',
+      6:'mgmt_approved_first',
+      1:'zone_designated_first'
+    };
+
+    // redev_projects_seoul에서 인가일 + 단계 정보 전체 조회
+    const projects = await sbfAll('redev_projects_seoul',
+      'select=gu_name,zone_name,stage_label,stage_score,zone_designated_first,zone_designated_last,committee_date,assoc_established,arch_review,impl_approved_first,impl_approved_last,mgmt_approved_first,mgmt_approved_last,move_out_start,construction_start'
+    );
+    if(!Array.isArray(projects)||!projects.length)return;
+
+    const NOW=new Date();
+    function monthsDiff(dateStr){
+      if(!dateStr)return null;
+      const d=new Date(dateStr);
+      if(isNaN(d))return null;
+      return (NOW.getFullYear()-d.getFullYear())*12+(NOW.getMonth()-d.getMonth());
+    }
+
     const al=[];
-    Object.entries(zm).forEach(([name,recs])=>{
-      recs.sort((a,b)=>a.period>b.period?1:-1);
-      const last=recs[recs.length-1];
-      if(!last.stage_score||last.stage_score===9)return;
-      // 현재 단계에서 머문 총 분기 수
-      let totalQ=0;for(let i=recs.length-1;i>=0;i--){if(recs[i].stage_score===last.stage_score)totalQ++;else break;}
-      // 정상 소요기간 초과분
-      const normalQ=NORMAL_Q[last.stage_score]||8;
-      const delayQ=totalQ-normalQ;
-      if(delayQ>0)al.push({name,gu:recs[0].gu_name,score:last.stage_score,stage:SN[last.stage_score]||'?',stuck:totalQ,delay:delayQ});
+    projects.forEach(p=>{
+      const score=Number(p.stage_score);
+      if(!score||score===9)return;
+      const normalQ=NORMAL_Q[score]||8;
+      const dateCol=STAGE_DATE[score];
+      const fbCol=STAGE_DATE_FB[score];
+      // 인가일: 주 컬럼 → fallback 컬럼 순서로 시도
+      const refDate=p[dateCol]||p[fbCol]||null;
+      const elapsedM=monthsDiff(refDate);
+      if(elapsedM===null)return; // 날짜 없으면 제외
+      const elapsedQ=Math.floor(elapsedM/3);
+      const delayQ=elapsedQ-normalQ;
+      if(delayQ>0){
+        al.push({
+          name:p.zone_name,
+          gu:p.gu_name,
+          score,
+          stage:SN[score]||p.stage_label||'?',
+          refDate:refDate?refDate.slice(0,7):'',
+          elapsedQ,
+          normalQ,
+          delay:delayQ
+        });
+      }
     });
-    al.sort((a,b)=>b.delay-a.delay);ALERTS=al;
-    // 지연분기 기준: 고위험 6+, 중위험 3~5, 주의 1~2
-    const h=al.filter(a=>a.delay>=6).length,m=al.filter(a=>a.delay>=3&&a.delay<6).length,l=al.filter(a=>a.delay>=1&&a.delay<3).length;
-    document.getElementById('aHigh').textContent=h;document.getElementById('aMid').textContent=m;
-    document.getElementById('aLow').textContent=l;document.getElementById('aTot').textContent=al.length;
-    document.getElementById('kpiAlert').textContent=h;document.getElementById('sbBadge').textContent=h;
+
+    al.sort((a,b)=>b.delay-a.delay);
+    ALERTS=al;
+    const h=al.filter(a=>a.delay>=6).length;
+    const m=al.filter(a=>a.delay>=3&&a.delay<6).length;
+    const l=al.filter(a=>a.delay>=1&&a.delay<3).length;
+    document.getElementById('aHigh').textContent=h;
+    document.getElementById('aMid').textContent=m;
+    document.getElementById('aLow').textContent=l;
+    document.getElementById('aTot').textContent=al.length;
+    document.getElementById('kpiAlert').textContent=h;
+    document.getElementById('sbBadge').textContent=h;
     document.getElementById('alertCountBadge').textContent='총 '+al.length+'건';
     renderAlertsDB(al);renderAlertsFull(al);drawAlertCharts(al);
   }catch(e){console.error(e);}
@@ -1955,7 +1994,7 @@ function renderAlertsFull(al){
   if(!al.length){el.innerHTML='<div class="empty"><div class="ei">✓</div><p>지연 구역 없음</p></div>';return;}
   el.innerHTML=al.slice(0,25).map(a=>{
     const cls=a.delay>=6?'h':a.delay>=3?'m':'l';
-    return`<div class="al-full-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div style="flex:1;"><div class="al-full-name">${a.name}</div><div class="al-full-desc">${a.gu} · ${a.stage} (체류 ${a.stuck}분기, 정상초과 ${a.delay}분기)</div></div><div style="text-align:right;"><div class="al-full-num ${cls}">${a.delay}</div><div style="font-size:10px;color:var(--gray-400);">분기 초과</div></div></div>`;
+    return`<div class="al-full-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div style="flex:1;"><div class="al-full-name">${a.name}</div><div class="al-full-desc">${a.gu} · ${a.stage} · 인가 ${a.refDate} · ${a.elapsedQ}분기 경과 (정상 ${a.normalQ}분기)</div></div><div style="text-align:right;"><div class="al-full-num ${cls}">${a.delay}</div><div style="font-size:10px;color:var(--gray-400);">분기 초과</div></div></div>`;
   }).join('');
 }
 
