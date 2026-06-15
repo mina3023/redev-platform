@@ -546,7 +546,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
       <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">총 정비구역</div><span class="kpi-icon">🏙</span></div><div class="kpi-val c-blue" id="kpiTot">—</div><div class="kpi-foot"><span class="kpi-sub">서울 25개 자치구</span><span class="kpi-tag t-neu" id="kpiTotSub">...</span></div></div>
       <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">준공 완료</div><span class="kpi-icon">✓</span></div><div class="kpi-val c-green" id="kpiDone">—</div><div class="kpi-foot"><span class="kpi-sub">9단계 달성</span><span class="kpi-tag t-up" id="kpiDoneR">...</span></div></div>
       <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">사업 진행 중</div><span class="kpi-icon">⚙</span></div><div class="kpi-val c-orange" id="kpiActive">—</div><div class="kpi-foot"><span class="kpi-sub">3~8단계 구역</span><span class="kpi-tag t-neu">진행 중</span></div></div>
-      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 경보</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="kpiAlert">—</div><div class="kpi-foot"><span class="kpi-sub">6기간+ 정체</span><span class="kpi-tag t-dn">즉시 점검</span></div></div>
+      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 경보</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="kpiAlert">—</div><div class="kpi-foot"><span class="kpi-sub">정상기간 6분기+ 초과</span><span class="kpi-tag t-dn">즉시 점검</span></div></div>
     </div>
     <div class="db-row2">
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">진행 중</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
@@ -717,11 +717,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 지연 경보 ══ -->
 <div id="tab-alert" class="tab-panel">
-  <div class="page-h"><div><h2>지연 경보</h2><p>최근 3기간 이상 동일 단계 정체 구역 자동 감지</p></div></div>
+  <div class="page-h"><div><h2>지연 경보</h2><p>단계별 정상 소요기간 초과 구역 자동 감지 (구역지정 2년 · 추진위 2년 · 조합설립 3년 · 건축심의 1년 · 사업시행 3년 · 관리처분 2년 · 이주 1년 · 착공 5년)</p></div></div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
-    <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 (6기간+)</div></div><div class="kpi-val c-red" id="aHigh">—</div><div class="kpi-foot"><span class="kpi-sub">즉시 점검</span><span class="kpi-tag t-dn">고위험</span></div></div>
-    <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">중위험 (4~5기간)</div></div><div class="kpi-val c-orange" id="aMid">—</div><div class="kpi-foot"><span class="kpi-sub">모니터링 강화</span><span class="kpi-tag t-dn">중위험</span></div></div>
-    <div class="kpi-card" style="border-top:2px solid #B45309;"><div class="kpi-top"><div class="kpi-lbl">주의 (3기간)</div></div><div class="kpi-val" style="color:#B45309;" id="aLow">—</div><div class="kpi-foot"><span class="kpi-sub">관찰 필요</span><span class="kpi-tag t-neu">주의</span></div></div>
+    <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 (6분기+ 초과)</div></div><div class="kpi-val c-red" id="aHigh">—</div><div class="kpi-foot"><span class="kpi-sub">즉시 점검</span><span class="kpi-tag t-dn">고위험</span></div></div>
+    <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">중위험 (3~5분기 초과)</div></div><div class="kpi-val c-orange" id="aMid">—</div><div class="kpi-foot"><span class="kpi-sub">모니터링 강화</span><span class="kpi-tag t-dn">중위험</span></div></div>
+    <div class="kpi-card" style="border-top:2px solid #B45309;"><div class="kpi-top"><div class="kpi-lbl">주의 (1~2분기 초과)</div></div><div class="kpi-val" style="color:#B45309;" id="aLow">—</div><div class="kpi-foot"><span class="kpi-sub">관찰 필요</span><span class="kpi-tag t-neu">주의</span></div></div>
     <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">전체 감지</div></div><div class="kpi-val c-blue" id="aTot">—</div><div class="kpi-foot"><span class="kpi-sub">경보 대상 합계</span><span class="kpi-tag t-neu">집계</span></div></div>
   </div>
   <div class="g31" style="margin-bottom:14px;">
@@ -1777,16 +1777,23 @@ async function detectAlerts(){
     }
     if(!all.length)return;
     const zm={};all.forEach(r=>{if(!zm[r.project_name])zm[r.project_name]=[];zm[r.project_name].push(r);});
+    // 단계별 정상 소요 기간 (분기 단위) — 이 기간 초과분만 지연으로 카운트
+    const NORMAL_Q={1:8,2:8,3:12,4:4,5:12,6:8,7:4,8:20};
     const al=[];
     Object.entries(zm).forEach(([name,recs])=>{
       recs.sort((a,b)=>a.period>b.period?1:-1);
       const last=recs[recs.length-1];
       if(!last.stage_score||last.stage_score===9)return;
-      let st=0;for(let i=recs.length-1;i>=0;i--){if(recs[i].stage_score===last.stage_score)st++;else break;}
-      if(st>=3)al.push({name,gu:recs[0].gu_name,score:last.stage_score,stage:SN[last.stage_score]||'?',stuck:st});
+      // 현재 단계에서 머문 총 분기 수
+      let totalQ=0;for(let i=recs.length-1;i>=0;i--){if(recs[i].stage_score===last.stage_score)totalQ++;else break;}
+      // 정상 소요기간 초과분
+      const normalQ=NORMAL_Q[last.stage_score]||8;
+      const delayQ=totalQ-normalQ;
+      if(delayQ>0)al.push({name,gu:recs[0].gu_name,score:last.stage_score,stage:SN[last.stage_score]||'?',stuck:totalQ,delay:delayQ});
     });
-    al.sort((a,b)=>b.stuck-a.stuck);ALERTS=al;
-    const h=al.filter(a=>a.stuck>=6).length,m=al.filter(a=>a.stuck>=4&&a.stuck<6).length,l=al.filter(a=>a.stuck===3).length;
+    al.sort((a,b)=>b.delay-a.delay);ALERTS=al;
+    // 지연분기 기준: 고위험 6+, 중위험 3~5, 주의 1~2
+    const h=al.filter(a=>a.delay>=6).length,m=al.filter(a=>a.delay>=3&&a.delay<6).length,l=al.filter(a=>a.delay>=1&&a.delay<3).length;
     document.getElementById('aHigh').textContent=h;document.getElementById('aMid').textContent=m;
     document.getElementById('aLow').textContent=l;document.getElementById('aTot').textContent=al.length;
     document.getElementById('kpiAlert').textContent=h;document.getElementById('sbBadge').textContent=h;
@@ -1885,16 +1892,16 @@ function renderAlertsDB(al){
   const el=document.getElementById('alertListDB');
   if(!al.length){el.innerHTML='<div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;">지연 구역 없음</div>';return;}
   el.innerHTML=al.slice(0,30).map(a=>{
-    const cls=a.stuck>=6?'h':a.stuck>=4?'m':'l';
-    return`<div class="al-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div class="al-name">${a.name}</div><div class="al-gu">${a.gu.replace('구','')}</div><div class="al-stage">${a.stage}</div><div class="al-num ${cls}">${a.stuck}</div><div class="al-unit">분기</div></div>`;
+    const cls=a.delay>=6?'h':a.delay>=3?'m':'l';
+    return`<div class="al-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div class="al-name">${a.name}</div><div class="al-gu">${a.gu.replace('구','')}</div><div class="al-stage">${a.stage}</div><div class="al-num ${cls}">${a.delay}</div><div class="al-unit">분기↑</div></div>`;
   }).join('');
 }
 function renderAlertsFull(al){
   const el=document.getElementById('alertListFull');
   if(!al.length){el.innerHTML='<div class="empty"><div class="ei">✓</div><p>지연 구역 없음</p></div>';return;}
   el.innerHTML=al.slice(0,25).map(a=>{
-    const cls=a.stuck>=6?'h':a.stuck>=4?'m':'l';
-    return`<div class="al-full-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div style="flex:1;"><div class="al-full-name">${a.name}</div><div class="al-full-desc">${a.gu} · ${a.stage} 단계에서 정체 중</div></div><div style="text-align:right;"><div class="al-full-num ${cls}">${a.stuck}</div><div style="font-size:10px;color:var(--gray-400);">분기 정체</div></div></div>`;
+    const cls=a.delay>=6?'h':a.delay>=3?'m':'l';
+    return`<div class="al-full-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div style="flex:1;"><div class="al-full-name">${a.name}</div><div class="al-full-desc">${a.gu} · ${a.stage} (체류 ${a.stuck}분기, 정상초과 ${a.delay}분기)</div></div><div style="text-align:right;"><div class="al-full-num ${cls}">${a.delay}</div><div style="font-size:10px;color:var(--gray-400);">분기 초과</div></div></div>`;
   }).join('');
 }
 
@@ -2234,7 +2241,7 @@ function showMapInfo(name,gu,score,stage){
   document.getElementById('mapInfoBody').innerHTML=`
     <div style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;">
       <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-400);">자치구</span><span style="font-weight:500;">${gu}</span></div>
-      ${alert?`<div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-400);">지연 경보</span><span style="color:var(--red);font-weight:600;">⚠ ${alert.stuck}분기 정체</span></div>`:''}
+      ${alert?`<div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-400);">지연 경보</span><span style="color:var(--red);font-weight:600;">⚠ ${alert.delay}분기 초과</span></div>`:''}
     </div>`;
   // 날짜 — redev_projects_seoul 실제 인가일 조회
   document.getElementById('mapDate1').textContent='조회 중...';
