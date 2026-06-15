@@ -133,7 +133,7 @@ input,select,textarea{font-family:var(--font);}
 .dist-row{display:flex;align-items:center;gap:8px;}
 .d-rk{font-size:10.5px;font-weight:700;color:var(--gray-300);width:14px;text-align:center;font-family:var(--mono);}
 .d-rk.t{color:var(--blue);}
-.d-nm{font-size:12px;font-weight:500;color:var(--gray-700);width:42px;flex-shrink:0;}
+.d-nm{font-size:12px;font-weight:500;color:var(--gray-700);width:52px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .d-bw{flex:1;background:var(--gray-100);height:5px;border-radius:3px;overflow:hidden;}
 .d-bf{height:100%;border-radius:3px;background:var(--blue);}
 .d-ct{font-size:11px;font-weight:600;color:var(--gray-600);width:24px;text-align:right;font-family:var(--mono);}
@@ -551,7 +551,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="db-row2">
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">진행 중</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 분포</div><span class="bdg bdg-blue">전체</span></div><div class="cc-body"><div class="cw"><canvas id="stageDonut"></canvas></div><div class="stage-leg" id="stageLeg"></div></div></div>
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>분기별 단계 진척 현황</div><span class="bdg bdg-gray">2017~2025</span></div><div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>연도별 신규 진입 추이</div><span class="bdg bdg-gray">구역지정 기준</span></div><div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div></div>
     </div>
     <div class="db-row3">
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar" style="background:var(--red);"></span>지연 경보 현황</div><span class="bdg bdg-red" id="alertCountBadge">로딩 중</span></div>
@@ -1919,41 +1919,42 @@ function drawDonut(){
     `<div class="sl-i"><div class="sl-dot" style="background:${SC[k]};"></div>${SN[k]} <b style="font-family:var(--mono);">${v}</b></div>`).join('');
 }
 function drawTrend(data){
-  // period 정규화
-  function normPeriod(p){
-    if(!p)return null;
-    p=String(p).trim();
-    if(/^\d{4}-\d{2}$/.test(p))return p;
-    if(/^\d{6}$/.test(p))return p.slice(0,4)+'-'+p.slice(4);
-    const qm={Q1:'03',Q2:'06',Q3:'09',Q4:'12','1':'03','2':'06','3':'09','4':'12'};
-    const qMatch=p.match(/^(\d{4})[- _]?Q?(\d)$/i);
-    if(qMatch)return qMatch[1]+'-'+(qm[qMatch[2]]||'03');
-    return null;
-  }
-
-  // 구역별로 분기 순서로 정렬 후 단계가 올라간 건수 집계
-  const byZone={};
-  data.forEach(r=>{
-    const np=normPeriod(r.period);
-    if(!np)return;
-    if(!byZone[r.project_name])byZone[r.project_name]=[];
-    byZone[r.project_name].push({period:np,score:Number(r.stage_score)||0});
-  });
-
-  const pc={};PERIODS.forEach(p=>pc[p]=0);
-  Object.values(byZone).forEach(recs=>{
-    recs.sort((a,b)=>a.period>b.period?1:-1);
-    for(let i=1;i<recs.length;i++){
-      if(recs[i].score>recs[i-1].score && pc[recs[i].period]!==undefined){
-        pc[recs[i].period]++;
+  // redev_projects_seoul의 zone_designated_first 기준 연도별 신규 구역지정 건수
+  // data 파라미터 미사용 → projects 전역변수 대신 별도 조회
+  sbfAll('redev_projects_seoul','select=zone_designated_first').then(projects=>{
+    if(!Array.isArray(projects)||!projects.length)return;
+    const yc={};
+    const START=2005,END=2026;
+    for(let y=START;y<=END;y++)yc[y]=0;
+    projects.forEach(p=>{
+      if(!p.zone_designated_first)return;
+      const y=new Date(p.zone_designated_first).getFullYear();
+      if(y>=START&&y<=END)yc[y]++;
+    });
+    const labels=Object.keys(yc).map(y=>y+"년");
+    const vals=Object.values(yc);
+    // 2026년은 1분기만이므로 색 구분
+    const colors=labels.map((l,i)=>i===labels.length-1?'rgba(27,79,216,.4)':'rgba(27,79,216,.75)');
+    if(CH.trend)CH.trend.destroy();
+    CH.trend=new Chart(document.getElementById('trendChart'),{
+      type:'bar',
+      data:{labels,datasets:[{
+        data:vals,
+        backgroundColor:colors,
+        borderColor:labels.map((l,i)=>i===labels.length-1?'#1B4FD8':'#1B4FD8'),
+        borderWidth:1,borderRadius:3,borderSkipped:false
+      }]},
+      options:{...OPTS,
+        scales:{
+          x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:9},maxRotation:45}},
+          y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10}},beginAtZero:true}
+        },
+        plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,
+          callbacks:{label:c=>`${c.raw}개 신규 구역지정`+(c.label==='2026년'?' (1분기)':'')}
+        }}
       }
-    }
-  });
-  if(CH.trend)CH.trend.destroy();
-  CH.trend=new Chart(document.getElementById('trendChart'),{type:'line',
-    data:{labels:PERIODS.map(p=>p.slice(2).replace('-','Q')),datasets:[{data:PERIODS.map(p=>pc[p]),borderColor:'#1B4FD8',backgroundColor:'rgba(27,79,216,.06)',borderWidth:2,fill:true,tension:.4,pointRadius:0}]},
-    options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:9},maxTicksLimit:10}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10}}}}}
-  });
+    });
+  }).catch(e=>console.warn('신규진입 차트 오류:',e));
 }
 function drawAlertCharts(al){
   const gm={};al.forEach(a=>{gm[a.gu]=(gm[a.gu]||0)+1;});
