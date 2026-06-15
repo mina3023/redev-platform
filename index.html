@@ -532,7 +532,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   <div class="sb-bottom">
     <div class="sb-stat"><span class="sb-stat-l">총 데이터</span><span class="sb-stat-v">45,000건+</span></div>
     <div class="sb-stat"><span class="sb-stat-l">총 구역</span><span class="sb-stat-v" id="sbTot">—</span></div>
-    <div class="sb-stat"><span class="sb-stat-l">기준일</span><span class="sb-stat-v">2025.12</span></div>
+    <div class="sb-stat"><span class="sb-stat-l">기준일</span><span class="sb-stat-v">2026.03</span></div>
     <div class="sb-db"><span class="sb-db-dot"></span><span class="sb-db-txt">Supabase 연결됨</span></div>
   </div>
 </aside>
@@ -543,10 +543,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div id="tab-home" class="tab-panel active">
   <div class="db-wrap">
     <div class="db-kpi-row">
-      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">총 정비구역</div><span class="kpi-icon">🏙</span></div><div class="kpi-val c-blue" id="kpiTot">—</div><div class="kpi-foot"><span class="kpi-sub">서울 25개 자치구</span><span class="kpi-tag t-neu" id="kpiTotSub">...</span></div></div>
-      <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">준공 완료</div><span class="kpi-icon">✓</span></div><div class="kpi-val c-green" id="kpiDone">—</div><div class="kpi-foot"><span class="kpi-sub">9단계 달성</span><span class="kpi-tag t-up" id="kpiDoneR">...</span></div></div>
-      <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">사업 진행 중</div><span class="kpi-icon">⚙</span></div><div class="kpi-val c-orange" id="kpiActive">—</div><div class="kpi-foot"><span class="kpi-sub">3~8단계 구역</span><span class="kpi-tag t-neu">진행 중</span></div></div>
-      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 경보</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="kpiAlert">—</div><div class="kpi-foot"><span class="kpi-sub">정상기간 6분기+ 초과</span><span class="kpi-tag t-dn">즉시 점검</span></div></div>
+      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">총 정비구역</div><span class="kpi-icon">🏙</span></div><div class="kpi-val c-blue" id="kpiTot">—</div><div class="kpi-foot"><span class="kpi-sub">서울 25개 자치구</span><span class="kpi-tag t-neu" id="kpiTotSub">26년 3월 기준</span></div></div>
+      <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">신규 진입</div><span class="kpi-icon">✦</span></div><div class="kpi-val c-green" id="kpiDone">—</div><div class="kpi-foot"><span class="kpi-sub">26년 1분기 구역지정</span><span class="kpi-tag t-up" id="kpiDoneR">신규</span></div></div>
+      <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">사업 진행 중</div><span class="kpi-icon">⚙</span></div><div class="kpi-val c-orange" id="kpiActive">—</div><div class="kpi-foot"><span class="kpi-sub">조합설립 3단계 이상</span><span class="kpi-tag t-neu">진행 중</span></div></div>
+      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 경보</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="kpiAlert">—</div><div class="kpi-foot"><span class="kpi-sub">인가일 기준 6분기 초과</span><span class="kpi-tag t-dn">즉시 점검</span></div></div>
     </div>
     <div class="db-row2">
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">진행 중</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
@@ -629,7 +629,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 구역 검색 ══ -->
 <div id="tab-search" class="tab-panel">
-  <div class="page-h"><div><h2>구역 검색 <span class="ph-badge">2,185구역</span></h2><p>전체 구역 타임라인 시각화 · AI 분석</p></div></div>
+  <div class="page-h"><div><h2>구역 검색 <span class="ph-badge">472구역</span></h2><p>전체 구역 타임라인 시각화 · AI 분석</p></div></div>
   <div class="card" style="margin-bottom:12px;">
     <input class="zone-inp" type="text" placeholder="구역명 또는 자치구 입력... (예: 한남, 흑석, 마포구)" id="zoneInp" oninput="searchZ(this.value)">
     <div class="chip-row" id="guChips"><span class="chip active" onclick="setGu('all',this)">전체</span></div>
@@ -1787,31 +1787,39 @@ async function init(){await Promise.all([loadAll(),detectAlerts(),loadZoneCoords
 
 async function loadAll(){
   try{
-    // 전체 조회 (준공 포함) — kpiTot에 전체 수 표시
+    // redev_projects_seoul (26년 3월 기준) → KPI 숫자 기준
+    const projects=await sbfAll('redev_projects_seoul','select=gu_name,zone_name,stage_label,stage_score,zone_designated_first');
+    // dashboard_summary → 타임라인·차트용 (ALL 배열)
     const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period,is_completed');
     if(!Array.isArray(zones)||!zones.length)return;
-    // ALL 배열은 진행 중만 (구역검색·지도용)
     ALL=zones.filter(z=>!z.is_completed).map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period}));
-    const tot=zones.length;           // 전체 (준공 포함)
-    const totActive=ALL.length;       // 진행 중만
+
+    // KPI: redev_projects_seoul 기준
+    const tot=Array.isArray(projects)?projects.length:0;
+    const active=Array.isArray(projects)?projects.filter(p=>Number(p.stage_score)>=3).length:0;
+
+    // 신규 진입: 26년 1분기 구역지정 (2026-01-01 ~ 2026-03-31)
+    const newQ1=Array.isArray(projects)?projects.filter(p=>{
+      if(!p.zone_designated_first)return false;
+      const d=new Date(p.zone_designated_first);
+      return d>=new Date('2026-01-01')&&d<=new Date('2026-03-31');
+    }).length:0;
+
     document.getElementById('kpiTot').textContent=tot.toLocaleString();
     document.getElementById('sbTot').textContent=tot.toLocaleString();
-    document.getElementById('kpiTotSub').textContent='총 '+tot.toLocaleString()+'개 구역 (진행 중 '+totActive.toLocaleString()+'개)';
-    const done=zones.filter(z=>z.stage_score===9).length;
-    const active=zones.filter(z=>z.stage_score>=3&&z.stage_score<=8).length;
-    document.getElementById('kpiDone').textContent=done.toLocaleString();
-    document.getElementById('kpiDoneR').textContent=Math.round(done/tot*100)+'%';
+    document.getElementById('kpiDone').textContent=newQ1.toLocaleString();
+    document.getElementById('kpiDoneR').textContent='신규';
     document.getElementById('kpiActive').textContent=active.toLocaleString();
+
+    // 단계별 분포: redev_projects_seoul 기준
     for(let i=1;i<=9;i++)SD[i]=0;
-    zones.forEach(z=>{if(z.stage_score)SD[z.stage_score]++;});
-    // 구별 활성도: project_name 중복 제거 후 카운트
-    const seenProj=new Set();
-    zones.filter(z=>!z.is_completed).forEach(z=>{
-      if(!seenProj.has(z.project_name)){
-        seenProj.add(z.project_name);
-        if(!DD[z.gu_name])DD[z.gu_name]=0;DD[z.gu_name]++;
-      }
+    if(Array.isArray(projects))projects.forEach(p=>{const s=Number(p.stage_score);if(s>=1&&s<=9)SD[s]++;});
+
+    // 구별 활성도: redev_projects_seoul 기준 (중복 없음)
+    if(Array.isArray(projects))projects.forEach(p=>{
+      if(!DD[p.gu_name])DD[p.gu_name]=0;DD[p.gu_name]++;
     });
+
     drawDistHBar();drawDonut();drawStageBar();drawStageTable();drawStageTbodyDB();
     const trend=await sbfAll('redev_timeline','select=project_name,period,stage_score&order=period');
     if(Array.isArray(trend)&&trend.length)drawTrend(trend);
