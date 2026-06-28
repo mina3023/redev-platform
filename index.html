@@ -133,7 +133,7 @@ input,select,textarea{font-family:var(--font);}
 .dist-row{display:flex;align-items:center;gap:8px;}
 .d-rk{font-size:10.5px;font-weight:700;color:var(--gray-300);width:14px;text-align:center;font-family:var(--mono);}
 .d-rk.t{color:var(--blue);}
-.d-nm{font-size:12px;font-weight:500;color:var(--gray-700);width:52px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.d-nm{font-size:12px;font-weight:500;color:var(--gray-700);width:42px;flex-shrink:0;}
 .d-bw{flex:1;background:var(--gray-100);height:5px;border-radius:3px;overflow:hidden;}
 .d-bf{height:100%;border-radius:3px;background:var(--blue);}
 .d-ct{font-size:11px;font-weight:600;color:var(--gray-600);width:24px;text-align:right;font-family:var(--mono);}
@@ -532,7 +532,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   <div class="sb-bottom">
     <div class="sb-stat"><span class="sb-stat-l">총 데이터</span><span class="sb-stat-v">45,000건+</span></div>
     <div class="sb-stat"><span class="sb-stat-l">총 구역</span><span class="sb-stat-v" id="sbTot">—</span></div>
-    <div class="sb-stat"><span class="sb-stat-l">기준일</span><span class="sb-stat-v">2026.03</span></div>
+    <div class="sb-stat"><span class="sb-stat-l">기준일</span><span class="sb-stat-v">2025.12</span></div>
     <div class="sb-db"><span class="sb-db-dot"></span><span class="sb-db-txt">Supabase 연결됨</span></div>
   </div>
 </aside>
@@ -543,15 +543,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div id="tab-home" class="tab-panel active">
   <div class="db-wrap">
     <div class="db-kpi-row">
-      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">총 정비구역</div><span class="kpi-icon">🏙</span></div><div class="kpi-val c-blue" id="kpiTot">—</div><div class="kpi-foot"><span class="kpi-sub">서울 25개 자치구</span><span class="kpi-tag t-neu" id="kpiTotSub">26년 3월 기준</span></div></div>
-      <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">신규 진입</div><span class="kpi-icon">✦</span></div><div class="kpi-val c-green" id="kpiDone">—</div><div class="kpi-foot"><span class="kpi-sub">26년 1분기 구역지정</span><span class="kpi-tag t-up" id="kpiDoneR">신규</span></div></div>
-      <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">사업 진행 중</div><span class="kpi-icon">⚙</span></div><div class="kpi-val c-orange" id="kpiActive">—</div><div class="kpi-foot"><span class="kpi-sub">조합설립 3단계 이상</span><span class="kpi-tag t-neu">진행 중</span></div></div>
-      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 경보</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="kpiAlert">—</div><div class="kpi-foot"><span class="kpi-sub">인가일 기준 6분기 초과</span><span class="kpi-tag t-dn">즉시 점검</span></div></div>
+      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">총 정비구역</div><span class="kpi-icon">🏙</span></div><div class="kpi-val c-blue" id="kpiTot">—</div><div class="kpi-foot"><span class="kpi-sub">서울 25개 자치구</span><span class="kpi-tag t-neu" id="kpiTotSub">...</span></div></div>
+      <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">준공 완료</div><span class="kpi-icon">✓</span></div><div class="kpi-val c-green" id="kpiDone">—</div><div class="kpi-foot"><span class="kpi-sub">9단계 달성</span><span class="kpi-tag t-up" id="kpiDoneR">...</span></div></div>
+      <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">사업 진행 중</div><span class="kpi-icon">⚙</span></div><div class="kpi-val c-orange" id="kpiActive">—</div><div class="kpi-foot"><span class="kpi-sub">3~8단계 구역</span><span class="kpi-tag t-neu">진행 중</span></div></div>
+      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 경보</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="kpiAlert">—</div><div class="kpi-foot"><span class="kpi-sub">6기간+ 정체</span><span class="kpi-tag t-dn">즉시 점검</span></div></div>
     </div>
     <div class="db-row2">
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">진행 중</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">실데이터</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 분포</div><span class="bdg bdg-blue">전체</span></div><div class="cc-body"><div class="cw"><canvas id="stageDonut"></canvas></div><div class="stage-leg" id="stageLeg"></div></div></div>
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>연도별 신규 진입 추이</div><span class="bdg bdg-gray">구역지정 기준</span></div><div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>분기별 사업 현황</div><span class="bdg bdg-gray">2017~2025</span></div><div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div></div>
     </div>
     <div class="db-row3">
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar" style="background:var(--red);"></span>지연 경보 현황</div><span class="bdg bdg-red" id="alertCountBadge">로딩 중</span></div>
@@ -560,7 +560,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
             <span style="font-size:9.5px;font-weight:600;color:var(--gray-400);flex:1;">구역명</span>
             <span style="font-size:9.5px;font-weight:600;color:var(--gray-400);width:36px;">자치구</span>
             <span style="font-size:9.5px;font-weight:600;color:var(--gray-400);width:48px;">단계</span>
-            <span style="font-size:9.5px;font-weight:600;color:var(--gray-400);width:24px;text-align:right;">분기</span>
+            <span style="font-size:9.5px;font-weight:600;color:var(--gray-400);width:24px;text-align:right;">기간</span>
             <span style="width:26px;"></span>
           </div>
           <div class="al-list" id="alertListDB"><div style="color:var(--gray-400);padding:20px;text-align:center;font-size:12px;"><span class="spinner"></span>로딩 중...</div></div>
@@ -629,7 +629,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 구역 검색 ══ -->
 <div id="tab-search" class="tab-panel">
-  <div class="page-h"><div><h2>구역 검색 <span class="ph-badge">472구역</span></h2><p>전체 구역 타임라인 시각화 · AI 분석</p></div></div>
+  <div class="page-h"><div><h2>구역 검색 <span class="ph-badge">2,185구역</span></h2><p>전체 구역 타임라인 시각화 · AI 분석</p></div></div>
   <div class="card" style="margin-bottom:12px;">
     <input class="zone-inp" type="text" placeholder="구역명 또는 자치구 입력... (예: 한남, 흑석, 마포구)" id="zoneInp" oninput="searchZ(this.value)">
     <div class="chip-row" id="guChips"><span class="chip active" onclick="setGu('all',this)">전체</span></div>
@@ -717,11 +717,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 지연 경보 ══ -->
 <div id="tab-alert" class="tab-panel">
-  <div class="page-h"><div><h2>지연 경보</h2><p>단계별 정상 소요기간 초과 구역 자동 감지 (구역지정 2년 · 추진위 2년 · 조합설립 3년 · 건축심의 1년 · 사업시행 3년 · 관리처분 2년 · 이주 1년 · 착공 5년)</p></div></div>
+  <div class="page-h"><div><h2>지연 경보</h2><p>최근 3기간 이상 동일 단계 정체 구역 자동 감지</p></div></div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
-    <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 (6분기+ 초과)</div></div><div class="kpi-val c-red" id="aHigh">—</div><div class="kpi-foot"><span class="kpi-sub">즉시 점검</span><span class="kpi-tag t-dn">고위험</span></div></div>
-    <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">중위험 (3~5분기 초과)</div></div><div class="kpi-val c-orange" id="aMid">—</div><div class="kpi-foot"><span class="kpi-sub">모니터링 강화</span><span class="kpi-tag t-dn">중위험</span></div></div>
-    <div class="kpi-card" style="border-top:2px solid #B45309;"><div class="kpi-top"><div class="kpi-lbl">주의 (1~2분기 초과)</div></div><div class="kpi-val" style="color:#B45309;" id="aLow">—</div><div class="kpi-foot"><span class="kpi-sub">관찰 필요</span><span class="kpi-tag t-neu">주의</span></div></div>
+    <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 (6기간+)</div></div><div class="kpi-val c-red" id="aHigh">—</div><div class="kpi-foot"><span class="kpi-sub">즉시 점검</span><span class="kpi-tag t-dn">고위험</span></div></div>
+    <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">중위험 (4~5기간)</div></div><div class="kpi-val c-orange" id="aMid">—</div><div class="kpi-foot"><span class="kpi-sub">모니터링 강화</span><span class="kpi-tag t-dn">중위험</span></div></div>
+    <div class="kpi-card" style="border-top:2px solid #B45309;"><div class="kpi-top"><div class="kpi-lbl">주의 (3기간)</div></div><div class="kpi-val" style="color:#B45309;" id="aLow">—</div><div class="kpi-foot"><span class="kpi-sub">관찰 필요</span><span class="kpi-tag t-neu">주의</span></div></div>
     <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">전체 감지</div></div><div class="kpi-val c-blue" id="aTot">—</div><div class="kpi-foot"><span class="kpi-sub">경보 대상 합계</span><span class="kpi-tag t-neu">집계</span></div></div>
   </div>
   <div class="g31" style="margin-bottom:14px;">
@@ -729,60 +729,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="card"><div class="card-h"><div class="card-title">단계별 지연</div></div><div class="cw2" style="height:200px;"><canvas id="alertStageChart"></canvas></div></div>
   </div>
   <div class="sec-lbl">지연 구역 목록</div>
-
-  <!-- 단계별 정상 소요기간 범례 -->
-  <div style="margin-bottom:12px;padding:12px 16px;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-      <span style="font-size:11px;font-weight:700;color:var(--gray-700);">📋 단계별 정상 소요기간 기준</span>
-      <span style="font-size:10px;color:var(--gray-400);">— 이 기간을 초과한 경우 지연 경보 발령 (도시정비법 기준 참고)</span>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
-      <div style="padding:8px 10px;background:var(--gray-50);border-radius:var(--r);border-left:3px solid #9CA3AF;">
-        <div style="font-size:10px;font-weight:700;color:#6B7280;">1단계 구역지정</div>
-        <div style="font-size:13px;font-weight:700;color:var(--gray-900);font-family:var(--mono);margin-top:2px;">2년 <span style="font-size:10px;color:var(--gray-400);">(8분기)</span></div>
-        <div style="font-size:10px;color:var(--gray-400);margin-top:2px;">추진위 승인까지 법정 2년</div>
-      </div>
-      <div style="padding:8px 10px;background:var(--gray-50);border-radius:var(--r);border-left:3px solid #1D4ED8;">
-        <div style="font-size:10px;font-weight:700;color:#1D4ED8;">2단계 추진위</div>
-        <div style="font-size:13px;font-weight:700;color:var(--gray-900);font-family:var(--mono);margin-top:2px;">2년 <span style="font-size:10px;color:var(--gray-400);">(8분기)</span></div>
-        <div style="font-size:10px;color:var(--gray-400);margin-top:2px;">조합설립까지 법정 2년</div>
-      </div>
-      <div style="padding:8px 10px;background:var(--gray-50);border-radius:var(--r);border-left:3px solid #6D28D9;">
-        <div style="font-size:10px;font-weight:700;color:#6D28D9;">3단계 조합설립</div>
-        <div style="font-size:13px;font-weight:700;color:var(--gray-900);font-family:var(--mono);margin-top:2px;">3년 <span style="font-size:10px;color:var(--gray-400);">(12분기)</span></div>
-        <div style="font-size:10px;color:var(--gray-400);margin-top:2px;">사업시행까지 법정 3년</div>
-      </div>
-      <div style="padding:8px 10px;background:var(--gray-50);border-radius:var(--r);border-left:3px solid #0369A1;">
-        <div style="font-size:10px;font-weight:700;color:#0369A1;">4단계 건축심의</div>
-        <div style="font-size:13px;font-weight:700;color:var(--gray-900);font-family:var(--mono);margin-top:2px;">1년 <span style="font-size:10px;color:var(--gray-400);">(4분기)</span></div>
-        <div style="font-size:10px;color:var(--gray-400);margin-top:2px;">통상 1년 내 처리</div>
-      </div>
-      <div style="padding:8px 10px;background:var(--gray-50);border-radius:var(--r);border-left:3px solid #065F46;">
-        <div style="font-size:10px;font-weight:700;color:#065F46;">5단계 사업시행</div>
-        <div style="font-size:13px;font-weight:700;color:var(--gray-900);font-family:var(--mono);margin-top:2px;">3년 <span style="font-size:10px;color:var(--gray-400);">(12분기)</span></div>
-        <div style="font-size:10px;color:var(--gray-400);margin-top:2px;">관리처분까지 통상 3년</div>
-      </div>
-      <div style="padding:8px 10px;background:var(--gray-50);border-radius:var(--r);border-left:3px solid #92400E;">
-        <div style="font-size:10px;font-weight:700;color:#92400E;">6단계 관리처분</div>
-        <div style="font-size:13px;font-weight:700;color:var(--gray-900);font-family:var(--mono);margin-top:2px;">2년 <span style="font-size:10px;color:var(--gray-400);">(8분기)</span></div>
-        <div style="font-size:10px;color:var(--gray-400);margin-top:2px;">착공까지 통상 2년</div>
-      </div>
-      <div style="padding:8px 10px;background:var(--gray-50);border-radius:var(--r);border-left:3px solid #B45309;">
-        <div style="font-size:10px;font-weight:700;color:#B45309;">7단계 이주</div>
-        <div style="font-size:13px;font-weight:700;color:var(--gray-900);font-family:var(--mono);margin-top:2px;">1년 <span style="font-size:10px;color:var(--gray-400);">(4분기)</span></div>
-        <div style="font-size:10px;color:var(--gray-400);margin-top:2px;">통상 1년 내 완료</div>
-      </div>
-      <div style="padding:8px 10px;background:var(--gray-50);border-radius:var(--r);border-left:3px solid #1E3A5F;">
-        <div style="font-size:10px;font-weight:700;color:#1E3A5F;">8단계 착공</div>
-        <div style="font-size:13px;font-weight:700;color:var(--gray-900);font-family:var(--mono);margin-top:2px;">5년 <span style="font-size:10px;color:var(--gray-400);">(20분기)</span></div>
-        <div style="font-size:10px;color:var(--gray-400);margin-top:2px;">공사기간 통상 3~5년</div>
-      </div>
-    </div>
-    <div style="margin-top:8px;font-size:10px;color:var(--gray-400);">
-      * 도시정비법 법정 기한 및 서울시 평균 소요기간 참고 기준 / 정상기간 초과 시: 🟡주의(1~2분기) 🟠중위험(3~5분기) 🔴고위험(6분기+)
-    </div>
-  </div>
-
   <div class="al-full" id="alertListFull"><div style="color:var(--gray-400);padding:20px;text-align:center;"><span class="spinner"></span>로딩 중...</div></div>
 </div>
 
@@ -1787,117 +1733,56 @@ async function init(){await Promise.all([loadAll(),detectAlerts(),loadZoneCoords
 
 async function loadAll(){
   try{
-    // redev_projects_seoul (26년 3월 기준) → KPI 숫자 기준
-    const projects=await sbfAll('redev_projects_seoul','select=gu_name,zone_name,stage_label,stage_score,zone_designated_first');
-    // dashboard_summary → 타임라인·차트용 (ALL 배열)
+    // 전체 조회 (준공 포함) — kpiTot에 전체 수 표시
     const zones=await sbfAll('dashboard_summary','select=gu_name,project_name,stage,stage_score,last_period,is_completed');
     if(!Array.isArray(zones)||!zones.length)return;
+    // ALL 배열은 진행 중만 (구역검색·지도용)
     ALL=zones.filter(z=>!z.is_completed).map(z=>({gu_name:z.gu_name,project_name:z.project_name,stage:z.stage,stage_score:z.stage_score,period:z.last_period}));
-
-    // KPI: redev_projects_seoul 기준
-    const tot=Array.isArray(projects)?projects.length:0;
-    const active=Array.isArray(projects)?projects.filter(p=>Number(p.stage_score)>=3).length:0;
-
-    // 신규 진입: 26년 1분기 구역지정 (2026-01-01 ~ 2026-03-31)
-    const newQ1=Array.isArray(projects)?projects.filter(p=>{
-      if(!p.zone_designated_first)return false;
-      const d=new Date(p.zone_designated_first);
-      return d>=new Date('2026-01-01')&&d<=new Date('2026-03-31');
-    }).length:0;
-
+    const tot=zones.length;           // 전체 (준공 포함)
+    const totActive=ALL.length;       // 진행 중만
     document.getElementById('kpiTot').textContent=tot.toLocaleString();
     document.getElementById('sbTot').textContent=tot.toLocaleString();
-    document.getElementById('kpiDone').textContent=newQ1.toLocaleString();
-    document.getElementById('kpiDoneR').textContent='신규';
+    document.getElementById('kpiTotSub').textContent='총 '+tot.toLocaleString()+'개 구역 (진행 중 '+totActive.toLocaleString()+'개)';
+    const done=zones.filter(z=>z.stage_score===9).length;
+    const active=zones.filter(z=>z.stage_score>=3&&z.stage_score<=8).length;
+    document.getElementById('kpiDone').textContent=done.toLocaleString();
+    document.getElementById('kpiDoneR').textContent=Math.round(done/tot*100)+'%';
     document.getElementById('kpiActive').textContent=active.toLocaleString();
-
-    // 단계별 분포: redev_projects_seoul 기준
     for(let i=1;i<=9;i++)SD[i]=0;
-    if(Array.isArray(projects))projects.forEach(p=>{const s=Number(p.stage_score);if(s>=1&&s<=9)SD[s]++;});
-
-    // 구별 활성도: redev_projects_seoul 기준 (중복 없음)
-    if(Array.isArray(projects))projects.forEach(p=>{
-      if(!DD[p.gu_name])DD[p.gu_name]=0;DD[p.gu_name]++;
-    });
-
+    zones.forEach(z=>{if(z.stage_score)SD[z.stage_score]++;});
+    zones.forEach(z=>{if(!DD[z.gu_name])DD[z.gu_name]=0;DD[z.gu_name]++;});
     drawDistHBar();drawDonut();drawStageBar();drawStageTable();drawStageTbodyDB();
-    const trend=await sbfAll('redev_timeline','select=project_name,period,stage_score&order=period');
-    if(Array.isArray(trend)&&trend.length)drawTrend(trend);
+    const trend=await sbf('redev_timeline','select=period,stage_score&limit=1000&order=period');
+    if(Array.isArray(trend))drawTrend(trend);
   }catch(e){console.error(e);}
 }
 
 async function detectAlerts(){
   try{
-    // 단계별 정상 소요기간(분기) 및 기준 인가일 컬럼
-    const NORMAL_Q={1:8,2:8,3:12,4:4,5:12,6:8,7:4,8:20};
-    const STAGE_DATE={
-      1:'zone_designated_last',
-      2:'committee_date',
-      3:'assoc_established',
-      4:'arch_review',
-      5:'impl_approved_last',
-      6:'mgmt_approved_last',
-      7:'move_out_start',
-      8:'construction_start'
-    };
-    const STAGE_DATE_FB={ // fallback (최종 없을 시 최초 사용)
-      5:'impl_approved_first',
-      6:'mgmt_approved_first',
-      1:'zone_designated_first'
-    };
-
-    // redev_projects_seoul에서 인가일 + 단계 정보 전체 조회
-    const projects = await sbfAll('redev_projects_seoul',
-      'select=gu_name,zone_name,stage_label,stage_score,zone_designated_first,zone_designated_last,committee_date,assoc_established,arch_review,impl_approved_first,impl_approved_last,mgmt_approved_first,mgmt_approved_last,move_out_start,construction_start'
-    );
-    if(!Array.isArray(projects)||!projects.length)return;
-
-    const NOW=new Date();
-    function monthsDiff(dateStr){
-      if(!dateStr)return null;
-      const d=new Date(dateStr);
-      if(isNaN(d))return null;
-      return (NOW.getFullYear()-d.getFullYear())*12+(NOW.getMonth()-d.getMonth());
+    let all=[],offset=0;
+    while(true){
+      const chunk=await sbf('redev_timeline',`select=gu_name,project_name,stage,period,stage_score&limit=1000&offset=${offset}&order=project_name,period`);
+      if(!Array.isArray(chunk)||!chunk.length)break;
+      all=[...all,...chunk];
+      if(chunk.length<1000)break;
+      offset+=1000;
+      if(offset>=10000)break;
     }
-
+    if(!all.length)return;
+    const zm={};all.forEach(r=>{if(!zm[r.project_name])zm[r.project_name]=[];zm[r.project_name].push(r);});
     const al=[];
-    projects.forEach(p=>{
-      const score=Number(p.stage_score);
-      if(!score||score===9)return;
-      const normalQ=NORMAL_Q[score]||8;
-      const dateCol=STAGE_DATE[score];
-      const fbCol=STAGE_DATE_FB[score];
-      // 인가일: 주 컬럼 → fallback 컬럼 순서로 시도
-      const refDate=p[dateCol]||p[fbCol]||null;
-      const elapsedM=monthsDiff(refDate);
-      if(elapsedM===null)return; // 날짜 없으면 제외
-      const elapsedQ=Math.floor(elapsedM/3);
-      const delayQ=elapsedQ-normalQ;
-      if(delayQ>0){
-        al.push({
-          name:p.zone_name,
-          gu:p.gu_name,
-          score,
-          stage:SN[score]||p.stage_label||'?',
-          refDate:refDate?refDate.slice(0,7):'',
-          elapsedQ,
-          normalQ,
-          delay:delayQ
-        });
-      }
+    Object.entries(zm).forEach(([name,recs])=>{
+      recs.sort((a,b)=>a.period>b.period?1:-1);
+      const last=recs[recs.length-1];
+      if(!last.stage_score||last.stage_score===9)return;
+      let st=0;for(let i=recs.length-1;i>=0;i--){if(recs[i].stage_score===last.stage_score)st++;else break;}
+      if(st>=3)al.push({name,gu:recs[0].gu_name,score:last.stage_score,stage:SN[last.stage_score]||'?',stuck:st});
     });
-
-    al.sort((a,b)=>b.delay-a.delay);
-    ALERTS=al;
-    const h=al.filter(a=>a.delay>=6).length;
-    const m=al.filter(a=>a.delay>=3&&a.delay<6).length;
-    const l=al.filter(a=>a.delay>=1&&a.delay<3).length;
-    document.getElementById('aHigh').textContent=h;
-    document.getElementById('aMid').textContent=m;
-    document.getElementById('aLow').textContent=l;
-    document.getElementById('aTot').textContent=al.length;
-    document.getElementById('kpiAlert').textContent=h;
-    document.getElementById('sbBadge').textContent=h;
+    al.sort((a,b)=>b.stuck-a.stuck);ALERTS=al;
+    const h=al.filter(a=>a.stuck>=6).length,m=al.filter(a=>a.stuck>=4&&a.stuck<6).length,l=al.filter(a=>a.stuck===3).length;
+    document.getElementById('aHigh').textContent=h;document.getElementById('aMid').textContent=m;
+    document.getElementById('aLow').textContent=l;document.getElementById('aTot').textContent=al.length;
+    document.getElementById('kpiAlert').textContent=h;document.getElementById('sbBadge').textContent=h;
     document.getElementById('alertCountBadge').textContent='총 '+al.length+'건';
     renderAlertsDB(al);renderAlertsFull(al);drawAlertCharts(al);
   }catch(e){console.error(e);}
@@ -1919,42 +1804,12 @@ function drawDonut(){
     `<div class="sl-i"><div class="sl-dot" style="background:${SC[k]};"></div>${SN[k]} <b style="font-family:var(--mono);">${v}</b></div>`).join('');
 }
 function drawTrend(data){
-  // redev_projects_seoul의 zone_designated_first 기준 연도별 신규 구역지정 건수
-  // data 파라미터 미사용 → projects 전역변수 대신 별도 조회
-  sbfAll('redev_projects_seoul','select=zone_designated_first').then(projects=>{
-    if(!Array.isArray(projects)||!projects.length)return;
-    const yc={};
-    const START=2005,END=2026;
-    for(let y=START;y<=END;y++)yc[y]=0;
-    projects.forEach(p=>{
-      if(!p.zone_designated_first)return;
-      const y=new Date(p.zone_designated_first).getFullYear();
-      if(y>=START&&y<=END)yc[y]++;
-    });
-    const labels=Object.keys(yc).map(y=>y+"년");
-    const vals=Object.values(yc);
-    // 2026년은 1분기만이므로 색 구분
-    const colors=labels.map((l,i)=>i===labels.length-1?'rgba(27,79,216,.4)':'rgba(27,79,216,.75)');
-    if(CH.trend)CH.trend.destroy();
-    CH.trend=new Chart(document.getElementById('trendChart'),{
-      type:'bar',
-      data:{labels,datasets:[{
-        data:vals,
-        backgroundColor:colors,
-        borderColor:labels.map((l,i)=>i===labels.length-1?'#1B4FD8':'#1B4FD8'),
-        borderWidth:1,borderRadius:3,borderSkipped:false
-      }]},
-      options:{...OPTS,
-        scales:{
-          x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:9},maxRotation:45}},
-          y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10}},beginAtZero:true}
-        },
-        plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,
-          callbacks:{label:c=>`${c.raw}개 신규 구역지정`+(c.label==='2026년'?' (1분기)':'')}
-        }}
-      }
-    });
-  }).catch(e=>console.warn('신규진입 차트 오류:',e));
+  const pc={};PERIODS.forEach(p=>pc[p]=0);data.forEach(r=>{if(pc[r.period]!==undefined)pc[r.period]++;});
+  if(CH.trend)CH.trend.destroy();
+  CH.trend=new Chart(document.getElementById('trendChart'),{type:'line',
+    data:{labels:PERIODS.map(p=>p.slice(2).replace('-','Q')),datasets:[{data:PERIODS.map(p=>pc[p]),borderColor:'#1B4FD8',backgroundColor:'rgba(27,79,216,.06)',borderWidth:2,fill:true,tension:.4,pointRadius:0}]},
+    options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:9},maxTicksLimit:10}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10}}}}}
+  });
 }
 function drawAlertCharts(al){
   const gm={};al.forEach(a=>{gm[a.gu]=(gm[a.gu]||0)+1;});
@@ -1994,16 +1849,16 @@ function renderAlertsDB(al){
   const el=document.getElementById('alertListDB');
   if(!al.length){el.innerHTML='<div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;">지연 구역 없음</div>';return;}
   el.innerHTML=al.slice(0,30).map(a=>{
-    const cls=a.delay>=6?'h':a.delay>=3?'m':'l';
-    return`<div class="al-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div class="al-name">${a.name}</div><div class="al-gu">${a.gu.replace('구','')}</div><div class="al-stage">${a.stage}</div><div class="al-num ${cls}">${a.delay}</div><div class="al-unit">분기↑</div></div>`;
+    const cls=a.stuck>=6?'h':a.stuck>=4?'m':'l';
+    return`<div class="al-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div class="al-name">${a.name}</div><div class="al-gu">${a.gu.replace('구','')}</div><div class="al-stage">${a.stage}</div><div class="al-num ${cls}">${a.stuck}</div><div class="al-unit">기간</div></div>`;
   }).join('');
 }
 function renderAlertsFull(al){
   const el=document.getElementById('alertListFull');
   if(!al.length){el.innerHTML='<div class="empty"><div class="ei">✓</div><p>지연 구역 없음</p></div>';return;}
   el.innerHTML=al.slice(0,25).map(a=>{
-    const cls=a.delay>=6?'h':a.delay>=3?'m':'l';
-    return`<div class="al-full-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div style="flex:1;"><div class="al-full-name">${a.name}</div><div class="al-full-desc">${a.gu} · ${a.stage} · 인가 ${a.refDate} · ${a.elapsedQ}분기 경과 (정상 ${a.normalQ}분기)</div></div><div style="text-align:right;"><div class="al-full-num ${cls}">${a.delay}</div><div style="font-size:10px;color:var(--gray-400);">분기 초과</div></div></div>`;
+    const cls=a.stuck>=6?'h':a.stuck>=4?'m':'l';
+    return`<div class="al-full-row ${cls}" onclick="jumpZ('${a.name.replace(/'/g,"\\'")}')"><div style="flex:1;"><div class="al-full-name">${a.name}</div><div class="al-full-desc">${a.gu} · ${a.stage} 단계에서 정체 중</div></div><div style="text-align:right;"><div class="al-full-num ${cls}">${a.stuck}</div><div style="font-size:10px;color:var(--gray-400);">기간 정체</div></div></div>`;
   }).join('');
 }
 
@@ -2343,7 +2198,7 @@ function showMapInfo(name,gu,score,stage){
   document.getElementById('mapInfoBody').innerHTML=`
     <div style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;">
       <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-400);">자치구</span><span style="font-weight:500;">${gu}</span></div>
-      ${alert?`<div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-400);">지연 경보</span><span style="color:var(--red);font-weight:600;">⚠ ${alert.delay}분기 초과</span></div>`:''}
+      ${alert?`<div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-400);">지연 경보</span><span style="color:var(--red);font-weight:600;">⚠ ${alert.stuck}기간 정체</span></div>`:''}
     </div>`;
   // 날짜 — redev_projects_seoul 실제 인가일 조회
   document.getElementById('mapDate1').textContent='조회 중...';
@@ -2775,12 +2630,10 @@ async function loadRisk(){
     return fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(timer));
   };
   try{
-    const [ecosRes,globalRes]=await Promise.all([
-      fetchWithTimeout('/api/ecos?type=all',10000),
-      fetchWithTimeout('/api/global-indicators',8000).catch(()=>({ok:false}))
+    const [ecosRes]=await Promise.all([
+      fetchWithTimeout('/api/ecos?type=all',10000)
     ]);
     const data=await ecosRes.json();
-    const global=globalRes.ok?await globalRes.json().catch(()=>({})):{};
     if(!data.success)throw new Error('ECOS API 오류');
     const rate=data.rate,ppi=data.ppi;
     const rateCurrent=rate.current,rateChange=Math.round((rateCurrent-rate.prev)*100)/100;
@@ -2825,24 +2678,37 @@ async function loadRisk(){
       const el=document.getElementById(id);if(el)el.textContent=val||'—';
       const del=document.getElementById(dateId);if(del&&dateStr)del.textContent=dateStr;
     };
-    if(global.success){
-      if(global.usdkrw?.current>0) setGlobal('usdKrw',global.usdkrw.current.toLocaleString()+'원','usdKrwDate','한국은행 ECOS');
-      else setGlobal('usdKrw','조회 중','usdKrwDate','잠시 후 새로고침');
-      if(global.constIdx?.current>0) setGlobal('constIdx',global.constIdx.current.toFixed(1),'constIdxDate','한국은행 ECOS');
-      else setGlobal('constIdx','조회 중','constIdxDate','잠시 후 새로고침');
-      if(global.usTreasury?.current>0) setGlobal('usTreasury',global.usTreasury.current.toFixed(2)+'%','usTreasuryDate','미 재무부');
-      else setGlobal('usTreasury','조회 중','usTreasuryDate','잠시 후 새로고침');
-      if(global.wti?.current>0) setGlobal('wtiPrice','$'+global.wti.current.toFixed(1),'wtiDate','국제유가');
-      else setGlobal('wtiPrice','조회 중','wtiDate','잠시 후 새로고침');
-    } else {
-      ['usdKrw','constIdx','usTreasury','wtiPrice'].forEach(id=>{
-        const el=document.getElementById(id);if(el)el.textContent='조회 중';
-      });
-      // DJP(원자재ETF) 및 글로벌 지표 Yahoo Finance fallback
-      loadYahooFinance();
-      // global-indicators API 직접 폴백: 환율은 ECOS에서 직접 시도
-      loadGlobalFallback();
+    // ── 글로벌 지표 ──
+    // USD/KRW: 한국은행 ECOS 731Y001 직접 조회
+    try{
+      const ecosBase='https://ecos.bok.or.kr/api/StatisticSearch';
+      const ecosKey='sample';
+      const today=new Date();
+      const ym=today.getFullYear().toString()+(String(today.getMonth()+1).padStart(2,'0'));
+      const prevYm=(()=>{const d=new Date(today);d.setMonth(d.getMonth()-1);return d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0');})();
+      const usdRes=await fetch(`${ecosBase}/${ecosKey}/json/kr/1/5/731Y001/MM/${prevYm}/${ym}/0000001`);
+      const usdData=await usdRes.json();
+      const usdRows=usdData?.StatisticSearch?.row;
+      if(Array.isArray(usdRows)&&usdRows.length>0){
+        const latest=usdRows[usdRows.length-1];
+        const val=parseFloat(latest.DATA_VALUE);
+        if(val>0){
+          setGlobal('usdKrw',val.toLocaleString()+'원','usdKrwDate','한국은행 ECOS');
+        } else throw new Error('no data');
+      } else throw new Error('no rows');
+    }catch(e){
+      // fallback: 최근 공시 환율
+      setGlobal('usdKrw','1,386원','usdKrwDate','26년 5월 기준(참고)');
     }
+
+    // 미국 10년물 국채금리 — 하드코딩 (26년 6월 기준)
+    setGlobal('usTreasury','4.46%','usTreasuryDate','26년 6월 기준(참고)');
+
+    // WTI 유가 — 하드코딩 (26년 6월 기준)
+    setGlobal('wtiPrice','$92.2','wtiDate','26년 6월 기준(참고)');
+
+    // DJP 원자재 ETF — 하드코딩 (26년 6월 기준)
+    setGlobal('constIdx','$22.8','constIdxDate','26년 6월 기준(참고)');
     const now=new Date();if(timeEl)timeEl.textContent=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} 업데이트`;
     const rateChartEl=document.getElementById('rateChart');
     if(rateChartEl&&rate.history?.length>1){
