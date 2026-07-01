@@ -1757,8 +1757,7 @@ async function loadAll(){
     zones.forEach(z=>{if(z.stage_score)SD[z.stage_score]++;});
     zones.forEach(z=>{if(!DD[z.gu_name])DD[z.gu_name]=0;DD[z.gu_name]++;});
     drawDistHBar();drawDonut();drawStageBar();drawStageTable();drawStageTbodyDB();
-    const trend=await sbf('redev_timeline','select=period,stage_score&limit=1000&order=period');
-    if(Array.isArray(trend))drawTrend(trend);
+    drawTrend(projects);
   }catch(e){console.error(e);}
 }
 
@@ -1808,12 +1807,31 @@ function drawDonut(){
   document.getElementById('stageLeg').innerHTML=Object.entries(SD).map(([k,v])=>
     `<div class="sl-i"><div class="sl-dot" style="background:${SC[k]};"></div>${SN[k]} <b style="font-family:var(--mono);">${v}</b></div>`).join('');
 }
-function drawTrend(data){
-  const pc={};PERIODS.forEach(p=>pc[p]=0);data.forEach(r=>{if(pc[r.period]!==undefined)pc[r.period]++;});
+function drawTrend(projects){
+  // redev_projects_seoul의 zone_designated_first 기준 연도별 신규 구역지정 건수
+  if(!Array.isArray(projects)||!projects.length)return;
+  const yc={};
+  const START=2005,END=new Date().getFullYear();
+  for(let y=START;y<=END;y++)yc[y]=0;
+  projects.forEach(p=>{
+    if(!p.zone_designated_first)return;
+    const y=new Date(p.zone_designated_first).getFullYear();
+    if(y>=START&&y<=END)yc[y]++;
+  });
+  const labels=Object.keys(yc).map(y=>y+'년');
+  const vals=Object.values(yc);
+  const bgColors=labels.map((l,i)=>i===labels.length-1?'rgba(27,79,216,.35)':'rgba(27,79,216,.75)');
   if(CH.trend)CH.trend.destroy();
-  CH.trend=new Chart(document.getElementById('trendChart'),{type:'line',
-    data:{labels:PERIODS.map(p=>p.slice(2).replace('-','Q')),datasets:[{data:PERIODS.map(p=>pc[p]),borderColor:'#1B4FD8',backgroundColor:'rgba(27,79,216,.06)',borderWidth:2,fill:true,tension:.4,pointRadius:0}]},
-    options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:9},maxTicksLimit:10}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10}}}}}
+  CH.trend=new Chart(document.getElementById('trendChart'),{
+    type:'bar',
+    data:{labels,datasets:[{data:vals,backgroundColor:bgColors,borderColor:'#1B4FD8',borderWidth:1,borderRadius:3,borderSkipped:false}]},
+    options:{...OPTS,
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:9},maxRotation:45}},
+        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10}},beginAtZero:true}
+      },
+      plugins:{...OPTS.plugins,tooltip:{callbacks:{label:c=>`${c.raw}개 신규 구역지정`+(c.label===''+END+'년'?' (진행중)':'')}}}
+    }
   });
 }
 function drawAlertCharts(al){
