@@ -447,7 +447,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div style="width:36px;height:4px;background:var(--gray-200);border-radius:2px;margin:0 auto 16px;"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <button onclick="sw('mydash',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>★</span>마이 대시보드</button>
-      <button onclick="sw('stage',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>≡</span>단계 관리</button>
       <button onclick="sw('news',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>📰</span>뉴스·정책</button>
       <button onclick="sw('risk',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>📊</span>경제 지표</button>
       <button onclick="sw('legal',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>⚖</span>법령·판례</button>
@@ -500,7 +499,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="sb-sec-lbl">정비사업 현황</div>
     <div class="sb-item" data-tab="map" onclick="sw('map',this)"><span class="sb-icon">🗺</span>지도</div>
     <div class="sb-item" data-tab="search" onclick="sw('search',this)"><span class="sb-icon">◎</span>구역 검색</div>
-    <div class="sb-item" data-tab="stage" onclick="sw('stage',this)"><span class="sb-icon">≡</span>단계 관리</div>
     <div class="sb-item" data-tab="news" onclick="sw('news',this)"><span class="sb-icon">📰</span>뉴스·정책</div>
     <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">📊</span>경제 지표</div>
     <div class="sb-item" data-tab="trade" onclick="sw('trade',this)"><span class="sb-icon">₩</span>실거래가</div>
@@ -557,7 +555,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     </div>
     <div class="db-row2">
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">실데이터</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 분포</div><span class="bdg bdg-blue">전체</span></div><div class="cc-body"><div class="cw"><canvas id="stageDonut"></canvas></div><div class="stage-leg" id="stageLeg"></div></div></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 분포</div><span class="bdg bdg-blue">정비몽땅 25.12</span></div><div class="cc-body"><div class="cw"><canvas id="stageDonut"></canvas></div><div class="stage-leg" id="stageLeg"></div></div></div>
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>분기별 사업 현황</div><span class="bdg bdg-gray">2017~2025</span></div><div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div></div>
     </div>
     <div class="db-row3">
@@ -573,7 +571,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
           <div class="al-list" id="alertListDB"><div style="color:var(--gray-400);padding:20px;text-align:center;font-size:12px;"><span class="spinner"></span>로딩 중...</div></div>
         </div>
       </div>
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 현황</div><span class="bdg bdg-blue">실데이터</span></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 현황</div><span class="bdg bdg-blue">정비몽땅 25.12</span></div>
         <div class="cc-body" style="padding:0;overflow-y:auto;">
           <table class="stg-tbl"><thead><tr><th>단계</th><th>단계명</th><th>구역 수</th><th>비율</th><th>진행률</th></tr></thead>
           <tbody id="stageTbodyDB"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--gray-400);"><span class="spinner"></span>로딩 중...</td></tr></tbody></table>
@@ -1720,6 +1718,32 @@ const SB='https://jhmhocgzjstwrstjwopm.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpobWhvY2d6anN0d3JzdGp3b3BtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMDIzMzEsImV4cCI6MjA5MTU3ODMzMX0.WHk3XfJhgZLELNIgc88oIx7oixvFICr0NoV_ZiBdDpY';
 const SN=['','구역지정','추진위','조합설립','건축심의','사업시행','관리처분','이주','착공','준공'];
 const SC=['','#9CA3AF','#1D4ED8','#6D28D9','#0369A1','#065F46','#92400E','#B45309','#1E3A5F','#059669'];
+// 정비몽땅 사업장목록(2025.12 기준, 1174건) 실제 진행단계 집계 — 정적 데이터
+const STAGE_DETAIL=[
+  {name:'정비계획 수립',count:73,color:'#9CA3AF'},
+  {name:'안전진단',count:10,color:'#9CA3AF'},
+  {name:'정비구역지정',count:41,color:'#9CA3AF'},
+  {name:'지구단위계획수립/건축심의/교통심의',count:8,color:'#9CA3AF'},
+  {name:'추진위원회승인',count:159,color:'#1D4ED8'},
+  {name:'조합설립인가',count:369,color:'#6D28D9'},
+  {name:'조합원 모집신고',count:27,color:'#6D28D9'},
+  {name:'사업시행인가',count:91,color:'#065F46'},
+  {name:'관리처분인가',count:63,color:'#92400E'},
+  {name:'철거',count:9,color:'#B45309'},
+  {name:'착공',count:37,color:'#1E3A5F'},
+  {name:'분양',count:16,color:'#1E3A5F'},
+  {name:'준공인가',count:32,color:'#059669'},
+  {name:'이전고시',count:51,color:'#4B5563'},
+  {name:'조합청산',count:59,color:'#4B5563'},
+  {name:'조합해산',count:104,color:'#4B5563'},
+  {name:'지역주택조합·리모델링',count:25,color:'#D1D5DB'},
+];
+const STAGE_SUMMARY=[
+  {name:'조합설립 이전',count:324,color:'#7F77DD'},
+  {name:'조합설립~준공(핵심 타겟)',count:611,color:'#D97706'},
+  {name:'사업 막바지·종결',count:214,color:'#9CA3AF'},
+  {name:'지역주택·리모델링',count:25,color:'#D1D5DB'},
+];
 const PERIODS=[];
 for(let y=2017;y<=2025;y++)for(let q of['03','06','09','12']){if(y===2025&&+q>12)break;PERIODS.push(`${y}-${q}`);}
 let ALL=[],ALERTS=[],SD={},DD={},CH={};
@@ -1823,14 +1847,14 @@ function drawDistHBar(){
     `<div class="dist-row"><div class="d-rk ${i<3?'t':''}">${i+1}</div><div class="d-nm">${nm}</div><div class="d-bw"><div class="d-bf" style="width:${Math.round(ct/max*100)}%;"></div></div><div class="d-ct">${ct}</div></div>`).join('');
 }
 function drawDonut(){
-  const vals=Object.values(SD),tot=vals.reduce((a,b)=>a+b,0)||1;
+  const tot=STAGE_SUMMARY.reduce((a,b)=>a+b.count,0)||1;
   if(CH.donut)CH.donut.destroy();
   CH.donut=new Chart(document.getElementById('stageDonut'),{type:'doughnut',
-    data:{labels:Object.keys(SD).map(k=>SN[k]),datasets:[{data:vals,backgroundColor:Object.keys(SD).map(k=>SC[k]),borderWidth:2,borderColor:'#fff',hoverOffset:4}]},
+    data:{labels:STAGE_SUMMARY.map(s=>s.name),datasets:[{data:STAGE_SUMMARY.map(s=>s.count),backgroundColor:STAGE_SUMMARY.map(s=>s.color),borderWidth:2,borderColor:'#fff',hoverOffset:4}]},
     options:{...OPTS,cutout:'65%',plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`${c.label}: ${c.raw}개 (${Math.round(c.raw/tot*100)}%)`}}}}
   });
-  document.getElementById('stageLeg').innerHTML=Object.entries(SD).map(([k,v])=>
-    `<div class="sl-i"><div class="sl-dot" style="background:${SC[k]};"></div>${SN[k]} <b style="font-family:var(--mono);">${v}</b></div>`).join('');
+  document.getElementById('stageLeg').innerHTML=STAGE_SUMMARY.map(s=>
+    `<div class="sl-i"><div class="sl-dot" style="background:${s.color};"></div>${s.name} <b style="font-family:var(--mono);">${s.count}</b></div>`).join('');
 }
 function drawTrend(projects){
   // redev_projects_seoul의 zone_designated_first 기준 연도별 신규 구역지정 건수
@@ -1888,9 +1912,11 @@ function drawStageTable(){
     <tr><td><span class="bdg ${k==9?'bdg-green':k>=7?'bdg-red':k>=5?'bdg-orange':'bdg-blue'}">${k}단계</span></td><td>${SN[k]}</td><td style="font-family:var(--mono);font-weight:600;">${v.toLocaleString()}</td><td style="font-family:var(--mono);font-weight:600;">${Math.round(v/tot*100)}%</td><td><div style="background:var(--gray-100);height:4px;border-radius:2px;overflow:hidden;width:90px;"><div style="height:100%;border-radius:2px;background:${SC[k]};width:${Math.round(v/tot*100)}%;"></div></div></td></tr>`).join('');
 }
 function drawStageTbodyDB(){
-  const tot=Object.values(SD).reduce((a,b)=>a+b,0)||1;
-  document.getElementById('stageTbodyDB').innerHTML=Object.entries(SD).map(([k,v])=>`
-    <tr><td><span class="bdg ${k==9?'bdg-green':k>=7?'bdg-red':k>=5?'bdg-orange':'bdg-blue'}">${k}</span></td><td style="font-size:11.5px;">${SN[k]}</td><td style="font-family:var(--mono);font-weight:600;">${v.toLocaleString()}</td><td style="font-family:var(--mono);font-weight:600;">${Math.round(v/tot*100)}%</td><td><div class="pw"><div class="pf" style="width:${Math.round(v/tot*100)}%;background:${SC[k]};"></div></div></td></tr>`).join('');
+  const tot=STAGE_DETAIL.reduce((a,b)=>a+b.count,0)||1;
+  document.getElementById('stageTbodyDB').innerHTML=STAGE_DETAIL.map(s=>{
+    const pct=Math.round(s.count/tot*100);
+    return `<tr><td><span class="bdg" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}55;">${s.count}건</span></td><td style="font-size:11.5px;">${s.name}</td><td style="font-family:var(--mono);font-weight:600;">${s.count.toLocaleString()}</td><td style="font-family:var(--mono);font-weight:600;">${pct}%</td><td><div class="pw"><div class="pf" style="width:${pct}%;background:${s.color};"></div></div></td></tr>`;
+  }).join('');
 }
 
 function renderAlertsDB(al){
