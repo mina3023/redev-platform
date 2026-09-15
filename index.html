@@ -518,6 +518,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   </div>
   <div class="sb-sec" style="padding-top:2px;">
     <div class="sb-item" data-tab="mydash" onclick="sw('mydash',this)"><span class="sb-icon">★</span>마이 대시보드</div>
+    <div class="sb-item" style="padding-left:34px;font-size:11.5px;color:var(--gray-500);" onclick="goMydashSub('finance')">자금운용 계획</div>
+    <div class="sb-item" style="padding-left:34px;font-size:11.5px;color:var(--gray-500);" onclick="goMydashSub('futurevalue')">내 집 미래가치</div>
     <div class="sb-item" data-tab="alert" onclick="sw('alert',this)"><span class="sb-icon">△</span>지연 경보<span class="sb-badge" id="sbBadge">-</span></div>
   </div>
   <div class="sb-div"></div>
@@ -2325,7 +2327,7 @@ function goToSearchFromMap(){
 }
 
 // ── 마이 대시보드 ──
-let myProjects=[],selectedProjectId=null;
+let myProjects=[],selectedProjectId=null,mydashSubTab='overview',curMydashProj=null;
 
 async function renderMyDash(){
   const locked=document.getElementById('mydashLocked');
@@ -2376,18 +2378,50 @@ function selectProject(id){
 }
 
 function renderProjectDetail(proj){
+  curMydashProj=proj;
+  mydashSubTab='overview';
+  renderMydashSub();
+}
+
+function goMydashSub(tab){
+  sw('mydash',document.querySelector('[data-tab="mydash"]'));
+  setTimeout(()=>{mydashSubTab=tab;renderMydashSub();},200);
+}
+
+function switchMydashSub(tab){
+  mydashSubTab=tab;
+  renderMydashSub();
+}
+
+function mydashNavHtml(){
+  const tabs=[{k:'overview',l:'개요'},{k:'finance',l:'자금운용 계획'},{k:'futurevalue',l:'내 집 미래가치'}];
+  return `<div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--gray-100);">${tabs.map(t=>
+    `<button onclick="switchMydashSub('${t.k}')" style="padding:8px 14px;font-size:12.5px;font-weight:600;border:none;background:none;cursor:pointer;font-family:var(--font);color:${mydashSubTab===t.k?'var(--blue)':'var(--gray-400)'};border-bottom:2px solid ${mydashSubTab===t.k?'var(--blue)':'transparent'};margin-bottom:-1px;">${t.l}</button>`
+  ).join('')}<button onclick="sw('alert',document.querySelector('[data-tab=\\'alert\\']'))" style="padding:8px 14px;font-size:12.5px;font-weight:600;border:none;background:none;cursor:pointer;font-family:var(--font);color:var(--gray-400);border-bottom:2px solid transparent;margin-bottom:-1px;margin-left:auto;">지연 경보 →</button></div>`;
+}
+
+function renderMydashSub(){
+  const proj=curMydashProj;
+  if(!proj)return;
   const zoneData=ALL.filter(r=>r.project_name===proj.project_name);
   const lastStage=zoneData.sort((a,b)=>b.period>a.period?1:-1)[0];
   const stageScore=lastStage?.stage_score||0;
-  const mortgageMonthly=proj.mortgage_amount&&proj.mortgage_rate?Math.round(proj.mortgage_amount*10000*(proj.mortgage_rate/100)/12):0;
-  const movingMonthly=proj.moving_loan_amount&&proj.moving_loan_rate?Math.round(proj.moving_loan_amount*10000*(proj.moving_loan_rate/100)/12):0;
-  const totalMonthly=mortgageMonthly+movingMonthly;
+  const nav=mydashNavHtml();
+  let body='';
+  if(mydashSubTab==='finance')body=renderFinanceTab(proj,stageScore);
+  else if(mydashSubTab==='futurevalue')body=renderFutureValueTab(proj,stageScore);
+  else body=renderOverviewTab(proj,stageScore,lastStage);
+  document.getElementById('myProjDetail').innerHTML=nav+body;
+  if(mydashSubTab==='futurevalue')initFvResultPlaceholder(proj.id);
+}
+
+function renderOverviewTab(proj,stageScore,lastStage){
   const stages=[{n:'구역지정',s:1},{n:'추진위',s:2},{n:'조합설립',s:3},{n:'사업시행',s:4},{n:'관리처분',s:5},{n:'이주',s:6},{n:'착공',s:7},{n:'분양',s:8},{n:'준공',s:9}];
   const scheduleHtml=`<div class="schedule-bar">${stages.map(st=>{
     const cls=st.s<stageScore?'done':st.s===stageScore?'current':'future';
     return`<div class="sch-step"><div class="sch-dot ${cls}">${st.s<stageScore?'✓':st.s}</div><div class="sch-label">${st.n}</div><div class="sch-date" style="color:${st.s===stageScore?'var(--blue)':'var(--gray-400)'};">${st.s===stageScore?'▶ 현재':''}</div></div>`;
   }).join('')}</div>`;
-  document.getElementById('myProjDetail').innerHTML=`
+  return `
     <div class="card">
       <div class="card-h">
         <div class="card-title">${proj.project_name}</div>
@@ -2399,8 +2433,8 @@ function renderProjectDetail(proj){
       </div>
       <div class="my-kpi-row" style="margin-bottom:14px;">
         <div style="background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:var(--r);padding:12px;"><div style="font-size:10px;color:var(--blue);margin-bottom:4px;font-weight:600;">현재 단계</div><div style="font-size:14px;font-weight:600;color:var(--navy);">${lastStage?.stage||'데이터 없음'}</div></div>
-        <div style="background:var(--red-bg);border:1px solid #FECACA;border-radius:var(--r);padding:12px;"><div style="font-size:10px;color:var(--red);margin-bottom:4px;font-weight:600;">월 이자 부담</div><div style="font-size:14px;font-weight:600;color:var(--red);">${totalMonthly?totalMonthly.toLocaleString()+'원':'미입력'}</div></div>
         <div style="background:var(--gray-50);border:1px solid var(--border);border-radius:var(--r);padding:12px;"><div style="font-size:10px;color:var(--gray-400);margin-bottom:4px;">구역 위치</div><div style="font-size:14px;font-weight:600;">${proj.gu_name||'—'}</div></div>
+        <div style="background:var(--gray-50);border:1px solid var(--border);border-radius:var(--r);padding:12px;cursor:pointer;" onclick="sw('alert',document.querySelector('[data-tab=\\'alert\\']'))"><div style="font-size:10px;color:var(--gray-400);margin-bottom:4px;">지연 현황</div><div style="font-size:14px;font-weight:600;color:var(--blue);">지연 경보 보기 →</div></div>
       </div>
       <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">사업추진 일정</div>
       ${scheduleHtml}
@@ -2412,7 +2446,7 @@ function renderProjectDetail(proj){
             단계별 조합원 체크리스트
             <span style="font-size:10px;font-weight:400;color:var(--gray-400);">${stageScore ? SN[stageScore]+'('+stageScore+'단계)' : '단계 정보 없음'}</span>
           </div>
-          <span style="font-size:10px;color:var(--blue);cursor:pointer;" onclick="sw('rights',document.querySelector('[data-tab=\'rights\']'))">법령 상세 보기 →</span>
+          <span style="font-size:10px;color:var(--blue);cursor:pointer;" onclick="sw('rights',document.querySelector('[data-tab=\\'rights\\']'))">법령 상세 보기 →</span>
         </div>
         ${stageScore ? renderChecklist(stageScore, proj.id) : '<div style="font-size:12px;color:var(--gray-400);">구역 단계 정보를 불러올 수 없습니다</div>'}
         <div style="margin-top:12px;padding:12px 14px;background:var(--gray-50);border:1px dashed var(--gray-300);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;gap:10px;">
@@ -2430,15 +2464,39 @@ function renderProjectDetail(proj){
         <button class="btn-primary" style="margin-top:6px;font-size:11px;padding:6px 14px;" onclick="${proj.id==='sample'?'openAuth()':`saveMemo(${proj.id})`}">${proj.id==='sample'?'로그인 후 메모 작성':'메모 저장'}</button>
       </div>
     </div>
-    ${(proj.mortgage_amount||proj.moving_loan_amount)?`
     <div class="card">
-      <div class="card-h"><div class="card-title">대출 현황</div></div>
-      <div class="loan-row">
-        ${proj.mortgage_amount?`<div class="loan-card"><div class="loan-label">담보대출 이자 (월)</div><div class="loan-val">${mortgageMonthly.toLocaleString()}원</div><div class="loan-sub">${proj.mortgage_amount.toLocaleString()}만원 · 연 ${proj.mortgage_rate}%</div></div>`:''}
-        ${proj.moving_loan_amount?`<div class="loan-card"><div class="loan-label">이주비대출 이자 (월)</div><div class="loan-val">${movingMonthly.toLocaleString()}원</div><div class="loan-sub">${proj.moving_loan_amount.toLocaleString()}만원 · 연 ${proj.moving_loan_rate}%</div></div>`:''}
+      <div class="ai-head" style="border-radius:var(--r) var(--r) 0 0;margin:-16px -18px 12px;padding:10px 16px;"><div class="ai-av">AI</div><div><div class="ai-title">AI 상담 <span style="font-size:10px;opacity:.6;">(도시정비법 기반)</span></div><div class="ai-desc">월 30회 · 잔여 ${Math.max(0,30-(currentProfile?.ai_usage_count||0))}회</div></div></div>
+      <div id="myAiMsgs" style="min-height:100px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"><div class="ai-msg bot">이 구역의 남은 절차와 예상 소요 시간이 궁금하면 물어보세요. 예: "앞으로 뭐가 남았고 얼마나 걸려?"</div></div>
+      <div style="display:flex;gap:7px;"><input class="ai-inp" type="text" id="myAiInp" placeholder="예: 앞으로 남은 절차와 예상 기간이 궁금해요" ${proj.id==='sample'?'onclick="openAuth()" readonly':`onkeydown="if(event.key==='Enter')sendMyAI(${proj.id})"`}><button class="ai-send" onclick="${proj.id==='sample'?'openAuth()':`sendMyAI(${proj.id})`}">↑</button></div>
+    </div>`;
+}
+
+function renderFinanceTab(proj,stageScore){
+  return `
+    <div class="card">
+      <div class="card-h"><div class="card-title">자금운용 계획</div></div>
+      <div class="inp-row">
+        <div><div class="inp-lbl">초기투자금액 (만원)</div><input class="inp-field" type="number" id="finInit_${proj.id}" placeholder="예: 40000"></div>
+        <div><div class="inp-lbl">대출 금리 (%)</div><input class="inp-field" type="number" step="0.01" id="finRate_${proj.id}" placeholder="예: 4.2"></div>
       </div>
-      ${totalMonthly?`<div style="margin-top:10px;padding:12px;background:var(--red-bg);border-radius:var(--r);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:600;color:var(--red);">월 총 이자 부담</span><span style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--red);">${totalMonthly.toLocaleString()}원</span></div>`:''}
-    </div>`:''}
+      <div class="inp-row">
+        <div><div class="inp-lbl">조합원분양가 (만원)</div><input class="inp-field" type="number" id="finPrice_${proj.id}" placeholder="예: 80000"></div>
+        <div><div class="inp-lbl">현재 공사비 - 내 세대분 (만원)</div><input class="inp-field" type="number" id="finCost_${proj.id}" placeholder="예: 30000"></div>
+      </div>
+      <div class="inp-row">
+        <div><div class="inp-lbl">완공시점 예상 공사비 상승률 (%)</div><input class="inp-field" type="number" step="0.1" id="finCostUp_${proj.id}" placeholder="예: 15"></div>
+        <div></div>
+      </div>
+      <button class="btn-primary" style="margin-top:6px;" onclick="calcFinance('${proj.id}')">계산</button>
+      <div id="finResult_${proj.id}" style="margin-top:14px;">
+        <div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">값을 입력하고 계산을 눌러주세요</div>
+      </div>
+      <div style="font-size:11px;color:var(--gray-400);margin-top:10px;">※ 대출필요액 = 조합원분양가 − 초기투자금액(이자만 상환 가정) · 예상분담금 = 기본분담금 + (현재 공사비 × 상승률). 참고용 추정치이며 실제 조합 고지 금액과 다를 수 있습니다.</div>
+    </div>`;
+}
+
+function renderFutureValueTab(proj,stageScore){
+  return `
     <div class="card">
       <div class="card-h"><div class="card-title">내 집 미래가치 예상</div></div>
       <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;">
@@ -2448,40 +2506,70 @@ function renderProjectDetail(proj){
         </div>
         <button class="btn-primary" style="padding:8px 16px;" onclick="calcFutureValue('${proj.id}','${proj.gu_name||''}',${stageScore||0})">계산</button>
       </div>
-      <div id="fvResult_${proj.id}">
-        <div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">조합원분양가를 입력하고 계산을 눌러주세요</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ai-head" style="border-radius:var(--r) var(--r) 0 0;margin:-16px -18px 12px;padding:10px 16px;"><div class="ai-av">AI</div><div><div class="ai-title">AI 상담 <span style="font-size:10px;opacity:.6;">(도시정비법 기반)</span></div><div class="ai-desc">월 30회 · 잔여 ${Math.max(0,30-(currentProfile?.ai_usage_count||0))}회</div></div></div>
-      <div id="myAiMsgs" style="min-height:100px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"><div class="ai-msg bot">이 구역 관련 법적 절차, 일정, 조합원 권리 등을 질문해보세요.</div></div>
-      <div style="display:flex;gap:7px;"><input class="ai-inp" type="text" id="myAiInp" placeholder="예: 착공한다는데 법적 절차가 맞나요?" ${proj.id==='sample'?'onclick="openAuth()" readonly':`onkeydown="if(event.key==='Enter')sendMyAI(${proj.id})"`}><button class="ai-send" onclick="${proj.id==='sample'?'openAuth()':`sendMyAI(${proj.id})`}">↑</button></div>
+      <div id="fvResult_${proj.id}"></div>
+      <div id="fvCompare_${proj.id}" style="margin-top:16px;"></div>
     </div>`;
 }
+
+function initFvResultPlaceholder(projId){
+  const r=document.getElementById('fvResult_'+projId);
+  if(r&&!r.innerHTML.trim())r.innerHTML='<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">조합원분양가를 입력하고 계산을 눌러주세요</div>';
+}
+
+function calcFinance(projId){
+  const iv=parseFloat(document.getElementById('finInit_'+projId)?.value)||0;
+  const rate=parseFloat(document.getElementById('finRate_'+projId)?.value)||0;
+  const price=parseFloat(document.getElementById('finPrice_'+projId)?.value)||0;
+  const cost=parseFloat(document.getElementById('finCost_'+projId)?.value)||0;
+  const costUp=parseFloat(document.getElementById('finCostUp_'+projId)?.value)||0;
+  const resEl=document.getElementById('finResult_'+projId);
+  if(!price){resEl.innerHTML='<div style="font-size:12px;color:var(--red);">조합원분양가를 입력해주세요</div>';return;}
+  const loanNeed=Math.max(price-iv,0);
+  const monthly=Math.round(loanNeed*10000*(rate/100)/12);
+  const baseShare=Math.max(price-iv,0);
+  const costIncrease=Math.round(cost*(costUp/100));
+  const expectedShare=baseShare+costIncrease;
+  const fmt=v=>v>=10000?(v/10000).toFixed(2)+'억':v.toLocaleString()+'만원';
+  resEl.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="loan-card"><div class="loan-label">대출 필요액</div><div class="loan-val" style="color:var(--gray-700);">${fmt(loanNeed)}</div></div>
+      <div class="loan-card"><div class="loan-label">월상환액 (이자)</div><div class="loan-val">${monthly.toLocaleString()}원</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">기본 분담금</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${fmt(baseShare)}</div></div>
+      <div style="background:var(--red-bg);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--red);">공사비 상승 반영 예상분담금</div><div style="font-size:16px;font-weight:600;margin-top:3px;color:var(--red);">${fmt(expectedShare)}</div></div>
+    </div>`;
+}
+
+function fvMonthList(yearsAgo){
+  const now=new Date();const arr=[];
+  for(let i=0;i<6;i++){const d=new Date(now);d.setFullYear(d.getFullYear()-yearsAgo);d.setMonth(d.getMonth()-i);arr.push(''+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0'));}
+  return arr;
+}
+async function fvAvgPyeong(lawdCd,months){
+  let all=[];
+  for(const ym of months){
+    try{const res=await fetch(`/api/apt-trade?lawdCd=${lawdCd}&dealYmd=${ym}&numOfRows=300`);const data=await res.json();if(data.success&&data.items)all=all.concat(data.items);}catch(e){}
+  }
+  const filtered=all.filter(d=>{const area=parseFloat(d.area)||0;return area>=60&&area<=85;});
+  const pyeongPrices=filtered.map(d=>{const amt=parseInt(d.dealAmount)||0;const area=parseFloat(d.area)||1;return amt/(area/3.3058);}).filter(v=>v>0);
+  if(!pyeongPrices.length)return null;
+  return pyeongPrices.reduce((a,b)=>a+b,0)/pyeongPrices.length;
+}
+const FV_BENCHMARK_GU=[{name:'강남구',code:'11680'},{name:'서초구',code:'11650'},{name:'송파구',code:'11710'}];
 
 async function calcFutureValue(projId,guName,stageScore){
   const priceInp=document.getElementById('fvPrice_'+projId);
   const resultEl=document.getElementById('fvResult_'+projId);
+  const compareEl=document.getElementById('fvCompare_'+projId);
   const price=parseFloat(priceInp?.value);
   if(!price||price<=0){resultEl.innerHTML='<div style="font-size:12px;color:var(--red);padding:8px 0;">조합원분양가를 입력해주세요</div>';return;}
   const lawdCd=GU_LAWD_CODE[guName];
   if(!lawdCd){resultEl.innerHTML='<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">해당 구의 시세 데이터를 찾을 수 없습니다</div>';return;}
   resultEl.innerHTML='<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>구 시세 데이터 조회 중...</div>';
-  const now=new Date();
-  const recentMonths=[];
-  for(let i=0;i<6;i++){const d=new Date(now);d.setMonth(d.getMonth()-i);recentMonths.push(''+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0'));}
-  const oldMonths=recentMonths.map(ym=>(parseInt(ym.slice(0,4))-5)+ym.slice(4));
-  async function avgPyeong(months){
-    let all=[];
-    for(const ym of months){
-      try{const res=await fetch(`/api/apt-trade?lawdCd=${lawdCd}&dealYmd=${ym}&numOfRows=300`);const data=await res.json();if(data.success&&data.items)all=all.concat(data.items);}catch(e){}
-    }
-    const filtered=all.filter(d=>{const area=parseFloat(d.area)||0;return area>=60&&area<=85;});
-    const pyeongPrices=filtered.map(d=>{const amt=parseInt(d.dealAmount)||0;const area=parseFloat(d.area)||1;return amt/(area/3.3058);}).filter(v=>v>0);
-    if(!pyeongPrices.length)return null;
-    return pyeongPrices.reduce((a,b)=>a+b,0)/pyeongPrices.length;
-  }
-  const [recentAvg,oldAvg]=await Promise.all([avgPyeong(recentMonths),avgPyeong(oldMonths)]);
+  if(compareEl)compareEl.innerHTML='';
+  const recentMonths=fvMonthList(0),oldMonths=fvMonthList(5);
+  const [recentAvg,oldAvg]=await Promise.all([fvAvgPyeong(lawdCd,recentMonths),fvAvgPyeong(lawdCd,oldMonths)]);
   if(!recentAvg||!oldAvg){resultEl.innerHTML='<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">이 구의 60~85㎡ 실거래 데이터가 충분하지 않습니다</div>';return;}
   const cagr=Math.pow(recentAvg/oldAvg,1/5)-1;
   const remainYears=STAGE_REMAIN_YEARS[stageScore]??5;
@@ -2508,8 +2596,32 @@ async function calcFutureValue(projId,guName,stageScore){
       <div style="background:var(--blue-light);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--blue);">예상 프리미엄 (${remainYears}년 후)</div><div style="font-size:16px;font-weight:600;margin-top:3px;color:var(--blue);">${fmt(premLow)} ~ ${fmt(premHigh)}</div></div>
     </div>
     <div style="font-size:11px;color:var(--gray-400);">${note}</div>`;
+  if(compareEl){
+    compareEl.innerHTML='<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>강남·서초·송파 비교 데이터 조회 중...</div>';
+    const benchAvgs=await Promise.all(FV_BENCHMARK_GU.map(g=>fvAvgPyeong(g.code,recentMonths)));
+    const rows=FV_BENCHMARK_GU.map((g,i)=>({name:g.name,val:benchAvgs[i]?Math.round(benchAvgs[i]*25.4):null}));
+    rows.push({name:guName+' (내 구역, 현재시세)',val:Math.round(recentAvg*25.4),highlight:true});
+    rows.push({name:guName+' (내 조합원분양가)',val:Math.round(price),highlight:true,isTotal:true});
+    rows.push({name:guName+' (준공 후 예상, 평균)',val:Math.round((futLow+futHigh)/2),highlight:true,isTotal:true});
+    const validVals=rows.map(r=>r.val).filter(v=>v!=null);
+    const max=Math.max(...validVals,1);
+    compareEl.innerHTML=`
+      <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin:4px 0 8px;text-transform:uppercase;letter-spacing:.04em;">강남·서초·송파 대비 위치 (84㎡ 환산가 기준)</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${rows.map(r=>{
+          const pct=r.val?Math.round(r.val/max*100):0;
+          const barColor=r.highlight?'var(--blue)':'#9CA3AF';
+          const displayVal=r.val==null?'데이터 없음':(r.val/10000).toFixed(1)+'억'+(r.isTotal?'':' (84㎡ 환산)');
+          return `<div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:150px;font-size:11.5px;color:${r.highlight?'var(--blue)':'var(--gray-600)'};font-weight:${r.highlight?600:400};flex-shrink:0;">${r.name}</div>
+            <div style="flex:1;background:var(--gray-100);height:14px;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;"></div></div>
+            <div style="width:70px;text-align:right;font-size:11.5px;font-family:var(--mono);color:var(--gray-700);flex-shrink:0;">${displayVal}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="font-size:10.5px;color:var(--gray-400);margin-top:8px;">※ 강남·서초·송파·내 구역 현재시세는 60~85㎡ 실거래 평균을 84㎡ 기준으로 환산한 값이며, 조합원분양가·준공후 예상가는 입력하신 실제 금액 기준이라 면적이 다를 수 있습니다.</div>`;
+  }
 }
-
 async function renderMyDelayPanel(){
   const panel=document.getElementById('myDelayPanel');
   if(!panel)return;
@@ -2567,11 +2679,17 @@ async function sendMyAI(projId){
   msgs.innerHTML+=`<div class="ai-msg bot" id="myAiTyping"><span class="spinner"></span>분석 중...</div>`;
   msgs.scrollTop=msgs.scrollHeight;
   const proj=myProjects.find(p=>p.id===projId);
-  const zoneCtx=ALL.filter(r=>r.project_name===proj?.project_name).slice(-6).map(r=>`${r.period}:${r.stage}(${r.stage_score}단계)`).join(', ');
+  const zoneRecs=ALL.filter(r=>r.project_name===proj?.project_name).sort((a,b)=>a.period>b.period?1:-1);
+  const zoneCtx=zoneRecs.slice(-6).map(r=>`${r.period}:${r.stage}(${r.stage_score}단계)`).join(', ');
+  const curScore=zoneRecs.length?zoneRecs[zoneRecs.length-1].stage_score:0;
+  const remainYears=STAGE_REMAIN_YEARS[curScore];
+  const stageOrder=['','구역지정','추진위','조합설립','건축심의','사업시행','관리처분','이주','착공','준공'];
+  const remainStages=curScore?stageOrder.slice(curScore+1).filter(Boolean).join(' → '):'정보없음';
+  const durationRef='추진위→조합설립 약12개월, 조합설립→사업시행인가 약24개월, 사업시행인가→관리처분인가 약12개월, 관리처분인가→착공 약12개월, 착공→준공 약36개월 (업계 일반 참고치)';
   try{
     const res=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       messages:[{role:'user',content:msg}],
-      system:`당신은 재건축·재개발 전문 AI입니다. 도시및주거환경정비법을 기반으로 답변하세요. 마크다운 금지. 600자 이내. 한국어.\n구역: ${proj?.project_name||'미선택'}\n현재단계: ${zoneCtx||'정보없음'}\n메모: ${proj?.memo||'없음'}`
+      system:`당신은 재건축·재개발 전문 AI입니다. 도시및주거환경정비법을 기반으로 답변하세요. 사용자가 남은 절차나 예상 소요 시간을 물으면, 아래 참고 소요기간과 현재 단계를 근거로 남은 단계와 대략적인 예상 기간을 함께 안내하세요(단, 참고치이며 실제와 다를 수 있다고 밝힐 것). 마크다운 금지. 600자 이내. 한국어.\\n구역: ${proj?.project_name||'미선택'}\\n현재단계: ${zoneCtx||'정보없음'}\\n남은 단계: ${remainStages}\\n표준 단계별 참고 소요기간: ${durationRef}\\n메모: ${proj?.memo||'없음'}`
     })});
     const typing=document.getElementById('myAiTyping');if(!typing)return;
     if(!res.ok){typing.innerHTML='오류가 발생했습니다.';return;}
