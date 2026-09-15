@@ -554,7 +554,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
       <div class="kpi-card" style="border-top:2px solid var(--gray-400);"><div class="kpi-top"><div class="kpi-lbl">사업 막바지·종결</div><span class="kpi-icon">✕</span></div><div class="kpi-val" style="color:var(--gray-500);">214</div><div class="kpi-foot"><span class="kpi-sub">이전고시~조합청산</span><span class="kpi-tag t-neu">18.2%</span></div></div>
     </div>
     <div class="db-row2">
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">실데이터</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">정비몽땅 25.12</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 분포</div><span class="bdg bdg-blue">정비몽땅 25.12</span></div><div class="cc-body"><div class="cw"><canvas id="stageDonut"></canvas></div><div class="stage-leg" id="stageLeg"></div></div></div>
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>분기별 사업 현황</div><span class="bdg bdg-gray">2017~2025</span></div><div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div></div>
     </div>
@@ -722,16 +722,31 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 지연 경보 ══ -->
 <div id="tab-alert" class="tab-panel">
-  <div class="page-h"><div><h2>지연 경보</h2><p>최근 3기간 이상 동일 단계 정체 구역 자동 감지</p></div></div>
+  <div class="page-h"><div><h2>지연 경보</h2><p>내 사업장 지연 현황 · 표준 소요기간 대비 분석</p></div></div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-h"><div class="card-title">내 사업장 지연 현황</div></div>
+    <div id="myDelayPanel"><div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>로딩 중...</div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-h"><div class="card-title">일반적인 단계별 표준 소요기간</div><span class="bdg bdg-gray">일반 참고치</span></div>
+    <table class="dtable"><thead><tr><th>구간</th><th style="text-align:right;">표준 소요기간</th></tr></thead>
+    <tbody>
+      <tr><td>추진위원회 → 조합설립인가</td><td style="text-align:right;font-family:var(--mono);">약 12개월</td></tr>
+      <tr><td>조합설립인가 → 사업시행인가</td><td style="text-align:right;font-family:var(--mono);">약 24개월</td></tr>
+      <tr><td>사업시행인가 → 관리처분인가</td><td style="text-align:right;font-family:var(--mono);">약 12개월</td></tr>
+      <tr><td>관리처분인가 → 착공</td><td style="text-align:right;font-family:var(--mono);">약 12개월</td></tr>
+      <tr><td>착공 → 준공</td><td style="text-align:right;font-family:var(--mono);">약 36개월</td></tr>
+    </tbody></table>
+    <div style="font-size:11px;color:var(--gray-400);margin-top:8px;">※ 업계에서 통상 참고하는 수치이며, 실제 구별·사업장별 소요기간과 다를 수 있습니다. 구 평균·서울시 평균은 실제 인가일자 데이터가 충분히 쌓이는 대로 반영 예정입니다.</div>
+  </div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
     <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 (6기간+)</div></div><div class="kpi-val c-red" id="aHigh">—</div><div class="kpi-foot"><span class="kpi-sub">즉시 점검</span><span class="kpi-tag t-dn">고위험</span></div></div>
     <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">중위험 (4~5기간)</div></div><div class="kpi-val c-orange" id="aMid">—</div><div class="kpi-foot"><span class="kpi-sub">모니터링 강화</span><span class="kpi-tag t-dn">중위험</span></div></div>
     <div class="kpi-card" style="border-top:2px solid #B45309;"><div class="kpi-top"><div class="kpi-lbl">주의 (3기간)</div></div><div class="kpi-val" style="color:#B45309;" id="aLow">—</div><div class="kpi-foot"><span class="kpi-sub">관찰 필요</span><span class="kpi-tag t-neu">주의</span></div></div>
     <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">전체 감지</div></div><div class="kpi-val c-blue" id="aTot">—</div><div class="kpi-foot"><span class="kpi-sub">경보 대상 합계</span><span class="kpi-tag t-neu">집계</span></div></div>
   </div>
-  <div class="g31" style="margin-bottom:14px;">
-    <div class="card"><div class="card-h"><div class="card-title">구별 지연 분포</div><span class="bdg bdg-red">실데이터</span></div><div class="cw2" style="height:200px;"><canvas id="alertDistChart"></canvas></div></div>
-    <div class="card"><div class="card-h"><div class="card-title">단계별 지연</div></div><div class="cw2" style="height:200px;"><canvas id="alertStageChart"></canvas></div></div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-h"><div class="card-title">구별 지연 분포</div><span class="bdg bdg-red">실데이터</span></div><div class="cw2" style="height:200px;"><canvas id="alertDistChart"></canvas></div>
   </div>
   <div class="sec-lbl">지연 구역 목록</div>
   <div class="al-full" id="alertListFull"><div style="color:var(--gray-400);padding:20px;text-align:center;"><span class="spinner"></span>로딩 중...</div></div>
@@ -1841,8 +1856,11 @@ async function detectAlerts(){
   }catch(e){console.error(e);}
 }
 
+const GU_COUNTS={'영등포구':121,'성북구':79,'서초구':70,'중랑구':68,'동작구':60,'강동구':58,'송파구':56,'은평구':52,'용산구':50,'강남구':49,'마포구':49,'강북구':47,'서대문구':47,'동대문구':46,'양천구':46,'강서구':43,'구로구':41,'관악구':36,'성동구':35,'광진구':27,'노원구':26,'금천구':24,'도봉구':20,'종로구':13,'중구':11};
+const GU_LAWD_CODE={'종로구':'11110','중구':'11140','용산구':'11170','성동구':'11200','광진구':'11215','동대문구':'11230','중랑구':'11260','성북구':'11290','강북구':'11305','도봉구':'11320','노원구':'11350','은평구':'11380','서대문구':'11410','마포구':'11440','양천구':'11470','강서구':'11500','구로구':'11530','금천구':'11545','영등포구':'11560','동작구':'11590','관악구':'11620','서초구':'11650','강남구':'11680','송파구':'11710','강동구':'11740'};
+const STAGE_REMAIN_YEARS={1:7,2:6,3:5,4:4,5:3,6:2,7:1,8:0.5,9:0};
 function drawDistHBar(){
-  const sorted=Object.entries(DD).sort((a,b)=>b[1]-a[1]);const max=sorted[0]?.[1]||1;
+  const sorted=Object.entries(GU_COUNTS).sort((a,b)=>b[1]-a[1]);const max=sorted[0]?.[1]||1;
   document.getElementById('distHBar').innerHTML=sorted.map(([nm,ct],i)=>
     `<div class="dist-row"><div class="d-rk ${i<3?'t':''}">${i+1}</div><div class="d-nm">${nm}</div><div class="d-bw"><div class="d-bf" style="width:${Math.round(ct/max*100)}%;"></div></div><div class="d-ct">${ct}</div></div>`).join('');
 }
@@ -1890,12 +1908,6 @@ function drawAlertCharts(al){
   CH.adist=new Chart(document.getElementById('alertDistChart'),{type:'bar',
     data:{labels:s.map(d=>d[0].replace('구','')),datasets:[{data:s.map(d=>d[1]),backgroundColor:'rgba(220,38,38,.7)',borderColor:'#DC2626',borderWidth:1,borderRadius:4,borderSkipped:false}]},
     options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}
-  });
-  const sm={};al.forEach(a=>{sm[a.score]=(sm[a.score]||0)+1;});const sk=Object.keys(sm).sort();
-  if(CH.astage)CH.astage.destroy();
-  CH.astage=new Chart(document.getElementById('alertStageChart'),{type:'doughnut',
-    data:{labels:sk.map(k=>SN[k]),datasets:[{data:sk.map(k=>sm[k]),backgroundColor:sk.map(k=>SC[k]),borderWidth:2,borderColor:'#fff'}]},
-    options:{...OPTS,cutout:'55%',plugins:{...OPTS.plugins,legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10,family:'IBM Plex Sans KR'},padding:8,boxWidth:10}}}}
   });
 }
 function drawStageBar(){
@@ -2428,10 +2440,109 @@ function renderProjectDetail(proj){
       ${totalMonthly?`<div style="margin-top:10px;padding:12px;background:var(--red-bg);border-radius:var(--r);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:600;color:var(--red);">월 총 이자 부담</span><span style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--red);">${totalMonthly.toLocaleString()}원</span></div>`:''}
     </div>`:''}
     <div class="card">
+      <div class="card-h"><div class="card-title">내 집 미래가치 예상</div></div>
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;">
+        <div style="flex:1;">
+          <div class="inp-lbl">예상 조합원분양가 (만원)</div>
+          <input class="inp-field" type="number" id="fvPrice_${proj.id}" placeholder="예: 80000" value="${proj.fv_price||''}">
+        </div>
+        <button class="btn-primary" style="padding:8px 16px;" onclick="calcFutureValue('${proj.id}','${proj.gu_name||''}',${stageScore||0})">계산</button>
+      </div>
+      <div id="fvResult_${proj.id}">
+        <div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">조합원분양가를 입력하고 계산을 눌러주세요</div>
+      </div>
+    </div>
+    <div class="card">
       <div class="ai-head" style="border-radius:var(--r) var(--r) 0 0;margin:-16px -18px 12px;padding:10px 16px;"><div class="ai-av">AI</div><div><div class="ai-title">AI 상담 <span style="font-size:10px;opacity:.6;">(도시정비법 기반)</span></div><div class="ai-desc">월 30회 · 잔여 ${Math.max(0,30-(currentProfile?.ai_usage_count||0))}회</div></div></div>
       <div id="myAiMsgs" style="min-height:100px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"><div class="ai-msg bot">이 구역 관련 법적 절차, 일정, 조합원 권리 등을 질문해보세요.</div></div>
       <div style="display:flex;gap:7px;"><input class="ai-inp" type="text" id="myAiInp" placeholder="예: 착공한다는데 법적 절차가 맞나요?" ${proj.id==='sample'?'onclick="openAuth()" readonly':`onkeydown="if(event.key==='Enter')sendMyAI(${proj.id})"`}><button class="ai-send" onclick="${proj.id==='sample'?'openAuth()':`sendMyAI(${proj.id})`}">↑</button></div>
     </div>`;
+}
+
+async function calcFutureValue(projId,guName,stageScore){
+  const priceInp=document.getElementById('fvPrice_'+projId);
+  const resultEl=document.getElementById('fvResult_'+projId);
+  const price=parseFloat(priceInp?.value);
+  if(!price||price<=0){resultEl.innerHTML='<div style="font-size:12px;color:var(--red);padding:8px 0;">조합원분양가를 입력해주세요</div>';return;}
+  const lawdCd=GU_LAWD_CODE[guName];
+  if(!lawdCd){resultEl.innerHTML='<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">해당 구의 시세 데이터를 찾을 수 없습니다</div>';return;}
+  resultEl.innerHTML='<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>구 시세 데이터 조회 중...</div>';
+  const now=new Date();
+  const recentMonths=[];
+  for(let i=0;i<6;i++){const d=new Date(now);d.setMonth(d.getMonth()-i);recentMonths.push(''+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0'));}
+  const oldMonths=recentMonths.map(ym=>(parseInt(ym.slice(0,4))-5)+ym.slice(4));
+  async function avgPyeong(months){
+    let all=[];
+    for(const ym of months){
+      try{const res=await fetch(`/api/apt-trade?lawdCd=${lawdCd}&dealYmd=${ym}&numOfRows=300`);const data=await res.json();if(data.success&&data.items)all=all.concat(data.items);}catch(e){}
+    }
+    const filtered=all.filter(d=>{const area=parseFloat(d.area)||0;return area>=60&&area<=85;});
+    const pyeongPrices=filtered.map(d=>{const amt=parseInt(d.dealAmount)||0;const area=parseFloat(d.area)||1;return amt/(area/3.3058);}).filter(v=>v>0);
+    if(!pyeongPrices.length)return null;
+    return pyeongPrices.reduce((a,b)=>a+b,0)/pyeongPrices.length;
+  }
+  const [recentAvg,oldAvg]=await Promise.all([avgPyeong(recentMonths),avgPyeong(oldMonths)]);
+  if(!recentAvg||!oldAvg){resultEl.innerHTML='<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">이 구의 60~85㎡ 실거래 데이터가 충분하지 않습니다</div>';return;}
+  const cagr=Math.pow(recentAvg/oldAvg,1/5)-1;
+  const remainYears=STAGE_REMAIN_YEARS[stageScore]??5;
+  const sigma=0.02;
+  let growthLow,growthHigh,note;
+  if(stageScore>=6){
+    growthLow=Math.max(cagr-sigma,0);growthHigh=Math.min(cagr+sigma,0.12);
+    note='최근 5년 지역 시세 흐름 기반 참고용 추정치입니다. 실제와 다를 수 있습니다.';
+  }else{
+    const discountMap={1:0.08,2:0.07,3:0.06,4:0.05,5:0.03};
+    const discount=discountMap[stageScore]??0.08;
+    const adj=Math.max(cagr-discount,0);
+    growthLow=Math.max(adj-sigma*1.5,0);growthHigh=Math.min(adj+sigma*1.5,0.12);
+    note='사업 초기 단계로 불확실성이 큽니다. 진행 상황에 따라 추정치가 크게 달라질 수 있습니다.';
+  }
+  const futLow=price*Math.pow(1+growthLow,remainYears);
+  const futHigh=price*Math.pow(1+growthHigh,remainYears);
+  const premLow=futLow-price,premHigh=futHigh-price;
+  const fmt=v=>(v/10000).toFixed(1)+'억';
+  resultEl.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;">
+      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">인근 5년 CAGR</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${(cagr*100).toFixed(1)}%</div></div>
+      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">조합원분양가</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${fmt(price)}</div></div>
+      <div style="background:var(--blue-light);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--blue);">예상 프리미엄 (${remainYears}년 후)</div><div style="font-size:16px;font-weight:600;margin-top:3px;color:var(--blue);">${fmt(premLow)} ~ ${fmt(premHigh)}</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--gray-400);">${note}</div>`;
+}
+
+async function renderMyDelayPanel(){
+  const panel=document.getElementById('myDelayPanel');
+  if(!panel)return;
+  let zoneName='신영1',guName='종로구',isSample=true;
+  if(currentUser&&Array.isArray(myProjects)&&myProjects.length){
+    zoneName=myProjects[0].project_name;guName=myProjects[0].gu_name||'';isSample=false;
+  }
+  panel.innerHTML='<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>조회 중...</div>';
+  try{
+    const sel='select=zone_name,gu_name,stage_label,delay_months,is_stagnant,over_months';
+    let zi=await sbf('redev_projects_seoul',`${sel}&zone_name=eq.${encodeURIComponent(zoneName)}&gu_name=eq.${encodeURIComponent(guName)}&limit=1`);
+    if(!Array.isArray(zi)||!zi.length)zi=await sbf('redev_projects_seoul',`${sel}&zone_name=eq.${encodeURIComponent(zoneName)}&limit=1`);
+    const z=Array.isArray(zi)&&zi.length?zi[0]:null;
+    const sampleTag=isSample?'<span style="font-size:10px;color:var(--gray-400);margin-left:6px;">(미리보기: 로그인 후 내 구역으로 교체)</span>':'';
+    if(!z){
+      panel.innerHTML=`<div style="font-size:12px;color:var(--gray-400);">"${zoneName}" 구역의 지연 정보를 찾을 수 없습니다.${sampleTag}</div>`;
+      return;
+    }
+    const delayed=!!z.is_stagnant;
+    const statusColor=delayed?'var(--red)':'var(--green)';
+    const statusBg=delayed?'var(--red-bg)':'var(--green-bg)';
+    const statusText=delayed?'지연':'정상 진행';
+    panel.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div><div style="font-size:13px;font-weight:600;">${z.gu_name||''} ${z.zone_name}</div>${sampleTag}</div>
+        <span style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;background:${statusBg};color:${statusColor};">${statusText}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">현재 단계</div><div style="font-size:14px;font-weight:600;margin-top:3px;">${z.stage_label||'—'}</div></div>
+        <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">지연 개월</div><div style="font-size:14px;font-weight:600;margin-top:3px;">${z.delay_months!=null?z.delay_months+'개월':'—'}</div></div>
+        <div style="background:${delayed?'var(--red-bg)':'var(--gray-50)'};border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:${delayed?'var(--red)':'var(--gray-400)'};">표준 초과</div><div style="font-size:14px;font-weight:600;margin-top:3px;color:${delayed?'var(--red)':'inherit'};">${z.over_months!=null?z.over_months+'개월':'—'}</div></div>
+      </div>`;
+  }catch(e){panel.innerHTML='<div style="font-size:12px;color:var(--gray-400);">지연 정보를 불러오지 못했습니다</div>';}
 }
 
 async function saveMemo(id){
@@ -2547,6 +2658,7 @@ async function sw(tab,el){
     loadTrend();
   },80);
   if(tab==='riskboard')setTimeout(renderRiskBoard,80);
+  if(tab==='alert')setTimeout(renderMyDelayPanel,80);
   if(tab==='risk')setTimeout(loadRisk,80);
   if(tab==='compare')setTimeout(initCompareChart,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
