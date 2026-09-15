@@ -495,10 +495,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <aside class="sidebar">
   <div class="sb-item active" data-tab="home" onclick="sw('home',this)" style="margin:8px 10px;padding:10px 12px;border-radius:var(--r);font-weight:700;font-size:13px;"><span class="sb-icon">⌂</span>홈</div>
   <div class="sb-div"></div>
+  <div id="sbGroupAnchor"></div>
+  <div id="sbFreeGroup">
   <div class="sb-sec">
     <div class="sb-sec-lbl">정비사업 현황</div>
     <div class="sb-item" data-tab="map" onclick="sw('map',this)"><span class="sb-icon">🗺</span>지도</div>
-    <div class="sb-item" data-tab="search" onclick="sw('search',this)"><span class="sb-icon">◎</span>구역 검색</div>
+    <div class="sb-item" data-tab="search" onclick="sw('search',this)"><span class="sb-icon">◎</span>정비사업 구역 검색</div>
     <div class="sb-item" data-tab="stage" onclick="sw('stage',this)"><span class="sb-icon">≡</span>단계 관리</div>
     <div class="sb-item" data-tab="alert" onclick="sw('alert',this)"><span class="sb-icon">△</span>지연 경보<span class="sb-badge" id="sbBadge">-</span></div>
   </div>
@@ -508,6 +510,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="sb-item" data-tab="news" onclick="sw('news',this)"><span class="sb-icon">📰</span>뉴스·정책</div>
     <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">📊</span>경제 지표</div>
     <div class="sb-item" data-tab="trade" onclick="sw('trade',this)"><span class="sb-icon">₩</span>실거래가</div>
+    <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
@@ -518,12 +521,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
-    <div class="sb-sec-lbl">투자 데이터</div>
+    <div class="sb-sec-lbl">참고 자료</div>
     <div class="sb-item" data-tab="investor" onclick="sw('investor',this)"><span class="sb-icon">💰</span>수익 계산기</div>
     <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
-    <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
-    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 <span style="font-size:9px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:3px;margin-left:2px;">프리미엄</span></div>
+  </div>
+  </div>
+  <div class="sb-div"></div>
+  <div id="sbProGroup">
+  <div class="sb-sec">
+    <div class="sb-sec-lbl">구독 서비스</div>
     <div class="sb-item" data-tab="mydash" onclick="sw('mydash',this)"><span class="sb-icon">★</span>마이 대시보드</div>
+    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 <span style="font-size:9px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:3px;margin-left:2px;">프리미엄</span></div>
+  </div>
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
@@ -578,11 +587,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 마이 대시보드 ══ -->
 <div id="tab-mydash" class="tab-panel">
-  <div class="page-h"><div><h2>마이 대시보드 <span class="ph-badge" style="background:#7F77DD;">Premium+</span></h2><p>내 조합원 프로젝트 현황 · 일정 · 대출 관리</p></div></div>
+  <div class="page-h"><div><h2>마이 대시보드 <span class="ph-badge" style="background:#7F77DD;">Standard+</span></h2><p>내 조합원 프로젝트 현황 · 일정 · 대출 관리</p></div></div>
   <div id="mydashLocked" class="locked-overlay" style="display:none;">
     <div style="font-size:32px;margin-bottom:12px;">🔒</div>
-    <div style="font-size:15px;font-weight:600;color:var(--gray-700);margin-bottom:6px;">Premium 이상 전용 기능입니다</div>
-    <div style="font-size:12px;color:var(--gray-400);margin-bottom:16px;">조합원 인증 후 Premium 플랜부터 이용 가능합니다</div>
+    <div style="font-size:15px;font-weight:600;color:var(--gray-700);margin-bottom:6px;">Standard 이상 전용 기능입니다</div>
+    <div style="font-size:12px;color:var(--gray-400);margin-bottom:16px;">조합원 인증 후 Standard 플랜부터 이용 가능합니다</div>
     <button class="btn-primary" onclick="openAuth()">로그인 / 회원가입</button>
   </div>
   <div id="mydashContent" style="display:none;">
@@ -629,7 +638,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 구역 검색 ══ -->
 <div id="tab-search" class="tab-panel">
-  <div class="page-h"><div><h2>구역 검색 <span class="ph-badge">2,185구역</span></h2><p>전체 구역 타임라인 시각화 · AI 분석</p></div></div>
+  <div class="page-h"><div><h2>정비사업 구역 검색 <span class="ph-badge">2,185구역</span></h2><p>전체 구역 타임라인 시각화 · AI 분석</p></div></div>
   <div class="card" style="margin-bottom:12px;">
     <input class="zone-inp" type="text" placeholder="구역명 또는 자치구 입력... (예: 한남, 흑석, 마포구)" id="zoneInp" oninput="searchZ(this.value)">
     <div class="chip-row" id="guChips"><span class="chip active" onclick="setGu('all',this)">전체</span></div>
@@ -1605,6 +1614,19 @@ function updateAuthUI(){
     avatarIcon.textContent='👤';menuEmail.textContent='—';menuTier.textContent='로그인이 필요합니다';
     menuLogout.style.display='none';menuLogin.style.display='block';
   }
+  reorderSidebar();
+}
+
+function reorderSidebar(){
+  const anchor=document.getElementById('sbGroupAnchor');
+  const freeGroup=document.getElementById('sbFreeGroup');
+  const proGroup=document.getElementById('sbProGroup');
+  if(!anchor||!freeGroup||!proGroup)return;
+  if(currentUser){
+    anchor.after(proGroup,freeGroup);
+  }else{
+    anchor.after(freeGroup,proGroup);
+  }
 }
 
 function openAuth(){setAuthMode('login');document.getElementById('authOverlay').style.display='flex';setTimeout(()=>document.getElementById('authEmail').focus(),100);}
@@ -2276,10 +2298,28 @@ let myProjects=[],selectedProjectId=null;
 async function renderMyDash(){
   const locked=document.getElementById('mydashLocked');
   const content=document.getElementById('mydashContent');
-  if(!currentUser){locked.style.display='flex';content.style.display='none';return;}
-  if(!canAccess('premium')){locked.style.display='flex';content.style.display='none';return;}
   locked.style.display='none';content.style.display='block';
+  if(!currentUser){
+    renderSampleMyDash();
+    return;
+  }
   await loadMyProjects();
+}
+
+function renderSampleMyDash(){
+  document.getElementById('myProjCount').textContent='미리보기';
+  document.getElementById('aiUsageDisplay').textContent='로그인 후 이용 가능';
+  const list=document.getElementById('myProjList');
+  list.innerHTML='<div class="my-proj-item active">신영1 (샘플)</div>';
+  const sample={id:'sample',project_name:'신영1',gu_name:'종로구',mortgage_amount:38000,mortgage_rate:3.8,moving_loan_amount:0,moving_loan_rate:0,memo:''};
+  renderProjectDetail(sample);
+  const detail=document.getElementById('myProjDetail');
+  if(detail){
+    const banner=document.createElement('div');
+    banner.style.cssText='margin-bottom:12px;padding:10px 14px;background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:var(--r);font-size:12px;color:var(--navy);';
+    banner.innerHTML='👀 <strong>미리보기 모드</strong> — 신영1 구역 샘플 데이터입니다. 로그인하면 내 구역으로 등록해 실제 데이터를 관리할 수 있어요. <span style="color:var(--blue);cursor:pointer;font-weight:600;" onclick="openAuth()">로그인 →</span>';
+    detail.prepend(banner);
+  }
 }
 
 async function loadMyProjects(){
@@ -2320,7 +2360,9 @@ function renderProjectDetail(proj){
       <div class="card-h">
         <div class="card-title">${proj.project_name}</div>
         <div style="display:flex;gap:6px;">
-          <button style="font-size:11px;padding:5px 10px;background:var(--red-bg);color:var(--red);border:1px solid #FECACA;border-radius:var(--r);cursor:pointer;" onclick="deleteProject(${proj.id})">삭제</button>
+          ${proj.id==='sample'
+            ? '<span style="font-size:11px;padding:5px 10px;background:var(--gray-50);color:var(--gray-400);border-radius:var(--r);">미리보기</span>'
+            : `<button style="font-size:11px;padding:5px 10px;background:var(--red-bg);color:var(--red);border:1px solid #FECACA;border-radius:var(--r);cursor:pointer;" onclick="deleteProject(${proj.id})">삭제</button>`}
         </div>
       </div>
       <div class="my-kpi-row" style="margin-bottom:14px;">
@@ -2345,8 +2387,8 @@ function renderProjectDetail(proj){
 
       <div style="margin-top:14px;">
         <div style="font-size:11px;font-weight:600;color:var(--gray-600);margin-bottom:6px;">📝 내 메모 <span style="font-size:10px;color:var(--gray-400);font-weight:400;">(조합 공지, 특이사항 자유 입력)</span></div>
-        <textarea id="projMemo_${proj.id}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;font-family:var(--font);resize:vertical;min-height:80px;outline:none;box-sizing:border-box;" placeholder="조합에서 공지한 일정, 특이사항 등을 자유롭게 메모하세요...">${proj.memo||''}</textarea>
-        <button class="btn-primary" style="margin-top:6px;font-size:11px;padding:6px 14px;" onclick="saveMemo(${proj.id})">메모 저장</button>
+        <textarea id="projMemo_${proj.id}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;font-family:var(--font);resize:vertical;min-height:80px;outline:none;box-sizing:border-box;" placeholder="조합에서 공지한 일정, 특이사항 등을 자유롭게 메모하세요..." ${proj.id==='sample'?'disabled':''}>${proj.memo||''}</textarea>
+        <button class="btn-primary" style="margin-top:6px;font-size:11px;padding:6px 14px;" onclick="${proj.id==='sample'?'openAuth()':`saveMemo(${proj.id})`}">${proj.id==='sample'?'로그인 후 메모 작성':'메모 저장'}</button>
       </div>
     </div>
     ${(proj.mortgage_amount||proj.moving_loan_amount)?`
@@ -2361,7 +2403,7 @@ function renderProjectDetail(proj){
     <div class="card">
       <div class="ai-head" style="border-radius:var(--r) var(--r) 0 0;margin:-16px -18px 12px;padding:10px 16px;"><div class="ai-av">AI</div><div><div class="ai-title">AI 상담 <span style="font-size:10px;opacity:.6;">(도시정비법 기반)</span></div><div class="ai-desc">월 30회 · 잔여 ${Math.max(0,30-(currentProfile?.ai_usage_count||0))}회</div></div></div>
       <div id="myAiMsgs" style="min-height:100px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"><div class="ai-msg bot">이 구역 관련 법적 절차, 일정, 조합원 권리 등을 질문해보세요.</div></div>
-      <div style="display:flex;gap:7px;"><input class="ai-inp" type="text" id="myAiInp" placeholder="예: 착공한다는데 법적 절차가 맞나요?" onkeydown="if(event.key==='Enter')sendMyAI(${proj.id})"><button class="ai-send" onclick="sendMyAI(${proj.id})">↑</button></div>
+      <div style="display:flex;gap:7px;"><input class="ai-inp" type="text" id="myAiInp" placeholder="예: 착공한다는데 법적 절차가 맞나요?" ${proj.id==='sample'?'onclick="openAuth()" readonly':`onkeydown="if(event.key==='Enter')sendMyAI(${proj.id})"`}><button class="ai-send" onclick="${proj.id==='sample'?'openAuth()':`sendMyAI(${proj.id})`}">↑</button></div>
     </div>`;
 }
 
@@ -2411,6 +2453,7 @@ async function sendMyAI(projId){
 
 let selectedProjName='',selectedProjGu='';
 function openAddProject(){
+  if(!currentUser){openAuth();return;}
   const maxProj=canAccess('black')?99:2;
   if(myProjects.length>=maxProj){alert(`최대 ${maxProj}개까지 등록 가능합니다.`);return;}
   const modal=document.getElementById('addProjModal');
@@ -2476,49 +2519,7 @@ async function sw(tab,el){
     if(c){c.style.width='100%';}
     loadTrend();
   },80);
-  if(tab==='riskboard'){
-    // 세션 복원 + loadProfile 완료 대기 (최대 3초)
-    if(!currentProfile){
-      await new Promise(resolve=>{
-        let tries=0;
-        const check=setInterval(()=>{
-          if(currentProfile||++tries>30){clearInterval(check);resolve();}
-        },100);
-      });
-    }
-    // 여전히 없으면 getSession으로 강제 복원 시도
-    if(!currentProfile){
-      try{
-        const{data:{session}}=await _SB.auth.getSession();
-        if(session?.user){
-          currentUser=session.user;
-          await loadProfile();
-        }
-      }catch(e){}
-    }
-    const tier=currentProfile?.tier||'free';
-    if(!['premium','black','b2b'].includes(tier)){
-      // 프리미엄 미달 → 잠금 화면 표시
-      const tabEl2=document.getElementById('tab-riskboard');
-      if(tabEl2){
-        tabEl2.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;">
-          <div style="font-size:48px;">🔒</div>
-          <div style="font-size:20px;font-weight:700;color:var(--gray-900);">프리미엄 전용 기능</div>
-          <div style="font-size:14px;color:var(--gray-500);text-align:center;line-height:1.8;">
-            조합 리스크 현황은 <strong>프리미엄(Premium)</strong> 이상 구독자만 열람 가능합니다.<br>
-            사업 지연·언론 보도 기반 객관적 데이터로 투자를 판단하세요.
-          </div>
-          <button onclick="openAuth()" style="padding:12px 28px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;">
-            프리미엄 업그레이드 →
-          </button>
-          <div style="font-size:11px;color:var(--gray-400);">월 49,900원 · Premium 이상</div>
-        </div>`;
-        tabEl2.classList.add('active');
-      }
-      return;
-    }
-    setTimeout(renderRiskBoard,80);
-  }
+  if(tab==='riskboard')setTimeout(renderRiskBoard,80);
   if(tab==='risk')setTimeout(loadRisk,80);
   if(tab==='compare')setTimeout(initCompareChart,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
@@ -3162,7 +3163,7 @@ function renderOneItem(projId, idx, item) {
   const checks = getClChecks(projId);
   const done = !!checks[String(idx)];
   const lawHtml = item.law ? `<span class="cl-law">⚖ ${item.law}</span>` : '';
-  return `<div class="cl-item${done ? ' cl-done' : ''}" onclick="toggleCl(${projId}, ${idx}, this)">
+  return `<div class="cl-item${done ? ' cl-done' : ''}" onclick="toggleCl('${projId}', ${idx}, this)">
     <div class="cl-box">${done ? '✓' : ''}</div>
     <div style="flex:1;">
       <div class="cl-text">${item.text}</div>
