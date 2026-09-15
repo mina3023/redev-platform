@@ -2512,15 +2512,10 @@ function renderFinanceTab(proj,stageScore){
       <div id="finResult2_${proj.id}" style="margin-top:14px;"><div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">대출금액과 금리를 입력하고 저장을 눌러주세요</div></div>
     </div>
     <div class="card">
-      <div class="card-h"><div class="card-title">공사단가 상승 추이</div><span class="bdg bdg-orange">한국건설기술연구원 COPI</span></div>
-      <div class="cw2" style="height:160px;"><canvas id="finCopiChart_${proj.id}"></canvas></div>
-      <div id="finCopiImpact_${proj.id}" style="margin-top:10px;font-size:12px;color:var(--gray-600);"></div>
-      <div style="font-size:11px;color:var(--gray-400);margin-top:6px;">※ ㎡당 공사단가는 국토부 기본형건축비 참고치에 COPI 지수 변동을 반영한 추정치이며, 실제 고시 단가와 다를 수 있습니다.</div>
-    </div>
-    <div class="card">
-      <div class="card-h"><div class="card-title">공사단가 상승 추이 & 내 분담금 전망</div><span class="bdg bdg-gray">추세 연장 추정</span></div>
-      <div class="cw2" style="height:160px;"><canvas id="finShareChart_${proj.id}"></canvas></div>
+      <div class="card-h"><div class="card-title">내 분담금 연도별 전망</div><span class="bdg bdg-gray">추세 연장 추정</span></div>
+      <div class="cw2" style="height:180px;"><canvas id="finShareChart_${proj.id}"></canvas></div>
       <div id="finShareNote_${proj.id}" style="margin-top:10px;font-size:11px;color:var(--gray-400);"></div>
+      <div style="font-size:11px;color:var(--gray-400);margin-top:6px;">※ 막대(왼쪽 축)는 연도별 예상 분담금, 선(오른쪽 축)은 ㎡당 공사단가입니다. 국토부 기본형건축비 참고치에 한국건설기술연구원 COPI 지수 변동을 반영한 추정치이며, 실제와 다를 수 있습니다.</div>
     </div>`;
 }
 
@@ -2586,7 +2581,8 @@ async function calcFin1(projId,stageScore,guName){
     const lawdCd=GU_LAWD_CODE[guName];
     if(lawdCd){
       marketEl.innerHTML='<div style="text-align:center;padding:8px;color:var(--gray-400);font-size:11px;"><span class="spinner"></span>인근 실거래 시세 조회 중...</div>';
-      const avgPerPyeong=await fvAvgPyeong(lawdCd,fvMonthList(0));
+      const avgRes=await smartAvgPyeong(lawdCd,0);
+      const avgPerPyeong=avgRes.value;
       if(avgPerPyeong){
         const marketRefTotal=Math.round(avgPerPyeong*pyeongEq);
         const fmt2=v=>(v/10000).toFixed(1)+'억';
@@ -2597,9 +2593,9 @@ async function calcFin1(projId,stageScore,guName){
             <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 10px;background:var(--blue-light);border-radius:var(--r);"><span style="color:var(--blue);">조합원분양가</span><span style="font-weight:600;color:var(--blue);">${fmt2(price)}</span></div>
             ${generalPrice?`<div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 10px;background:#EDE9FE;border-radius:var(--r);"><span style="color:#6D28D9;">일반분양가</span><span style="font-weight:600;color:#6D28D9;">${fmt2(generalPrice)}</span></div>`:''}
           </div>
-          <div style="font-size:10px;color:var(--gray-400);margin-top:6px;">※ 인근 실거래 시세는 60~85㎡ 최근 6개월 실거래 평균을 내 면적 기준으로 환산한 참고치입니다.</div>`;
+          <div style="font-size:10px;color:var(--gray-400);margin-top:6px;">※ 인근 실거래 시세는 최근 6개월 실거래 평균을 내 면적 기준으로 환산한 참고치입니다.${avgRes.note?' ('+avgRes.note+' 포함)':''}</div>`;
       }else{
-        marketEl.innerHTML='<div style="font-size:11px;color:var(--gray-400);">이 구의 인근 실거래 데이터가 충분하지 않습니다</div>';
+        marketEl.innerHTML='<div style="font-size:11px;color:var(--gray-400);">이 구는 면적·기간을 확장해도 실거래 데이터가 충분하지 않습니다</div>';
       }
     }
   }
@@ -2649,28 +2645,9 @@ function ackRateChange(projId,amt,newRate,newBase){
 
 const R_RISK=0.0562283227536796;
 function drawFinCopiChart(projId,stageScore){
-  const canvas=document.getElementById('finCopiChart_'+projId);
-  if(!canvas)return;
   if(!window._finCharts)window._finCharts={};
-  if(window._finCharts[projId])window._finCharts[projId].destroy();
-  window._finCharts[projId]=new Chart(canvas,{type:'line',data:{
-    labels:GLOBAL_COPI_DATA.map(h=>h.date),
-    datasets:[{data:GLOBAL_COPI_DATA.map(h=>h.value),borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.06)',borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#D97706'}]
-  },options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}},plugins:{...OPTS.plugins,legend:{display:false},tooltip:{callbacks:{label:c=>`건설공사비지수: ${c.raw.toFixed(2)} (2020=100)`}}}}});
   const base=GLOBAL_COPI_DATA[0].value,latest=GLOBAL_COPI_DATA[GLOBAL_COPI_DATA.length-1].value;
-  const pctUp=((latest-base)/base*100).toFixed(1);
-  const impactEl=document.getElementById('finCopiImpact_'+projId);
   const fin1=loadFinState(finKey1(projId));
-  if(impactEl){
-    if(fin1&&fin1.sqm){
-      const sqm=Math.round(fin1.sqm);
-      const deltaPerM2=costPerM2(latest)-costPerM2(base);
-      const shareIncrease=Math.round(deltaPerM2*sqm/10000);
-      impactEl.innerHTML=`최근 1년간 공사단가 <b style="color:var(--orange);">${pctUp}%</b> 상승 → ${sqm}㎡ 기준 내 분담금 약 <b style="color:var(--red);">${shareIncrease.toLocaleString()}만원</b> 증가 추정`;
-    }else{
-      impactEl.innerHTML=`최근 1년간 공사단가 <b style="color:var(--orange);">${pctUp}%</b> 상승 — "분담금 계산"에서 전용면적을 입력하면 내 분담금 영향을 추정해드려요.`;
-    }
-  }
   const shareCanvas=document.getElementById('finShareChart_'+projId);
   const shareNoteEl=document.getElementById('finShareNote_'+projId);
   if(shareCanvas&&fin1&&fin1.sqm&&fin1.price){
@@ -2680,13 +2657,14 @@ function drawFinCopiChart(projId,stageScore){
     const monthsSpan=GLOBAL_COPI_DATA.length-1;
     const annualGrowth=Math.pow(latest/base,12/monthsSpan)-1;
     const remainYears=Math.max(Math.round(STAGE_REMAIN_YEARS[stageScore]??5),1);
-    const yearLabels=['현재'];
+    const nowYear=new Date().getFullYear();
+    const yearLabels=[`${nowYear}년(현재)`];
     const shareVals=[baseShare];
     const costVals=[costPerM2(latest)];
     for(let y=1;y<=remainYears;y++){
       const projectedCost=costPerM2(latest)*Math.pow(1+annualGrowth,y);
       const deltaShare=(projectedCost-costPerM2(latest))*sqm/10000;
-      yearLabels.push(y===remainYears?`${y}년후(예상 준공)`:`${y}년후`);
+      yearLabels.push(y===remainYears?`${nowYear+y}년(예상 준공)`:`${nowYear+y}년`);
       shareVals.push(Math.round(baseShare+deltaShare));
       costVals.push(Math.round(projectedCost));
     }
@@ -2694,13 +2672,13 @@ function drawFinCopiChart(projId,stageScore){
     window._finCharts['share_'+projId]=new Chart(shareCanvas,{data:{
       labels:yearLabels,
       datasets:[
-        {type:'bar',label:'예상 분담금',data:shareVals,backgroundColor:shareVals.map((v,i)=>i===0?'rgba(156,163,175,.6)':'rgba(220,38,38,.65)'),borderColor:shareVals.map((v,i)=>i===0?'#9CA3AF':'#DC2626'),borderWidth:1.5,borderRadius:5,borderSkipped:false,yAxisID:'y',order:2},
-        {type:'line',label:'㎡당 공사단가',data:costVals,borderColor:'#D97706',backgroundColor:'#D97706',borderWidth:2.5,tension:.3,pointRadius:4,pointBackgroundColor:'#D97706',yAxisID:'y1',order:1}
+        {type:'line',label:'㎡당 공사단가',data:costVals,borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.08)',borderWidth:2.5,fill:true,tension:.3,pointRadius:4,pointBackgroundColor:'#D97706',yAxisID:'y',order:1},
+        {type:'bar',label:'예상 분담금',data:shareVals,backgroundColor:shareVals.map((v,i)=>i===0?'rgba(156,163,175,.5)':'rgba(220,38,38,.55)'),borderColor:shareVals.map((v,i)=>i===0?'#9CA3AF':'#DC2626'),borderWidth:1.5,borderRadius:5,borderSkipped:false,yAxisID:'y1',order:2}
       ]
     },options:{...OPTS,scales:{
-      x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
-      y:{position:'left',grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toLocaleString()+'만'},title:{display:true,text:'분담금(만원)',color:'#9CA3AF',font:{size:10}}},
-      y1:{position:'right',grid:{display:false},ticks:{color:'#D97706',font:{size:11},callback:v=>Math.round(v/10000)+'만원'},title:{display:true,text:'㎡당 공사단가',color:'#D97706',font:{size:10}}}
+      x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}},title:{display:true,text:'연도',color:'#9CA3AF',font:{size:10}}},
+      y:{position:'left',grid:{color:'#F3F4F6'},ticks:{color:'#D97706',font:{size:11},callback:v=>Math.round(v/10000)+'만원'},title:{display:true,text:'㎡당 공사단가',color:'#D97706',font:{size:10}}},
+      y1:{position:'right',min:Math.floor(Math.min(...shareVals)*0.95/100)*100,grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toLocaleString()+'만'},title:{display:true,text:'분담금(만원, 0부터 시작 아님)',color:'#9CA3AF',font:{size:10}}}
     },plugins:{...OPTS.plugins,legend:{display:true,position:'top',labels:{color:'#6B7280',font:{size:10.5,family:'IBM Plex Sans KR'},boxWidth:10,padding:10}},tooltip:{callbacks:{label:c=>c.dataset.type==='line'?`㎡당 공사단가: ${c.raw.toLocaleString()}원`:`예상 분담금: ${c.raw.toLocaleString()}만원`}}}}});
     if(shareNoteEl)shareNoteEl.innerHTML=`최근 1년 공사단가 상승률(연 ${(annualGrowth*100).toFixed(1)}%)이 계속된다고 가정하고, 예상 준공(${remainYears}년 후)까지 연도별 추세를 연장한 값입니다. 실제 공사비 변동은 시장 상황에 따라 다를 수 있습니다.`;
   }else if(shareCanvas&&shareNoteEl){
@@ -2737,20 +2715,40 @@ async function initFinanceTab(projId,stageScore,guName){
   drawFinCopiChart(projId,stageScore);
 }
 
-function fvMonthList(yearsAgo){
+function fvMonthList(yearsAgo,count){
+  count=count||6;
   const now=new Date();const arr=[];
-  for(let i=0;i<6;i++){const d=new Date(now);d.setFullYear(d.getFullYear()-yearsAgo);d.setMonth(d.getMonth()-i);arr.push(''+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0'));}
+  for(let i=0;i<count;i++){const d=new Date(now);d.setFullYear(d.getFullYear()-yearsAgo);d.setMonth(d.getMonth()-i);arr.push(''+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0'));}
   return arr;
 }
-async function fvAvgPyeong(lawdCd,months){
+async function fetchTradeItems(lawdCd,months){
   let all=[];
   for(const ym of months){
     try{const res=await fetch(`/api/apt-trade?lawdCd=${lawdCd}&dealYmd=${ym}&numOfRows=300`);const data=await res.json();if(data.success&&data.items)all=all.concat(data.items);}catch(e){}
   }
-  const filtered=all.filter(d=>{const area=parseFloat(d.area)||0;return area>=60&&area<=85;});
+  return all;
+}
+function avgPyeongFromItems(items,areaMin,areaMax){
+  const filtered=items.filter(d=>{const area=parseFloat(d.area)||0;return area>=areaMin&&area<=areaMax;});
   const pyeongPrices=filtered.map(d=>{const amt=parseInt(d.dealAmount)||0;const area=parseFloat(d.area)||1;return amt/(area/3.3058);}).filter(v=>v>0);
   if(!pyeongPrices.length)return null;
   return pyeongPrices.reduce((a,b)=>a+b,0)/pyeongPrices.length;
+}
+async function fvAvgPyeong(lawdCd,months){
+  return avgPyeongFromItems(await fetchTradeItems(lawdCd,months),60,85);
+}
+async function smartAvgPyeong(lawdCd,yearsAgo){
+  let months=fvMonthList(yearsAgo,6);
+  let items=await fetchTradeItems(lawdCd,months);
+  let val=avgPyeongFromItems(items,60,85);
+  if(val!=null)return{value:val,note:null};
+  val=avgPyeongFromItems(items,40,110);
+  if(val!=null)return{value:val,note:'면적 확장(40~110㎡)'};
+  months=fvMonthList(yearsAgo,12);
+  items=await fetchTradeItems(lawdCd,months);
+  val=avgPyeongFromItems(items,40,110);
+  if(val!=null)return{value:val,note:'면적·기간 확장(40~110㎡, 12개월)'};
+  return{value:null,note:null};
 }
 const FV_BENCHMARK_GU=[{name:'강남구',code:'11680'},{name:'서초구',code:'11650'},{name:'송파구',code:'11710'}];
 
@@ -2771,7 +2769,9 @@ async function calcFutureValue(projId,guName,stageScore){
   resultEl.innerHTML='<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>구 시세 데이터 조회 중...</div>';
   if(compareEl)compareEl.innerHTML='';
   const recentMonths=fvMonthList(0),oldMonths=fvMonthList(5);
-  const [recentAvg,oldAvg]=await Promise.all([fvAvgPyeong(lawdCd,recentMonths),fvAvgPyeong(lawdCd,oldMonths)]);
+  const [recentRes,oldRes]=await Promise.all([smartAvgPyeong(lawdCd,0),smartAvgPyeong(lawdCd,5)]);
+  const recentAvg=recentRes.value,oldAvg=oldRes.value;
+  const widenNote=recentRes.note||oldRes.note;
   const guSisePer84=recentAvg?Math.round(recentAvg*25.4):null;
   const fmt2=v=>v==null?'—':(v/10000).toFixed(1)+'억';
   if(summaryEl){
@@ -2780,9 +2780,10 @@ async function calcFutureValue(projId,guName,stageScore){
         <div style="background:var(--blue-light);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--blue);">조합원분양가</div><div style="font-size:15px;font-weight:600;margin-top:3px;color:var(--blue);">${fmt2(price)}</div></div>
         ${generalPrice?`<div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">일반분양가</div><div style="font-size:15px;font-weight:600;margin-top:3px;">${fmt2(generalPrice)}</div></div>`:''}
         <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">${guName} 현재시세 (84㎡ 환산)</div><div style="font-size:15px;font-weight:600;margin-top:3px;">${fmt2(guSisePer84)}</div></div>
-      </div>`;
+      </div>
+      ${widenNote?`<div style="font-size:10.5px;color:var(--gray-400);margin-top:6px;">※ 거래량이 적어 ${widenNote} 데이터를 함께 사용했습니다.</div>`:''}`;
   }
-  if(!recentAvg||!oldAvg){resultEl.innerHTML='<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">이 구의 60~85㎡ 실거래 데이터가 충분하지 않습니다</div>';return;}
+  if(!recentAvg||!oldAvg){resultEl.innerHTML='<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">이 구는 면적·기간을 확장해도 실거래 데이터가 충분하지 않습니다</div>';return;}
   const cagr=Math.pow(recentAvg/oldAvg,1/5)-1;
   const remainYears=STAGE_REMAIN_YEARS[stageScore]??5;
   const sigma=0.02;
