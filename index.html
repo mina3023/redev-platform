@@ -453,7 +453,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
       <button onclick="sw('legal',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>⚖</span>법령·판례</button>
       <button onclick="sw('tax',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>🧾</span>세금 계산기</button>
       <button onclick="sw('rights',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>📋</span>조합원 권리</button>
-      <button onclick="sw('investor',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>💰</span>수익 계산기</button>
     </div>
   </div>
 </div>
@@ -500,17 +499,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   <div class="sb-sec">
     <div class="sb-sec-lbl">정비사업 현황</div>
     <div class="sb-item" data-tab="map" onclick="sw('map',this)"><span class="sb-icon">🗺</span>지도</div>
-    <div class="sb-item" data-tab="search" onclick="sw('search',this)"><span class="sb-icon">◎</span>정비사업 구역 검색</div>
+    <div class="sb-item" data-tab="search" onclick="sw('search',this)"><span class="sb-icon">◎</span>구역 검색</div>
     <div class="sb-item" data-tab="stage" onclick="sw('stage',this)"><span class="sb-icon">≡</span>단계 관리</div>
-    <div class="sb-item" data-tab="alert" onclick="sw('alert',this)"><span class="sb-icon">△</span>지연 경보<span class="sb-badge" id="sbBadge">-</span></div>
-  </div>
-  <div class="sb-div"></div>
-  <div class="sb-sec">
-    <div class="sb-sec-lbl">정보</div>
     <div class="sb-item" data-tab="news" onclick="sw('news',this)"><span class="sb-icon">📰</span>뉴스·정책</div>
     <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">📊</span>경제 지표</div>
     <div class="sb-item" data-tab="trade" onclick="sw('trade',this)"><span class="sb-icon">₩</span>실거래가</div>
-    <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
@@ -519,19 +512,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div class="sb-item" data-tab="tax" onclick="sw('tax',this)"><span class="sb-icon">🧾</span>세금 계산기</div>
     <div class="sb-item" data-tab="rights" onclick="sw('rights',this)"><span class="sb-icon">📋</span>조합원 권리</div>
   </div>
-  <div class="sb-div"></div>
-  <div class="sb-sec">
-    <div class="sb-sec-lbl">참고 자료</div>
-    <div class="sb-item" data-tab="investor" onclick="sw('investor',this)"><span class="sb-icon">💰</span>수익 계산기</div>
-    <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
-  </div>
   </div>
   <div class="sb-div"></div>
   <div id="sbProGroup">
-  <div class="sb-sec">
-    <div class="sb-sec-lbl">구독 서비스</div>
+  <div style="border-left:2px solid var(--blue);border-radius:0;margin:0 10px;padding-left:8px;">
+    <div style="font-size:9.5px;font-weight:700;color:var(--blue);letter-spacing:.05em;padding:6px 0 4px;">STANDARD <span style="font-weight:500;color:var(--gray-400);">(유료)</span></div>
+  </div>
+  <div class="sb-sec" style="padding-top:2px;">
     <div class="sb-item" data-tab="mydash" onclick="sw('mydash',this)"><span class="sb-icon">★</span>마이 대시보드</div>
-    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 <span style="font-size:9px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:3px;margin-left:2px;">프리미엄</span></div>
+    <div class="sb-item" data-tab="alert" onclick="sw('alert',this)"><span class="sb-icon">△</span>지연 경보<span class="sb-badge" id="sbBadge">-</span></div>
+  </div>
+  <div class="sb-div"></div>
+  <div style="border-left:2px solid #7F77DD;border-radius:0;margin:0 10px;padding-left:8px;">
+    <div style="font-size:9.5px;font-weight:700;color:#7F77DD;letter-spacing:.05em;padding:6px 0 4px;">PREMIUM <span style="font-weight:500;color:var(--gray-400);">(유료)</span></div>
+  </div>
+  <div class="sb-sec" style="padding-top:2px;">
+    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크</div>
+    <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
+    <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
   </div>
   </div>
   <div class="sb-div"></div>
@@ -552,10 +550,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div id="tab-home" class="tab-panel active">
   <div class="db-wrap">
     <div class="db-kpi-row">
-      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">총 정비구역</div><span class="kpi-icon">🏙</span></div><div class="kpi-val c-blue" id="kpiTot">—</div><div class="kpi-foot"><span class="kpi-sub">서울 25개 자치구</span><span class="kpi-tag t-neu" id="kpiTotSub">...</span></div></div>
-      <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">준공 완료</div><span class="kpi-icon">✓</span></div><div class="kpi-val c-green" id="kpiDone">—</div><div class="kpi-foot"><span class="kpi-sub">9단계 달성</span><span class="kpi-tag t-up" id="kpiDoneR">...</span></div></div>
+      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">전체 사업수</div><span class="kpi-icon">🏙</span></div><div class="kpi-val c-blue">1,174</div><div class="kpi-foot"><span class="kpi-sub">서울 25개 자치구</span><span class="kpi-tag t-neu">추진현황</span></div></div>
+      <div class="kpi-card" style="border-top:2px solid var(--gray-400);"><div class="kpi-top"><div class="kpi-lbl">조합 해산·청산</div><span class="kpi-icon">✕</span></div><div class="kpi-val" style="color:var(--gray-500);">162</div><div class="kpi-foot"><span class="kpi-sub">사업 종결 구역</span><span class="kpi-tag t-neu">종결</span></div></div>
       <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">사업 진행 중</div><span class="kpi-icon">⚙</span></div><div class="kpi-val c-orange" id="kpiActive">—</div><div class="kpi-foot"><span class="kpi-sub">3~8단계 구역</span><span class="kpi-tag t-neu">진행 중</span></div></div>
-      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 경보</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="kpiAlert">—</div><div class="kpi-foot"><span class="kpi-sub">6기간+ 정체</span><span class="kpi-tag t-dn">즉시 점검</span></div></div>
+      <div class="kpi-card" style="border-top:2px solid #7F77DD;"><div class="kpi-top"><div class="kpi-lbl">조합설립 이전단계</div><span class="kpi-icon">🌱</span></div><div class="kpi-val" style="color:#7F77DD;">116</div><div class="kpi-foot"><span class="kpi-sub">구역지정~추진위</span><span class="kpi-tag t-neu">초기 단계</span></div></div>
     </div>
     <div class="db-row2">
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">실데이터</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
@@ -638,7 +636,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 구역 검색 ══ -->
 <div id="tab-search" class="tab-panel">
-  <div class="page-h"><div><h2>정비사업 구역 검색 <span class="ph-badge">2,185구역</span></h2><p>전체 구역 타임라인 시각화 · AI 분석</p></div></div>
+  <div class="page-h"><div><h2>구역 검색 <span class="ph-badge">2,185구역</span></h2><p>전체 구역 타임라인 시각화 · AI 분석</p></div></div>
   <div class="card" style="margin-bottom:12px;">
     <input class="zone-inp" type="text" placeholder="구역명 또는 자치구 입력... (예: 한남, 흑석, 마포구)" id="zoneInp" oninput="searchZ(this.value)">
     <div class="chip-row" id="guChips"><span class="chip active" onclick="setGu('all',this)">전체</span></div>
@@ -1774,10 +1772,7 @@ async function loadAll(){
       return d>=new Date('2026-01-01')&&d<=new Date('2026-03-31');
     }).length:0;
 
-    document.getElementById('kpiTot').textContent=tot.toLocaleString();
     document.getElementById('sbTot').textContent=tot.toLocaleString();
-    document.getElementById('kpiDone').textContent=newQ1.toLocaleString();
-    document.getElementById('kpiDoneR').textContent='신규';
     document.getElementById('kpiActive').textContent=active.toLocaleString();
 
     // 단계별 분포: redev_projects_seoul 기준
@@ -1817,7 +1812,7 @@ async function detectAlerts(){
     const h=al.filter(a=>a.stuck>=6).length,m=al.filter(a=>a.stuck>=4&&a.stuck<6).length,l=al.filter(a=>a.stuck===3).length;
     document.getElementById('aHigh').textContent=h;document.getElementById('aMid').textContent=m;
     document.getElementById('aLow').textContent=l;document.getElementById('aTot').textContent=al.length;
-    document.getElementById('kpiAlert').textContent=h;document.getElementById('sbBadge').textContent=h;
+    document.getElementById('sbBadge').textContent=h;
     document.getElementById('alertCountBadge').textContent='총 '+al.length+'건';
     renderAlertsDB(al);renderAlertsFull(al);drawAlertCharts(al);
   }catch(e){console.error(e);}
@@ -2383,6 +2378,13 @@ function renderProjectDetail(proj){
           <span style="font-size:10px;color:var(--blue);cursor:pointer;" onclick="sw('rights',document.querySelector('[data-tab=\'rights\']'))">법령 상세 보기 →</span>
         </div>
         ${stageScore ? renderChecklist(stageScore, proj.id) : '<div style="font-size:12px;color:var(--gray-400);">구역 단계 정보를 불러올 수 없습니다</div>'}
+        <div style="margin-top:12px;padding:12px 14px;background:var(--gray-50);border:1px dashed var(--gray-300);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div>
+            <div style="font-size:12.5px;font-weight:600;color:var(--gray-500);display:flex;align-items:center;gap:6px;">📨 정보공개청구 자동생성 <span style="font-size:9.5px;font-weight:700;color:#fff;background:var(--gray-400);padding:1px 7px;border-radius:10px;">개발 중</span></div>
+            <div style="font-size:11px;color:var(--gray-400);margin-top:3px;">도시정비법 제124조 근거, 조합에 보낼 정보공개 요청 공문을 자동으로 만들어드려요</div>
+          </div>
+          <button disabled style="padding:7px 14px;background:var(--gray-200);color:var(--gray-400);border:none;border-radius:var(--r);font-size:11.5px;font-weight:600;cursor:not-allowed;white-space:nowrap;">공문 생성</button>
+        </div>
       </div>
 
       <div style="margin-top:14px;">
