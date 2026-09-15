@@ -517,7 +517,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
     <div style="font-size:9.5px;font-weight:700;color:var(--blue);letter-spacing:.05em;padding:6px 0 4px;">STANDARD <span style="font-weight:500;color:var(--gray-400);">(유료)</span></div>
   </div>
   <div class="sb-sec" style="padding-top:2px;">
-    <div class="sb-item" data-tab="mydash" onclick="sw('mydash',this)"><span class="sb-icon">★</span>마이 대시보드</div>
+    <div class="sb-item" data-tab="mydash" onclick="sw('mydash',this)"><span class="sb-icon">★</span>마이 대시보드<span style="margin-left:auto;font-size:9px;font-weight:700;color:var(--blue);border:1px solid var(--blue-mid);background:var(--blue-light);padding:1px 6px;border-radius:4px;">AI 상담</span></div>
     <div class="sb-item" style="padding-left:34px;font-size:11.5px;color:var(--gray-500);" onclick="goMydashSub('finance')">자금운용 계획</div>
     <div class="sb-item" style="padding-left:34px;font-size:11.5px;color:var(--gray-500);" onclick="goMydashSub('futurevalue')">내 집 미래가치</div>
     <div class="sb-item" data-tab="alert" onclick="sw('alert',this)"><span class="sb-icon">△</span>지연 경보<span class="sb-badge" id="sbBadge">-</span></div>
@@ -714,11 +714,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
         실제 사업 현황과 차이가 있을 수 있으며, 정확한 정보는 해당 조합에 직접 확인하세요.
       </div>
     </div>
-  </div>
-  <div class="ai-wrap">
-    <div class="ai-head"><div class="ai-av">AI</div><div><div class="ai-title">구역 AI 분석</div><div class="ai-desc">구역 선택 후 질문하세요</div></div></div>
-    <div class="ai-msgs" id="aiMsgs"><div class="ai-msg bot">구역을 선택하면 사업 현황, 단계 이력, 지연 여부, 투자 시사점을 분석합니다.</div></div>
-    <div class="ai-inp-row"><input class="ai-inp" type="text" placeholder="선택 구역에 대해 질문..." id="aiInp" onkeydown="if(event.key==='Enter')sendAI()"><button class="ai-send" onclick="sendAI()">↑</button></div>
   </div>
 </div>
 
@@ -1295,7 +1290,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <!-- ══ 구역별 수익 비교 / 시세 추이 / PRISM ══ -->
 <div id="tab-compare" class="tab-panel">
   <div class="page-h">
-    <div><h2>재개발 완공 수익률 <span class="ph-badge">투자 데이터</span></h2>
+    <div><h2>재개발 완공 수익률</h2>
     <p>입주 시점 vs 현재 평당가 · 자치구 평균 점선 비교</p></div>
     <span class="bdg bdg-green" style="align-self:center;">참고 데이터</span>
   </div>
@@ -1346,7 +1341,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div id="tab-trend" class="tab-panel">
   <div style="max-width:1100px;margin:0 auto;">
   <div class="page-h">
-    <div><h2>시세 추이 <span class="ph-badge">투자 데이터</span></h2><p>자치구별 아파트 평당가 추이 · 재개발 완료 구역 수익률</p></div>
+    <div><h2>시세 추이</h2><p>자치구별 아파트 평당가 추이 · 재개발 완료 구역 수익률</p></div>
     <div style="display:flex;gap:8px;align-items:center;">
       <select id="trendGu" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:#fff;cursor:pointer;outline:none;" onchange="loadTrend()">
         <option value="11650">서초구</option><option value="11680">강남구</option><option value="11710">송파구</option><option value="11590">동작구</option><option value="11440">마포구</option><option value="11410">서대문구</option><option value="11170">용산구</option><option value="11200">성동구</option><option value="11290">성북구</option><option value="11560">영등포구</option>
@@ -1406,8 +1401,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div id="tab-riskboard" class="tab-panel">
   <div class="page-h">
     <div>
-      <h2>조합 리스크 <span class="ph-badge">투자 참고</span></h2>
-      <p>사업 지연·언론 보도 기반 객관적 데이터 · 투자 판단 참고용</p>
+      <h2>조합 리스크</h2>
+      <p>사업 지연·언론 보도 기반 객관적 데이터 · 조합원을 위한 리스크 확인 자료</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <select id="rbGuFilter" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:#fff;outline:none;" onchange="renderRiskBoard()">
@@ -1441,7 +1436,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   <!-- 면책 고지 -->
   <div style="margin-bottom:14px;padding:11px 14px;background:#FEF9EC;border-radius:var(--r);border-left:3px solid #F59E0B;font-size:12px;color:#78350F;line-height:1.7;">
     ⚠ 이 자료는 <strong>사업 지연 기간·언론 보도 건수</strong> 등 공개 데이터 기반 참고 지표입니다.
-    특정 조합·조합장에 대한 법적 판단이 아니며, <strong>투자 의사결정의 보조 자료</strong>로만 활용하세요.
+    특정 조합·조합장에 대한 법적 판단이 아니며, <strong>내 사업장 상황을 파악하는 보조 자료</strong>로만 활용하세요.
     출처: 서울시 정비사업 추진현황(25년 12월), 네이버뉴스 API
   </div>
 
@@ -2100,8 +2095,6 @@ async function selZ(name){
   document.getElementById('tlGrid').innerHTML=
     `<div class="tl-hrow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm" style="font-size:9.5px;color:var(--gray-400);padding:5px 10px;">기간</div>${dynPeriods.map(p=>`<div class="tl-cell" style="padding:5px 0;"><div class="tl-plbl">${p.slice(2).replace('-','Q')}</div></div>`).join('')}</div>
     <div class="tl-drow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm">${name.length>14?name.slice(0,14)+'…':name}</div>${dynPeriods.map(p=>{const sc=pm[p]||0;const color=SC[sc];return sc&&color?`<div class="tl-cell"><div class="tl-dot" style="background:${color};border-color:${color};" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`:`<div class="tl-cell"><div class="tl-mt"></div></div>`;}).join('')}</div>`;
-  const ctx=recs.slice(-5).map(r=>`${r.period}: ${r.stage}(${r.stage_score}단계)`).join(', ');
-  document.getElementById('aiMsgs').innerHTML=`<div class="ai-msg bot"><strong>[${name}]</strong> 최근 이력: ${ctx}<br><br>이 구역에 대해 질문하거나 분석을 요청하세요.</div>`;
   if(!ALL.find(r=>r.project_name===name))ALL=[...ALL,...recs];
 }
 function jumpZ(name){sw('search',document.querySelector('[data-tab="search"]'));document.getElementById('zoneInp').value=name;searchZ(name);}
@@ -2492,7 +2485,13 @@ function renderFinanceTab(proj,stageScore){
       </div>
       <div class="inp-row">
         <div><div class="inp-lbl">권리가액 직접입력 (만원, 선택)</div><input class="inp-field" type="number" id="finRight_${proj.id}" placeholder="입력 시 위 두 값 대신 사용"></div>
-        <div><div class="inp-lbl">조합원분양가 (만원)</div><input class="inp-field" type="number" id="finPrice1_${proj.id}" placeholder="예: 80000"></div>
+        <div>
+          <div class="inp-lbl">조합원분양가 (만원) · 산정년도</div>
+          <div style="display:flex;gap:6px;">
+            <input class="inp-field" type="number" id="finPrice1_${proj.id}" placeholder="예: 80000" style="flex:1;">
+            <select class="inp-field" id="finPriceYear_${proj.id}" style="width:88px;flex-shrink:0;">${Array.from({length:2026-2010+1},(_,i)=>2026-i).map(y=>`<option value="${y}">${y}년</option>`).join('')}</select>
+          </div>
+        </div>
       </div>
       <div class="inp-row">
         <div><div class="inp-lbl">전용면적 (㎡)</div><input class="inp-field" type="number" id="finSqm_${proj.id}" placeholder="예: 84.5"></div>
@@ -2563,7 +2562,8 @@ async function calcFin1(projId,stageScore,guName){
   const curCostPerPyeong=Math.round(curCostPerM2*3.3058);
   const sqm=sqmInput?Math.round(sqmInput):0;
   const pyeongEq=sqmInput?(sqmInput/3.3058).toFixed(1):0;
-  saveFinState(finKey1(projId),{ev,ratio,right:rightManual,price,sqm:sqmInput,generalPrice});
+  const priceYear=parseInt(document.getElementById('finPriceYear_'+projId)?.value)||new Date().getFullYear();
+  saveFinState(finKey1(projId),{ev,ratio,right:rightManual,price,sqm:sqmInput,generalPrice,priceYear});
   drawFinCopiChart(projId,stageScore);
   resEl.innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
@@ -2690,6 +2690,7 @@ async function initFinanceTab(projId,stageScore,guName){
     if(fin1.price)document.getElementById('finPrice1_'+projId).value=fin1.price;
     if(fin1.sqm)document.getElementById('finSqm_'+projId).value=fin1.sqm;
     if(fin1.generalPrice)document.getElementById('finGeneralPrice_'+projId).value=fin1.generalPrice;
+    if(fin1.priceYear)document.getElementById('finPriceYear_'+projId).value=fin1.priceYear;
     if(fin1.price)calcFin1(projId,stageScore,guName);
   }
   const fin2=loadFinState(finKey2(projId));
