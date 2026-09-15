@@ -2581,7 +2581,7 @@ async function calcFin1(projId,stageScore,guName){
     const lawdCd=GU_LAWD_CODE[guName];
     if(lawdCd){
       marketEl.innerHTML='<div style="text-align:center;padding:8px;color:var(--gray-400);font-size:11px;"><span class="spinner"></span>인근 실거래 시세 조회 중...</div>';
-      const avgRes=await smartAvgPyeong(lawdCd,0);
+      const avgRes=await smartAvgPyeong(guName,0);
       const avgPerPyeong=avgRes.value;
       if(avgPerPyeong){
         const marketRefTotal=Math.round(avgPerPyeong*pyeongEq);
@@ -2737,7 +2737,27 @@ function avgPyeongFromItems(items,areaMin,areaMax){
 async function fvAvgPyeong(lawdCd,months){
   return avgPyeongFromItems(await fetchTradeItems(lawdCd,months),60,85);
 }
-async function smartAvgPyeong(lawdCd,yearsAgo){
+const KB_GRADE_GROUPS={
+  1:['서초구','강남구'],
+  2:['용산구','송파구'],
+  3:['성동구','마포구','광진구','양천구'],
+  4:['영등포구','강동구','동작구','중구','종로구'],
+  5:['서대문구','강서구','동대문구','성북구','은평구','관악구'],
+  6:['노원구','구로구','중랑구','금천구','강북구','도봉구']
+};
+function getGuGrade(guName){
+  for(const g of Object.keys(KB_GRADE_GROUPS))if(KB_GRADE_GROUPS[g].includes(guName))return parseInt(g);
+  return null;
+}
+const CITY_REPRESENTATIVE_GU=['강남구','송파구','마포구','동작구','관악구','노원구'];
+async function fetchGuAvgPyeong(guName,months,areaMin,areaMax){
+  const lawdCd=GU_LAWD_CODE[guName];
+  if(!lawdCd)return null;
+  return avgPyeongFromItems(await fetchTradeItems(lawdCd,months),areaMin,areaMax);
+}
+async function smartAvgPyeong(guName,yearsAgo){
+  const lawdCd=GU_LAWD_CODE[guName];
+  if(!lawdCd)return{value:null,note:null};
   let months=fvMonthList(yearsAgo,6);
   let items=await fetchTradeItems(lawdCd,months);
   let val=avgPyeongFromItems(items,60,85);
@@ -2748,6 +2768,18 @@ async function smartAvgPyeong(lawdCd,yearsAgo){
   items=await fetchTradeItems(lawdCd,months);
   val=avgPyeongFromItems(items,40,110);
   if(val!=null)return{value:val,note:'면적·기간 확장(40~110㎡, 12개월)'};
+  const grade=getGuGrade(guName);
+  const recentMonths6=fvMonthList(yearsAgo,6);
+  if(grade!=null){
+    const peers=KB_GRADE_GROUPS[grade].filter(g=>g!==guName);
+    const peerVals=await Promise.all(peers.map(g=>fetchGuAvgPyeong(g,recentMonths6,60,85)));
+    const valid=peerVals.filter(v=>v!=null);
+    if(valid.length)return{value:valid.reduce((a,b)=>a+b,0)/valid.length,note:`KB 시세등급 ${grade}등급 그룹 평균(${peers.join('·')})`};
+  }
+  const repGus=CITY_REPRESENTATIVE_GU.filter(g=>g!==guName);
+  const repVals=await Promise.all(repGus.map(g=>fetchGuAvgPyeong(g,recentMonths6,60,85)));
+  const validRep=repVals.filter(v=>v!=null);
+  if(validRep.length)return{value:validRep.reduce((a,b)=>a+b,0)/validRep.length,note:'서울 대표 6개구 평균'};
   return{value:null,note:null};
 }
 const FV_BENCHMARK_GU=[{name:'강남구',code:'11680'},{name:'서초구',code:'11650'},{name:'송파구',code:'11710'}];
@@ -2769,7 +2801,7 @@ async function calcFutureValue(projId,guName,stageScore){
   resultEl.innerHTML='<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>구 시세 데이터 조회 중...</div>';
   if(compareEl)compareEl.innerHTML='';
   const recentMonths=fvMonthList(0),oldMonths=fvMonthList(5);
-  const [recentRes,oldRes]=await Promise.all([smartAvgPyeong(lawdCd,0),smartAvgPyeong(lawdCd,5)]);
+  const [recentRes,oldRes]=await Promise.all([smartAvgPyeong(guName,0),smartAvgPyeong(guName,5)]);
   const recentAvg=recentRes.value,oldAvg=oldRes.value;
   const widenNote=recentRes.note||oldRes.note;
   const guSisePer84=recentAvg?Math.round(recentAvg*25.4):null;
@@ -2781,7 +2813,7 @@ async function calcFutureValue(projId,guName,stageScore){
         ${generalPrice?`<div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">일반분양가</div><div style="font-size:15px;font-weight:600;margin-top:3px;">${fmt2(generalPrice)}</div></div>`:''}
         <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">${guName} 현재시세 (84㎡ 환산)</div><div style="font-size:15px;font-weight:600;margin-top:3px;">${fmt2(guSisePer84)}</div></div>
       </div>
-      ${widenNote?`<div style="font-size:10.5px;color:var(--gray-400);margin-top:6px;">※ 거래량이 적어 ${widenNote} 데이터를 함께 사용했습니다.</div>`:''}`;
+      ${widenNote?`<div style="font-size:10.5px;color:var(--gray-400);margin-top:6px;">※ 거래량이 적어 ${widenNote}(으)로 대체해 계산했습니다.</div>`:''}`;
   }
   if(!recentAvg||!oldAvg){resultEl.innerHTML='<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">이 구는 면적·기간을 확장해도 실거래 데이터가 충분하지 않습니다</div>';return;}
   const cagr=Math.pow(recentAvg/oldAvg,1/5)-1;
@@ -2796,16 +2828,21 @@ async function calcFutureValue(projId,guName,stageScore){
     growthLow=Math.max(adj-sigma*1.5,0);growthHigh=Math.min(adj+sigma*1.5,0.12);
     note=`사업 초기 단계로 리스크 할인율(연 ${(R_RISK*100).toFixed(1)}%, 89개 구역 실측 캘리브레이션 참고치)을 반영했습니다. 실제와 다를 수 있습니다.`;
   }
-  const futLow=price*Math.pow(1+growthLow,remainYears);
-  const futHigh=price*Math.pow(1+growthHigh,remainYears);
-  const premLow=futLow-price,premHigh=futHigh-price;
+  const pyeongEq=fin1&&fin1.sqm?fin1.sqm/3.3058:25.4;
+  const myAreaLabel=fin1&&fin1.sqm?`${Math.round(fin1.sqm)}㎡`:'84㎡ 환산';
+  const currentMarketValue=Math.round(recentAvg*pyeongEq);
+  const futLow=currentMarketValue*Math.pow(1+growthLow,remainYears);
+  const futHigh=currentMarketValue*Math.pow(1+growthHigh,remainYears);
+  const profitLow=futLow-price,profitHigh=futHigh-price;
+  const roiLow=(profitLow/price*100),roiHigh=(profitHigh/price*100);
   const fmt=v=>(v/10000).toFixed(1)+'억';
   resultEl.innerHTML=`
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px;">
       <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">인근 5년 CAGR</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${(cagr*100).toFixed(1)}%</div></div>
-      <div style="background:var(--blue-light);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--blue);">예상 프리미엄 (${remainYears}년 후)</div><div style="font-size:16px;font-weight:600;margin-top:3px;color:var(--blue);">${fmt(premLow)} ~ ${fmt(premHigh)}</div></div>
+      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">현재 시세 (${myAreaLabel})</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${fmt(currentMarketValue)}</div></div>
     </div>
-    <div style="background:#EDE9FE;border-radius:var(--r);padding:10px 12px;margin-bottom:8px;"><div style="font-size:11px;color:#6D28D9;">예상 미래가치 (조합원분양가 + 프리미엄)</div><div style="font-size:18px;font-weight:700;margin-top:3px;color:#6D28D9;">${fmt(futLow)} ~ ${fmt(futHigh)}</div></div>
+    <div style="background:#EDE9FE;border-radius:var(--r);padding:10px 12px;margin-bottom:8px;"><div style="font-size:11px;color:#6D28D9;">예상 미래가치 (${remainYears}년 후, 시세 기준)</div><div style="font-size:18px;font-weight:700;margin-top:3px;color:#6D28D9;">${fmt(futLow)} ~ ${fmt(futHigh)}</div></div>
+    <div style="background:${profitLow>=0?'var(--green-bg)':'var(--red-bg)'};border-radius:var(--r);padding:10px 12px;margin-bottom:8px;"><div style="font-size:11px;color:${profitLow>=0?'var(--green)':'var(--red)'};">예상 수익금액 (미래가치 − 조합원분양가)</div><div style="font-size:18px;font-weight:700;margin-top:3px;color:${profitLow>=0?'var(--green)':'var(--red)'};">${fmt(profitLow)} ~ ${fmt(profitHigh)}</div><div style="font-size:11px;color:${profitLow>=0?'var(--green)':'var(--red)'};margin-top:2px;">수익률 약 ${roiLow.toFixed(0)}% ~ ${roiHigh.toFixed(0)}%</div></div>
     <div style="font-size:11px;color:var(--gray-400);">${note}</div>`;
   if(compareEl){
     compareEl.innerHTML='<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>강남·서초·송파 비교 데이터 조회 중...</div>';
