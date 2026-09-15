@@ -1861,6 +1861,16 @@ async function detectAlerts(){
 const GU_COUNTS={'영등포구':121,'성북구':79,'서초구':70,'중랑구':68,'동작구':60,'강동구':58,'송파구':56,'은평구':52,'용산구':50,'강남구':49,'마포구':49,'강북구':47,'서대문구':47,'동대문구':46,'양천구':46,'강서구':43,'구로구':41,'관악구':36,'성동구':35,'광진구':27,'노원구':26,'금천구':24,'도봉구':20,'종로구':13,'중구':11};
 const GU_LAWD_CODE={'종로구':'11110','중구':'11140','용산구':'11170','성동구':'11200','광진구':'11215','동대문구':'11230','중랑구':'11260','성북구':'11290','강북구':'11305','도봉구':'11320','노원구':'11350','은평구':'11380','서대문구':'11410','마포구':'11440','양천구':'11470','강서구':'11500','구로구':'11530','금천구':'11545','영등포구':'11560','동작구':'11590','관악구':'11620','서초구':'11650','강남구':'11680','송파구':'11710','강동구':'11740'};
 const STAGE_REMAIN_YEARS={1:7,2:6,3:5,4:4,5:3,6:2,7:1,8:0.5,9:0};
+const GLOBAL_COPI_DATA=[
+  {date:'25년5월',value:131.17},{date:'25년6월',value:131.35},
+  {date:'25년7월',value:131.52},{date:'25년8월',value:131.68},
+  {date:'25년9월',value:131.85},{date:'25년10월',value:132.12},
+  {date:'25년11월',value:132.45},{date:'25년12월',value:132.70},
+  {date:'26년1월',value:133.52},{date:'26년2월',value:133.76},
+  {date:'26년3월',value:134.53},{date:'26년4월',value:136.88}
+];
+const BASE_COST_PER_M2_2020=1800000;
+function costPerM2(copiValue){return Math.round(BASE_COST_PER_M2_2020*(copiValue/100));}
 function drawDistHBar(){
   const sorted=Object.entries(GU_COUNTS).sort((a,b)=>b[1]-a[1]);const max=sorted[0]?.[1]||1;
   document.getElementById('distHBar').innerHTML=sorted.map(([nm,ct],i)=>
@@ -2413,6 +2423,7 @@ function renderMydashSub(){
   else body=renderOverviewTab(proj,stageScore,lastStage);
   document.getElementById('myProjDetail').innerHTML=nav+body;
   if(mydashSubTab==='futurevalue')initFvResultPlaceholder(proj.id);
+  if(mydashSubTab==='finance')setTimeout(()=>initFinanceTab(proj.id),30);
 }
 
 function renderOverviewTab(proj,stageScore,lastStage){
@@ -2474,24 +2485,37 @@ function renderOverviewTab(proj,stageScore,lastStage){
 function renderFinanceTab(proj,stageScore){
   return `
     <div class="card">
-      <div class="card-h"><div class="card-title">자금운용 계획</div></div>
+      <div class="card-h"><div class="card-title">분담금 계산</div></div>
       <div class="inp-row">
-        <div><div class="inp-lbl">초기투자금액 (만원)</div><input class="inp-field" type="number" id="finInit_${proj.id}" placeholder="예: 40000"></div>
-        <div><div class="inp-lbl">대출 금리 (%)</div><input class="inp-field" type="number" step="0.01" id="finRate_${proj.id}" placeholder="예: 4.2"></div>
+        <div><div class="inp-lbl">감정평가금액 (만원)</div><input class="inp-field" type="number" id="finEval_${proj.id}" placeholder="예: 50000"></div>
+        <div><div class="inp-lbl">비례율 (%)</div><input class="inp-field" type="number" step="0.01" id="finRatio_${proj.id}" placeholder="예: 105.3"></div>
       </div>
       <div class="inp-row">
-        <div><div class="inp-lbl">조합원분양가 (만원)</div><input class="inp-field" type="number" id="finPrice_${proj.id}" placeholder="예: 80000"></div>
-        <div><div class="inp-lbl">현재 공사비 - 내 세대분 (만원)</div><input class="inp-field" type="number" id="finCost_${proj.id}" placeholder="예: 30000"></div>
+        <div><div class="inp-lbl">권리가액 직접입력 (만원, 선택)</div><input class="inp-field" type="number" id="finRight_${proj.id}" placeholder="입력 시 위 두 값 대신 사용"></div>
+        <div><div class="inp-lbl">조합원분양가 (만원)</div><input class="inp-field" type="number" id="finPrice1_${proj.id}" placeholder="예: 80000"></div>
       </div>
       <div class="inp-row">
-        <div><div class="inp-lbl">완공시점 예상 공사비 상승률 (%)</div><input class="inp-field" type="number" step="0.1" id="finCostUp_${proj.id}" placeholder="예: 15"></div>
+        <div><div class="inp-lbl">평형 (평)</div><input class="inp-field" type="number" id="finPyeong_${proj.id}" placeholder="예: 34"></div>
         <div></div>
       </div>
-      <button class="btn-primary" style="margin-top:6px;" onclick="calcFinance('${proj.id}')">계산</button>
-      <div id="finResult_${proj.id}" style="margin-top:14px;">
-        <div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">값을 입력하고 계산을 눌러주세요</div>
+      <button class="btn-primary" style="margin-top:6px;" onclick="calcFin1('${proj.id}')">계산</button>
+      <div id="finResult1_${proj.id}" style="margin-top:14px;"><div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">값을 입력하고 계산을 눌러주세요</div></div>
+      <div style="font-size:11px;color:var(--gray-400);margin-top:10px;">※ 권리가액 = 감정평가금액 × 비례율 (직접입력 시 그 값 우선) · 분담금 = 조합원분양가 − 권리가액. 참고용 추정치입니다.</div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-title">대출 및 월상환액</div></div>
+      <div class="inp-row">
+        <div><div class="inp-lbl">이주비대출·주담대 금액 (만원)</div><input class="inp-field" type="number" id="finLoanAmt_${proj.id}" placeholder="예: 40000"></div>
+        <div><div class="inp-lbl">대출 금리 (%)</div><input class="inp-field" type="number" step="0.01" id="finLoanRate_${proj.id}" placeholder="예: 4.2"></div>
       </div>
-      <div style="font-size:11px;color:var(--gray-400);margin-top:10px;">※ 대출필요액 = 조합원분양가 − 초기투자금액(이자만 상환 가정) · 예상분담금 = 기본분담금 + (현재 공사비 × 상승률). 참고용 추정치이며 실제 조합 고지 금액과 다를 수 있습니다.</div>
+      <button class="btn-primary" style="margin-top:6px;" onclick="calcFin2('${proj.id}',true)">저장 및 계산</button>
+      <div id="finResult2_${proj.id}" style="margin-top:14px;"><div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">대출금액과 금리를 입력하고 저장을 눌러주세요</div></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-title">공사단가 상승 추이</div><span class="bdg bdg-orange">한국건설기술연구원 COPI</span></div>
+      <div class="cw2" style="height:160px;"><canvas id="finCopiChart_${proj.id}"></canvas></div>
+      <div id="finCopiImpact_${proj.id}" style="margin-top:10px;font-size:12px;color:var(--gray-600);"></div>
+      <div style="font-size:11px;color:var(--gray-400);margin-top:6px;">※ ㎡당 공사단가는 국토부 기본형건축비 참고치에 COPI 지수 변동을 반영한 추정치이며, 실제 고시 단가와 다를 수 있습니다.</div>
     </div>`;
 }
 
@@ -2516,29 +2540,129 @@ function initFvResultPlaceholder(projId){
   if(r&&!r.innerHTML.trim())r.innerHTML='<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">조합원분양가를 입력하고 계산을 눌러주세요</div>';
 }
 
-function calcFinance(projId){
-  const iv=parseFloat(document.getElementById('finInit_'+projId)?.value)||0;
-  const rate=parseFloat(document.getElementById('finRate_'+projId)?.value)||0;
-  const price=parseFloat(document.getElementById('finPrice_'+projId)?.value)||0;
-  const cost=parseFloat(document.getElementById('finCost_'+projId)?.value)||0;
-  const costUp=parseFloat(document.getElementById('finCostUp_'+projId)?.value)||0;
-  const resEl=document.getElementById('finResult_'+projId);
+function finKey1(projId){return 'fin1_'+projId;}
+function finKey2(projId){return 'fin2_'+projId;}
+function loadFinState(key){try{return JSON.parse(localStorage.getItem(key)||'null');}catch(e){return null;}}
+function saveFinState(key,obj){try{localStorage.setItem(key,JSON.stringify(obj));}catch(e){}}
+const fmtMan=v=>v>=10000?(v/10000).toFixed(2)+'억':Math.round(v).toLocaleString()+'만원';
+
+function calcFin1(projId){
+  const ev=parseFloat(document.getElementById('finEval_'+projId)?.value)||0;
+  const ratio=parseFloat(document.getElementById('finRatio_'+projId)?.value)||0;
+  const rightInput=document.getElementById('finRight_'+projId)?.value;
+  const rightManual=rightInput?parseFloat(rightInput):null;
+  const price=parseFloat(document.getElementById('finPrice1_'+projId)?.value)||0;
+  const pyeong=parseFloat(document.getElementById('finPyeong_'+projId)?.value)||0;
+  const resEl=document.getElementById('finResult1_'+projId);
   if(!price){resEl.innerHTML='<div style="font-size:12px;color:var(--red);">조합원분양가를 입력해주세요</div>';return;}
-  const loanNeed=Math.max(price-iv,0);
-  const monthly=Math.round(loanNeed*10000*(rate/100)/12);
-  const baseShare=Math.max(price-iv,0);
-  const costIncrease=Math.round(cost*(costUp/100));
-  const expectedShare=baseShare+costIncrease;
-  const fmt=v=>v>=10000?(v/10000).toFixed(2)+'억':v.toLocaleString()+'만원';
+  const rightValue=(rightManual!=null&&!isNaN(rightManual))?rightManual:Math.round(ev*(ratio/100));
+  const share=price-rightValue;
+  const latestCopi=GLOBAL_COPI_DATA[GLOBAL_COPI_DATA.length-1].value;
+  const curCostPerM2=costPerM2(latestCopi);
+  const sqm=pyeong?Math.round(pyeong*3.3058):0;
+  saveFinState(finKey1(projId),{ev,ratio,right:rightManual,price,pyeong});
   resEl.innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div class="loan-card"><div class="loan-label">대출 필요액</div><div class="loan-val" style="color:var(--gray-700);">${fmt(loanNeed)}</div></div>
-      <div class="loan-card"><div class="loan-label">월상환액 (이자)</div><div class="loan-val">${monthly.toLocaleString()}원</div></div>
+      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">권리가액</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${fmtMan(rightValue)}</div></div>
+      <div style="background:${share>=0?'var(--red-bg)':'var(--green-bg)'};border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:${share>=0?'var(--red)':'var(--green)'};">${share>=0?'추가 분담금':'환급 예상액'}</div><div style="font-size:16px;font-weight:600;margin-top:3px;color:${share>=0?'var(--red)':'var(--green)'};">${fmtMan(Math.abs(share))}</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">기본 분담금</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${fmt(baseShare)}</div></div>
-      <div style="background:var(--red-bg);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--red);">공사비 상승 반영 예상분담금</div><div style="font-size:16px;font-weight:600;margin-top:3px;color:var(--red);">${fmt(expectedShare)}</div></div>
+    ${sqm?`<div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">${pyeong}평(${sqm}㎡) 기준 참고 ㎡당 공사단가</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${curCostPerM2.toLocaleString()}원/㎡</div></div>`:''}
+    <div style="font-size:10.5px;color:var(--green);margin-top:8px;">✓ 저장됨 — 다음 접속 시에도 이 값이 유지됩니다</div>`;
+}
+
+async function getCurrentBaseRate(){
+  try{const res=await fetch('/api/ecos?type=all');const data=await res.json();if(data.success&&data.rate)return data.rate.current;}catch(e){}
+  return null;
+}
+
+async function calcFin2(projId,isManualSave){
+  const amt=parseFloat(document.getElementById('finLoanAmt_'+projId)?.value)||0;
+  const rate=parseFloat(document.getElementById('finLoanRate_'+projId)?.value)||0;
+  const resEl=document.getElementById('finResult2_'+projId);
+  if(!amt||!rate){resEl.innerHTML='<div style="font-size:12px;color:var(--red);">대출금액과 금리를 입력해주세요</div>';return;}
+  resEl.innerHTML='<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>기준금리 확인 중...</div>';
+  const baseRateNow=await getCurrentBaseRate();
+  saveFinState(finKey2(projId),{amt,rate,baseRateAtSave:baseRateNow});
+  renderFin2Normal(projId,amt,rate);
+}
+
+function renderFin2Normal(projId,amt,rate){
+  const resEl=document.getElementById('finResult2_'+projId);
+  const monthly=Math.round(amt*10000*(rate/100)/12);
+  resEl.innerHTML=`
+    <div class="loan-card"><div class="loan-label">예상 월상환액 (이자)</div><div class="loan-val">${monthly.toLocaleString()}원</div><div class="loan-sub">${amt.toLocaleString()}만원 · 연 ${rate}%</div></div>
+    <div style="font-size:10.5px;color:var(--green);margin-top:8px;">✓ 저장됨 — 기준금리 변경 시 자동으로 알려드려요</div>`;
+}
+
+function renderFin2Changed(projId,amt,storedRate,adjustedRate,oldBase,newBase){
+  const resEl=document.getElementById('finResult2_'+projId);
+  const monthly=Math.round(amt*10000*(adjustedRate/100)/12);
+  resEl.innerHTML=`
+    <div class="loan-card" style="background:#FFFBEB;border:1px solid #FDE68A;"><div class="loan-label" style="color:#92400E;">한국은행 기준금리 변경 감지 (${oldBase}% → ${newBase}%)</div><div class="loan-val" style="color:#92400E;">${monthly.toLocaleString()}원</div><div class="loan-sub">추정 조정금리 연 ${adjustedRate.toFixed(2)}% 반영 (기존 ${storedRate}%)</div></div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="btn-primary" style="font-size:11px;padding:6px 14px;" onclick="ackRateChange('${projId}',${amt},${adjustedRate},${newBase})">이 금리로 확인</button>
+      <button class="btn-secondary" style="font-size:11px;padding:6px 14px;" onclick="document.getElementById('finLoanAmt_${projId}').value=${amt};document.getElementById('finLoanRate_${projId}').value=${storedRate};">직접 수정하기</button>
     </div>`;
+}
+
+function ackRateChange(projId,amt,newRate,newBase){
+  saveFinState(finKey2(projId),{amt,rate:newRate,baseRateAtSave:newBase});
+  document.getElementById('finLoanAmt_'+projId).value=amt;
+  document.getElementById('finLoanRate_'+projId).value=newRate.toFixed(2);
+  renderFin2Normal(projId,amt,newRate);
+}
+
+function drawFinCopiChart(projId){
+  const canvas=document.getElementById('finCopiChart_'+projId);
+  if(!canvas)return;
+  if(!window._finCharts)window._finCharts={};
+  if(window._finCharts[projId])window._finCharts[projId].destroy();
+  window._finCharts[projId]=new Chart(canvas,{type:'line',data:{
+    labels:GLOBAL_COPI_DATA.map(h=>h.date),
+    datasets:[{data:GLOBAL_COPI_DATA.map(h=>h.value),borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.06)',borderWidth:2.5,fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#D97706'}]
+  },options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}},plugins:{...OPTS.plugins,legend:{display:false},tooltip:{callbacks:{label:c=>`건설공사비지수: ${c.raw.toFixed(2)} (2020=100)`}}}}});
+  const impactEl=document.getElementById('finCopiImpact_'+projId);
+  if(impactEl){
+    const fin1=loadFinState(finKey1(projId));
+    const base=GLOBAL_COPI_DATA[0].value,latest=GLOBAL_COPI_DATA[GLOBAL_COPI_DATA.length-1].value;
+    const pctUp=((latest-base)/base*100).toFixed(1);
+    if(fin1&&fin1.pyeong){
+      const sqm=Math.round(fin1.pyeong*3.3058);
+      const deltaPerM2=costPerM2(latest)-costPerM2(base);
+      const shareIncrease=Math.round(deltaPerM2*sqm/10000);
+      impactEl.innerHTML=`최근 1년간 공사단가 <b style="color:var(--orange);">${pctUp}%</b> 상승 → ${fin1.pyeong}평 기준 내 분담금 약 <b style="color:var(--red);">${shareIncrease.toLocaleString()}만원</b> 증가 추정`;
+    }else{
+      impactEl.innerHTML=`최근 1년간 공사단가 <b style="color:var(--orange);">${pctUp}%</b> 상승 — "분담금 계산"에서 평형을 입력하면 내 분담금 영향을 추정해드려요.`;
+    }
+  }
+}
+
+async function initFinanceTab(projId){
+  const fin1=loadFinState(finKey1(projId));
+  if(fin1){
+    if(fin1.ev)document.getElementById('finEval_'+projId).value=fin1.ev;
+    if(fin1.ratio)document.getElementById('finRatio_'+projId).value=fin1.ratio;
+    if(fin1.right!=null)document.getElementById('finRight_'+projId).value=fin1.right;
+    if(fin1.price)document.getElementById('finPrice1_'+projId).value=fin1.price;
+    if(fin1.pyeong)document.getElementById('finPyeong_'+projId).value=fin1.pyeong;
+    if(fin1.price)calcFin1(projId);
+  }
+  const fin2=loadFinState(finKey2(projId));
+  if(fin2){
+    document.getElementById('finLoanAmt_'+projId).value=fin2.amt;
+    document.getElementById('finLoanRate_'+projId).value=fin2.rate;
+    const resEl=document.getElementById('finResult2_'+projId);
+    resEl.innerHTML='<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>기준금리 확인 중...</div>';
+    const currentBase=await getCurrentBaseRate();
+    if(currentBase!=null&&fin2.baseRateAtSave!=null&&Math.abs(currentBase-fin2.baseRateAtSave)>=0.01){
+      const delta=currentBase-fin2.baseRateAtSave;
+      const adjusted=Math.max(fin2.rate+delta,0);
+      renderFin2Changed(projId,fin2.amt,fin2.rate,adjusted,fin2.baseRateAtSave,currentBase);
+    }else{
+      renderFin2Normal(projId,fin2.amt,fin2.rate);
+    }
+  }
+  drawFinCopiChart(projId);
 }
 
 function fvMonthList(yearsAgo){
