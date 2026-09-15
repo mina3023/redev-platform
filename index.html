@@ -2518,7 +2518,7 @@ function renderFinanceTab(proj,stageScore){
       <div style="font-size:11px;color:var(--gray-400);margin-top:6px;">※ ㎡당 공사단가는 국토부 기본형건축비 참고치에 COPI 지수 변동을 반영한 추정치이며, 실제 고시 단가와 다를 수 있습니다.</div>
     </div>
     <div class="card">
-      <div class="card-h"><div class="card-title">내 분담금 연도별 전망</div><span class="bdg bdg-gray">추세 연장 추정</span></div>
+      <div class="card-h"><div class="card-title">공사단가 상승 추이 & 내 분담금 전망</div><span class="bdg bdg-gray">추세 연장 추정</span></div>
       <div class="cw2" style="height:160px;"><canvas id="finShareChart_${proj.id}"></canvas></div>
       <div id="finShareNote_${proj.id}" style="margin-top:10px;font-size:11px;color:var(--gray-400);"></div>
     </div>`;
@@ -2682,20 +2682,29 @@ function drawFinCopiChart(projId,stageScore){
     const remainYears=Math.max(Math.round(STAGE_REMAIN_YEARS[stageScore]??5),1);
     const yearLabels=['현재'];
     const shareVals=[baseShare];
+    const costVals=[costPerM2(latest)];
     for(let y=1;y<=remainYears;y++){
       const projectedCost=costPerM2(latest)*Math.pow(1+annualGrowth,y);
       const deltaShare=(projectedCost-costPerM2(latest))*sqm/10000;
       yearLabels.push(y===remainYears?`${y}년후(예상 준공)`:`${y}년후`);
       shareVals.push(Math.round(baseShare+deltaShare));
+      costVals.push(Math.round(projectedCost));
     }
     if(window._finCharts['share_'+projId])window._finCharts['share_'+projId].destroy();
-    window._finCharts['share_'+projId]=new Chart(shareCanvas,{type:'bar',data:{
+    window._finCharts['share_'+projId]=new Chart(shareCanvas,{data:{
       labels:yearLabels,
-      datasets:[{data:shareVals,backgroundColor:shareVals.map((v,i)=>i===0?'rgba(156,163,175,.6)':'rgba(220,38,38,.65)'),borderColor:shareVals.map((v,i)=>i===0?'#9CA3AF':'#DC2626'),borderWidth:1.5,borderRadius:5,borderSkipped:false}]
-    },options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toLocaleString()+'만'}}},plugins:{...OPTS.plugins,legend:{display:false},tooltip:{callbacks:{label:c=>`예상 분담금: ${c.raw.toLocaleString()}만원`}}}}});
+      datasets:[
+        {type:'bar',label:'예상 분담금',data:shareVals,backgroundColor:shareVals.map((v,i)=>i===0?'rgba(156,163,175,.6)':'rgba(220,38,38,.65)'),borderColor:shareVals.map((v,i)=>i===0?'#9CA3AF':'#DC2626'),borderWidth:1.5,borderRadius:5,borderSkipped:false,yAxisID:'y',order:2},
+        {type:'line',label:'㎡당 공사단가',data:costVals,borderColor:'#D97706',backgroundColor:'#D97706',borderWidth:2.5,tension:.3,pointRadius:4,pointBackgroundColor:'#D97706',yAxisID:'y1',order:1}
+      ]
+    },options:{...OPTS,scales:{
+      x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},
+      y:{position:'left',grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toLocaleString()+'만'},title:{display:true,text:'분담금(만원)',color:'#9CA3AF',font:{size:10}}},
+      y1:{position:'right',grid:{display:false},ticks:{color:'#D97706',font:{size:11},callback:v=>Math.round(v/10000)+'만원'},title:{display:true,text:'㎡당 공사단가',color:'#D97706',font:{size:10}}}
+    },plugins:{...OPTS.plugins,legend:{display:true,position:'top',labels:{color:'#6B7280',font:{size:10.5,family:'IBM Plex Sans KR'},boxWidth:10,padding:10}},tooltip:{callbacks:{label:c=>c.dataset.type==='line'?`㎡당 공사단가: ${c.raw.toLocaleString()}원`:`예상 분담금: ${c.raw.toLocaleString()}만원`}}}}});
     if(shareNoteEl)shareNoteEl.innerHTML=`최근 1년 공사단가 상승률(연 ${(annualGrowth*100).toFixed(1)}%)이 계속된다고 가정하고, 예상 준공(${remainYears}년 후)까지 연도별 추세를 연장한 값입니다. 실제 공사비 변동은 시장 상황에 따라 다를 수 있습니다.`;
   }else if(shareCanvas&&shareNoteEl){
-    shareNoteEl.innerHTML='"분담금 계산"에서 조합원분양가와 평형을 입력하면 연도별 전망을 볼 수 있어요.';
+    shareNoteEl.innerHTML='"분담금 계산"에서 조합원분양가와 전용면적을 입력하면 연도별 전망을 볼 수 있어요.';
   }
 }
 
