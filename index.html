@@ -3697,7 +3697,7 @@ const MY_KEY='redev_my_v1';
 const MY_DEF={zone:'',unit:'',price:'',buyDate:'',appraisal:'',ratioMode:'auto',totRev:'',totCost:'',totAppr:'',ratioDirect:'',
   salePrice:'',paid:'',pyeong:'',loan:'',rate:'',loanYears:'30',repay:'grace',
   stage:'7',dMgmt:'',dMove:'',dStart:'',moveInOverride:'',extraDelayQ:'0',
-  cost0:'',costBase:'',wL:'40',gL:'4',wM:'45',gM:'3.5',wO:'15',gO:'3',
+  cost0:'',costBase:'',costNew:'',costNewDate:'',costNewOk:'0',costMode:'blend',wL:'40',gL:'4',wM:'45',gM:'3.5',wO:'15',gO:'3',
   nearNew:'',gLow:'0',gMid:'2',gHigh:'4',inclCost:'1',
   refs:[{n:'',sale:'',cur:'',yr:''},{n:'',sale:'',cur:'',yr:''},{n:'',sale:'',cur:'',yr:''}]};
 let MY=(function(){try{const o=JSON.parse(localStorage.getItem(MY_KEY)||'{}');return Object.assign({},MY_DEF,o,{refs:(o.refs&&o.refs.length?o.refs:MY_DEF.refs)});}catch(e){return JSON.parse(JSON.stringify(MY_DEF));}})();
@@ -3757,17 +3757,30 @@ function myCalc(){
   }
   R.moveIn=pD(MY.moveInOverride)||R.moveInD||null;
   R.moveInSrc=pD(MY.moveInOverride)?'직접 입력':(R.moveInD?'정상 일정 + 지연 반영':'');
-  // 3) 공사비
-  const c0=n_(MY.cost0),cb=pD(MY.costBase);
+  // 3) 공사비 (확정 단가 + 증액 논의안 + 입주 시점 예상)
+  const c0=n_(MY.cost0),cb=pD(MY.costBase)||pD(MY.dMgmt),c1=n_(MY.costNew),cd=pD(MY.costNewDate)||today;
   const w=[n_(MY.wL),n_(MY.wM),n_(MY.wO)],g=[n_(MY.gL),n_(MY.gM),n_(MY.gO)];
   const ws=w[0]+w[1]+w[2];
   R.gBlend=ws>0?(w[0]*g[0]+w[1]*g[1]+w[2]*g[2])/ws:0;
-  if(c0>0&&cb&&R.moveIn){
-    const complete=addM(R.moveIn,-3);
-    R.costYears=Math.max(0,monthsBetween(cb,complete)/12);
-    R.costF=c0*Math.pow(1+R.gBlend/100,R.costYears);
-    R.costUp=R.costF/c0-1;
-    R.costMy=n_(MY.pyeong)>0?(R.costF-c0)*n_(MY.pyeong):null;
+  R.cost=null;
+  if(c0>0&&cb){
+    const C={c0,cb,c1,cd,ok:MY.costNewOk==='1'};R.cost=C;
+    const py=n_(MY.pyeong);
+    if(c1>0){
+      const yh=monthsBetween(cb,cd)/12;
+      if(yh>0.25)R.gTrend=(Math.pow(c1/c0,1/yh)-1)*100;
+      if(py>0)R.costMyNow=(c1-c0)*py;
+    }
+    if(R.moveIn){
+      const complete=addM(R.moveIn,-3);
+      const refP=c1>0?c1:c0,refD=c1>0?cd:cb;
+      R.gUsed=(MY.costMode==='trend'&&R.gTrend!=null)?R.gTrend:R.gBlend;
+      R.costYears=Math.max(0,monthsBetween(refD,complete)/12);
+      R.costF=refP*Math.pow(1+R.gUsed/100,R.costYears);
+      R.costComplete=complete;R.costRef={p:refP,d:refD};
+      R.costUp=R.costF/c0-1;
+      R.costMy=py>0?(R.costF-c0)*py:null;
+    }
   }
   // 4) 대출
   R.loan=null;
@@ -3787,6 +3800,7 @@ function myCalc(){
     const s2=loanSched(L,r+1,N,MY.repay,nIn);
     R.loan.intInPlus1=sum(s2,0,nIn,'i');
     R.loan.curPlus1=s2[Math.min(nNow,s2.length-1)];
+    R.loan.sched2=s2;
   }
   return R;
 }
@@ -3854,8 +3868,10 @@ function myBuild(){
     ${fld('extraDelayQ','추가로 가정할 지연 (분기)','number','0','조합 일정이 더 밀릴 경우를 가정해 보세요')}
     <div style="margin-top:8px;"><button class="btn-secondary" onclick="myLoadDb()">DB에서 내 구역 일정 불러오기</button></div>
     </div>
-    <div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">공사비 가정 (직접 수정 가능)</div></div>
-    ${row2(fld('cost0','현 공사비 단가 (만원/평)','number','예: 900','계약서·총회 자료의 평당 단가'),fld('costBase','단가 기준 시점','date',''))}
+    <div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">공사비 단가 · 가정 (직접 수정 가능)</div></div>
+    ${row2(fld('cost0','확정 단가 (만원/평)','number','예: 580','관리처분인가 당시 도급 단가'),fld('costBase','확정 단가 기준일','date','','비우면 관리처분인가일'))}
+    ${row2(fld('costNew','증액 논의·확정 단가 (만원/평)','number','예: 890'),fld('costNewDate','논의안 시점','date',''))}
+    ${row2(sel('costNewOk','증액안 상태',[['0','논의 중 (미확정)'],['1','확정']]),sel('costMode','입주 시점 예상 방식',[['blend','인건비·자재·유류 가정'],['trend','인가 이후 실제 추세']]))}
     <div class="inp-lbl" style="margin-top:6px;">상승 요인별 비중(%) · 연 상승률(%) — 가정값입니다</div>
     ${row2(fld('wL','인건비 비중','number',''),fld('gL','인건비 연 상승률','number',''))}
     ${row2(fld('wM','자재비 비중','number',''),fld('gM','자재비 연 상승률','number',''))}
@@ -3936,7 +3952,9 @@ function myRender(){
       ${kpi('총 투입(매매가+분담금)',R.invest!=null?fmtM(R.invest):'—',n_(MY.pyeong)>0&&R.invest!=null?`평당 ${fmtM(R.invest/n_(MY.pyeong))}`:'','vc-red')}
       ${kpi('대출',MY.loan?fmtM(n_(MY.loan)):'—',has_(MY.rate)?`연 ${n_(MY.rate)}%`:'','vc-orange')}
     </div>${R.share==null?note('감정가·비례율·조합원 분양가를 입력하면 분담금이 계산돼요. 분담금 = 조합원 분양가 − 권리가액 (음수면 환급).'):''}
+    ${R.rights!=null&&n_(MY.price)>0?`<div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">분양가·총 투입 구성</div></div>${cw('myShareChart',200)}${R.share!=null&&R.share<0?note('분담금이 음수(환급)라 막대에는 표시하지 않았어요.'):''}</div>`:''}
     ${note('※ 참고용 계산입니다. 확정 금액은 관리처분계획서·조합 안내를 기준으로 확인하세요. 청산금·추가분담금·세금은 별도입니다.')}`;
+    drawShare(R);
   }
   /* 2 */
   const o2=document.getElementById('my2Out');
@@ -3952,18 +3970,26 @@ function myRender(){
         ${kpi('지연',R.delayQ>0?`${R.delayQ}분기`:'없음',`지연 반영 +${R.extraQ}분기`,gc==='green'?'vc-green':gc==='orange'?'vc-orange':'vc-red')}
         ${kpi('예상 입주',ymd(R.moveIn),R.moveInSrc+(R.moveInN?` · 정상 ${ymd(R.moveInN)}`:''),'vc-orange')}
       </div>
+      ${myTimeline(R)}
       ${note(`정상 일정 가정: 관리처분→이주 ${NQ[6]}분기, 이주→착공 ${NQ[7]}분기, 착공→준공 ${NQ[8]}분기, 준공→입주 3개월. 현재 단계가 정상 기간을 넘긴 만큼을 지연으로 보고 입주 시점에 더했어요. 조합 발표 일정이 있으면 '입주예정일'에 직접 입력하세요.`)}</div>`;
     }else h+=`<div class="card"><div class="empty"><div class="ei">⏱</div><p>왼쪽에서 현재 단계와 해당 단계의 시작일(관리처분인가일 / 이주 개시일 / 착공일)을 입력하세요.</p></div></div>`;
     // 공사비
-    h+=`<div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">공사비 단가 전망</div></div>`;
-    if(R.costF){
+    h+=`<div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">공사비 단가 추이 · 전망</div></div>`;
+    if(R.cost){
+      const C=R.cost;
       h+=`<div style="${KG}">
-        ${kpi('현 단가',fmtM(n_(MY.cost0))+'/평','기준 '+(MY.costBase||'—'),'vc-blue')}
-        ${kpi('입주 시점 예상 단가',fmtM(R.costF)+'/평',`약 ${R.costYears.toFixed(1)}년 · 연 ${R.gBlend.toFixed(2)}%`,'vc-orange')}
-        ${kpi('상승률',`+${(R.costUp*100).toFixed(1)}%`,'가중 평균 가정','vc-red')}
-        ${kpi('내 평형 추가 부담 상한',R.costMy!=null?fmtM(R.costMy):'평형 입력 필요','(단가 증가분 × 배정 평수)','vc-red')}
-      </div>${note('내 평형 추가 부담은 증가분이 전부 조합원에게 전가된다고 본 상한 추정이에요. 실제는 도급계약의 물가변동 조항(고정/변동), 일반분양 수입 변동 등에 따라 달라지므로 총회 자료·계약서의 공사비 증액 조건을 꼭 확인하세요.')}`;
-    }else h+=`<div class="empty" style="padding:20px;"><p>현 공사비 단가·기준 시점·입주예정(위 일정)을 입력하면 계산돼요.</p></div>`;
+        ${kpi('확정 단가',fmtM(C.c0)+'/평','기준 '+ymd(C.cb),'vc-blue')}
+        ${C.c1>0?kpi(C.ok?'증액 확정안':'증액 논의안',fmtM(C.c1)+'/평',`+${((C.c1/C.c0-1)*100).toFixed(1)}% · ${ymd(C.cd)}${C.ok?'':' · 미확정'}`,'vc-orange'):''}
+        ${R.gTrend!=null?kpi('인가 이후 연 환산',R.gTrend.toFixed(1)+'%/년','확정→논의안 기준','vc-orange'):''}
+        ${R.costF?kpi('입주 시점 예상',fmtM(R.costF)+'/평',`약 ${R.costYears.toFixed(1)}년 · 연 ${R.gUsed.toFixed(1)}% 적용`,'vc-red'):''}
+        ${R.costMyNow!=null?kpi('논의안 반영 시 내 추가 부담',fmtM(R.costMyNow),'(논의안−확정) × 배정 평수','vc-red'):''}
+        ${R.costMy!=null?kpi('입주 시점까지 상한',fmtM(R.costMy),'(예상−확정) × 배정 평수','vc-red'):''}
+      </div>
+      ${lg([['확정 단가',C_BL(),'solid'],['증액 논의안(미확정)',C_OR(),'dash'],['입주 시점 예상',C_RD(),'hatch'],['가정 상승률만 적용',C_GY,'hatch']])}
+      ${cw('myCostChart',270)}
+      ${R.costF?'':note('입주예정(위 일정)을 입력하면 입주 시점 예상선이 그려져요.')}
+      ${note('실선은 확정된 단가, 점선은 논의안·예상이에요. 내 평형 추가 부담은 증가분이 전부 조합원에게 전가된다고 본 상한 추정입니다. 실제는 도급계약의 물가변동 조항, 일반분양 수입 변동 등에 따라 달라지므로 총회 자료·계약서의 증액 조건을 꼭 확인하세요.')}`;
+    }else h+=`<div class="empty" style="padding:20px;"><p>확정 단가(관리처분인가 당시)와 기준일을 입력하면 그래프가 그려져요. 증액 논의안이 있으면 함께 입력하세요.</p></div>`;
     h+='</div>';
     // 대출
     h+=`<div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">대출 원금·이자</div></div>`;
@@ -3975,6 +4001,7 @@ function myRender(){
         ${kpi('오늘부터 입주까지',fmtM(L.intLeft+L.prinLeft),`이자 ${fmtM(L.intLeft)} + 원금 ${fmtM(L.prinLeft)}`,'vc-orange')}
         ${kpi('금리 +1%p면',fmtM(L.intInPlus1),`입주까지 이자 (+${fmtM(L.intInPlus1-L.intIn)}) · 월 ${fmtM(L.curPlus1.pay)}`,'vc-red')}
       </div>
+      ${lg([['누적 이자·월 납부 (경과)',C_RD(),'solid'],['예상',C_RD(),'dash'],['금리 +1%p 가정',C_GY,'hatch']])}${cw('myLoanChart',260)}
       <div style="font-size:11.5px;color:var(--gray-600);margin-bottom:8px;">대출 만기까지 총 이자: <b>${fmtM(L.intAll)}</b> · 입주예정일 ${R.moveIn?ymd(R.moveIn):'미정(입력 필요)'}${R.moveInSrc?' ('+R.moveInSrc+')':''}</div>
       <div style="overflow-x:auto;"><table class="dtable" style="min-width:520px;"><thead><tr><th>구간</th><th style="text-align:right;">납부 원금</th><th style="text-align:right;">납부 이자</th><th style="text-align:right;">월 납부(말)</th><th style="text-align:right;">연말 잔액</th></tr></thead><tbody>${loanYearRows(L)}</tbody></table></div>
       ${note('고정금리 가정입니다. 변동금리·중도상환·이주비/중도금 대출 조건은 반영하지 않았어요. 실제 약정 조건으로 확인하세요.')}`;
@@ -3989,6 +4016,7 @@ function myRender(){
     const keep=document.getElementById('myScriptOut');const kv=keep?keep.value:'';
     const checked=[...document.querySelectorAll('.myTopic')].filter(x=>x.checked).map(x=>x.value);
     o2.innerHTML=h;
+    drawCost(R);drawLoan(R);
     const nk=document.getElementById('myScriptOut');if(nk&&kv)nk.value=kv;
     document.querySelectorAll('.myTopic').forEach(x=>{if(checked.length)x.checked=checked.includes(x.value);});
   }
@@ -4007,12 +4035,15 @@ function myRender(){
         ${kpi('총 투입 비용',fmtM(totalCost),`매매가+분담금 ${fmtM(R.invest)}${loanInt?` + 이자 ${fmtM(loanInt)}`:''}${costAdd?` + 공사비 ${fmtM(costAdd)}`:''}`,'vc-red')}
         ${kpi('지금 신축 시세와 비교',fmtM(nearNew-R.invest),'신축 현 시세 − (매매가+분담금)',nearNew-R.invest>=0?'vc-green':'vc-red')}
       </div>
+      ${lg([['총 투입 비용',C_RD(),'solid'],['시세 시나리오(가정)',C_BL(),'dash']])}
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;">${cw('myFutureChart',260)}${cw('myStackChart',260)}</div>
       <div style="overflow-x:auto;"><table class="dtable" style="min-width:480px;"><thead><tr><th>시나리오</th><th>연 상승률</th><th style="text-align:right;">입주 시 예상 시세</th><th style="text-align:right;">예상 차익</th><th style="text-align:right;">투입 대비</th></tr></thead><tbody>
       ${sc.map(s=>`<tr><td>${s.nm}</td><td>${s.g}%</td><td style="text-align:right;">${fmtM(s.v)}</td><td style="text-align:right;color:${s.pf>=0?'var(--green)':'var(--red)'};font-weight:600;">${fmtM(s.pf)}</td><td style="text-align:right;">${s.roi.toFixed(1)}%</td></tr>`).join('')}
       </tbody></table></div>
       ${note('시나리오는 가정입니다(전망이 아닙니다). 양도세·취득세·중개비·보유세, 추가분담금 확정 여부는 반영되지 않았어요. 세금은 <a href="#" onclick="sw(\'tax\',document.querySelector(\'[data-tab=tax]\'));return false;" style="color:var(--blue)">세금 계산기</a>에서 따로 확인하세요.')}</div>`;
     }else h+=`<div class="card"><div class="empty"><div class="ei">📈</div><p>인근 신축 현 시세를 입력하고, 1·2번 화면에서 매매가·분양가·감정가·입주일정을 채우면 계산돼요.</p></div></div>`;
     o3.innerHTML=h;
+    if(nearNew>0&&R.invest!=null&&yrs!=null&&R.moveIn){const loanInt=R.loan?R.loan.intIn:0,costAdd=(MY.inclCost==='1'&&R.costMy)?R.costMy:0;const totalCost=R.invest+loanInt+costAdd;drawFuture(R,{nearNew,totalCost,loanInt,costAdd,sc:[['보수',MY.gLow],['기준',MY.gMid],['낙관',MY.gHigh]].map(([nm,g])=>({nm,g:n_(g),v:nearNew*Math.pow(1+n_(g)/100,yrs)}))});}
   }
   const ro=document.getElementById('myRefOut');
   if(ro){
@@ -4073,6 +4104,210 @@ function myScript(useAI){
   .catch(()=>{out.value=base+'\n\n(AI 연결 실패 — 기본 문안을 사용하세요)';});
 }
 function myCopyScript(){const t=document.getElementById('myScriptOut');if(!t||!t.value)return;t.select();try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}}
+
+/* ══════════ 시각화 ══════════
+ * 원칙: 확정·경과 = 실선 / 논의·예상 = 점선 / 지연분 = 빗금
+ */
+const MYCH={};
+const cv=(n,f)=>(getComputedStyle(document.documentElement).getPropertyValue(n).trim()||f);
+const C_BL=()=>cv('--blue','#1B4FD8'),C_GR=()=>cv('--green','#059669'),C_OR=()=>cv('--orange','#D97706'),C_RD=()=>cv('--red','#DC2626'),C_GY='#9CA3AF';
+function yr(d){return d.getFullYear()+(d.getMonth()+(d.getDate()-1)/31)/12;}
+function mkChart(id,cfg){
+  if(MYCH[id]){MYCH[id].destroy();delete MYCH[id];}
+  const el=document.getElementById(id);
+  if(!el||el.offsetParent===null||typeof Chart==='undefined')return;
+  cfg.options=Object.assign({responsive:true,maintainAspectRatio:false,animation:false},cfg.options||{});
+  cfg.plugins=(cfg.plugins||[]).concat([myOverlay]);
+  MYCH[id]=new Chart(el,cfg);
+}
+const myOverlay={id:'myOverlay',afterDatasetsDraw(chart){
+  const {ctx,chartArea:a,scales}=chart;const x=scales.x;
+  chart.data.datasets.forEach((d,di)=>{
+    const m=chart.getDatasetMeta(di);if(m.hidden)return;
+    d.data.forEach((p,i)=>{
+      if(!p||!p.lab)return;const e=m.data[i];if(!e)return;
+      ctx.save();ctx.font='600 11px sans-serif';ctx.fillStyle=d.borderColor||'#374151';ctx.textAlign=p.align||'center';
+      ctx.fillText(p.lab,e.x+(p.dx||0),e.y+(p.dy===undefined?-9:p.dy));ctx.restore();
+    });
+  });
+  const o=chart.options.plugins&&chart.options.plugins.myOverlay;
+  if(o&&o.vlines&&x&&x.getPixelForValue){
+    o.vlines.forEach((v,k)=>{
+      const px=x.getPixelForValue(v.x);if(!(px>=a.left&&px<=a.right))return;
+      ctx.save();ctx.strokeStyle=v.color||'#9CA3AF';ctx.setLineDash([3,3]);ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle=v.color||'#6B7280';ctx.font='600 10px sans-serif';ctx.textAlign='center';
+      ctx.fillText(v.label,Math.min(Math.max(px,a.left+18),a.right-18),a.top+10+(k%2)*11);ctx.restore();
+    });
+  }
+}};
+const axYear={type:'linear',ticks:{stepSize:1,callback:v=>Number.isInteger(v)?v:'' ,font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}};
+const tipYear=items=>{const v=items[0].parsed.x;const y=Math.floor(v),m=Math.min(12,Math.floor((v-y)*12)+1);return `${y}.${String(m).padStart(2,'0')}`;};
+const cw=(id,h)=>`<div style="position:relative;height:${h||260}px;margin:6px 0 10px;"><canvas id="${id}"></canvas></div>`;
+const lg=(items)=>`<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--gray-600);margin-bottom:6px;">${items.map(([t,c,k])=>`<span style="display:inline-flex;align-items:center;gap:5px;"><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="${c}" stroke-width="${k==='solid'?3:2.5}" ${k==='solid'?'':(k==='hatch'?'stroke-dasharray="2 2"':'stroke-dasharray="5 3"')}/></svg>${t}</span>`).join('')}</div>`;
+
+/* ── 공사비 단가: 확정(실선) / 논의안·예상(점선) ── */
+function drawCost(R){
+  const C=R.cost;if(!C)return;
+  const BL=C_BL(),OR=C_OR(),RD=C_RD();
+  const t0=yr(C.cb),tN=yr(new Date()),tc=yr(C.cd);
+  const conf=[{x:t0,y:C.c0,lab:fmtM(C.c0),dx:6,dy:-10,align:'left'}];
+  if(C.c1>0&&C.ok){conf.push({x:tc,y:C.c0},{x:tc,y:C.c1,lab:fmtM(C.c1)+' 확정',dx:-6,dy:-10,align:'right'});}
+  const lastY=(C.c1>0&&C.ok)?C.c1:C.c0;
+  conf.push({x:Math.max(tN,conf[conf.length-1].x),y:lastY});
+  const ds=[{label:'확정 단가',data:conf,borderColor:BL,backgroundColor:BL,borderWidth:3.5,pointRadius:conf.map((p,i)=>i===0?5:0),stepped:false,tension:0}];
+  let maxY=C.c0,minY=C.c0;
+  if(C.c1>0&&!C.ok){
+    ds.push({label:'증액 논의안 (미확정)',data:[{x:tc,y:C.c0},{x:tc,y:C.c1,lab:fmtM(C.c1)+' 논의 중',dx:-4,dy:-10,align:'right'}],borderColor:OR,backgroundColor:'#fff',borderDash:[6,4],borderWidth:2.5,pointRadius:[0,7],pointStyle:'rectRot',pointBorderWidth:2});
+  }
+  if(C.c1>0)maxY=Math.max(maxY,C.c1);
+  if(R.costF&&R.costRef){
+    const a=R.costRef,tE=yr(R.costComplete);
+    ds.push({label:'입주 시점 예상 (연 '+R.gUsed.toFixed(1)+'%)',data:[{x:yr(a.d),y:a.p},{x:tE,y:R.costF,lab:fmtM(R.costF)+' 예상',dx:0,dy:-10,align:'right'}],borderColor:RD,backgroundColor:RD,borderDash:[2,4],borderWidth:2.5,pointRadius:[0,5],pointStyle:'circle'});
+    maxY=Math.max(maxY,R.costF);
+    if(C.c1>0){
+      const yAll=Math.max(0,monthsBetween(C.cb,R.costComplete)/12),v=C.c0*Math.pow(1+R.gBlend/100,yAll);
+      ds.push({label:'논의안 없이 가정 상승률만 적용',data:[{x:t0,y:C.c0},{x:tE,y:v}],borderColor:C_GY,backgroundColor:C_GY,borderDash:[2,4],borderWidth:2,pointRadius:[0,4]});
+      maxY=Math.max(maxY,v);
+    }
+  }
+  const tEnd=R.costF&&R.costComplete?yr(R.costComplete):tN;
+  mkChart('myCostChart',{type:'line',data:{datasets:ds},options:{
+    interaction:{mode:'nearest',intersect:true},
+    scales:{x:Object.assign({},axYear,{min:Math.floor(t0),max:Math.ceil(tEnd+0.3)}),
+      y:{min:Math.max(0,Math.floor(minY*0.8/50)*50),max:Math.ceil(maxY*1.12/50)*50,title:{display:true,text:'만원/평',font:{size:10}},ticks:{callback:v=>v.toLocaleString(),font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}},
+    plugins:{legend:{display:false},myOverlay:{vlines:[{x:tN,label:'오늘'}].concat(R.moveIn?[{x:yr(R.moveIn),label:'입주',color:C_GR()}]:[])},
+      tooltip:{callbacks:{title:tipYear,label:c=>`${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString()}만원/평`}}}}});
+}
+
+/* ── 일정 타임라인 (SVG) ── */
+function myTimeline(R){
+  if(!R.startDate)return '';
+  const st=R.stage,today=new Date();
+  const dM=pD(MY.dMgmt),dV=pD(MY.dMove),dS=pD(MY.dStart);
+  const s=[];
+  if(st===6){s[0]=dM;s[1]=addM(dM,NQ[6]*3);s[2]=addM(s[1],NQ[7]*3);}
+  else if(st===7){s[0]=dM;s[1]=dV;s[2]=addM(dV,NQ[7]*3);}
+  else{s[0]=dM;s[1]=dV;s[2]=dS;}
+  s[3]=addM(s[2],NQ[8]*3);s[4]=addM(s[3],3);
+  const cur=st===6?0:st===7?1:2;
+  const shiftM=R.moveIn?monthsBetween(R.moveInN,R.moveIn):0;
+  const sB=s.map((d,i)=>d?(i>cur?addM(d,shiftM):d):null);
+  const names=['관리처분 후 대기','이주·철거','공사','준공~입주'];
+  const cols=['#7C3AED','#D97706','#1B4FD8','#059669'];
+  const valid=[...s,...sB].filter(Boolean);
+  const tmin=Math.min(...valid.map(d=>d.getTime()),today.getTime()),tmax=Math.max(...valid.map(d=>d.getTime()))+90*864e5;
+  const W=900,PL=92,PR=14,iw=W-PL-PR;
+  const X=t=>PL+(t-tmin)/(tmax-tmin)*iw;
+  const T=d=>d.getTime(),nowT=today.getTime();
+  let g='';
+  // 연도 눈금
+  for(let y=new Date(tmin).getFullYear();y<=new Date(tmax).getFullYear()+1;y++){
+    const x=X(new Date(y,0,1).getTime());if(x<PL||x>W-PR)continue;
+    g+=`<line x1="${x}" y1="22" x2="${x}" y2="150" stroke="#E5E7EB"/><text x="${x+3}" y="16" font-size="10" fill="#9CA3AF">${y}</text>`;
+  }
+  const rows=[[s,'정상 일정',34,false],[sB,'지연 반영',92,true]];
+  rows.forEach(([b,lab,y0,isDelay])=>{
+    const h=30;
+    g+=`<text x="${PL-8}" y="${y0+h/2+4}" font-size="11" text-anchor="end" fill="#4B5563" font-weight="600">${lab}</text>`;
+    for(let i=0;i<4;i++){
+      if(!b[i]||!b[i+1])continue;
+      const a=T(b[i]),e=T(b[i+1]),c=cols[i];
+      const pastE=Math.min(e,nowT);
+      if(pastE>a)g+=`<rect x="${X(a)}" y="${y0}" width="${Math.max(0,X(pastE)-X(a))}" height="${h}" fill="${c}" rx="3"/>`;
+      const fa=Math.max(a,nowT);
+      if(e>fa)g+=`<rect x="${X(fa)}" y="${y0}" width="${X(e)-X(fa)}" height="${h}" fill="${c}" fill-opacity=".13" stroke="${c}" stroke-width="1.6" stroke-dasharray="5 3" rx="3"/>`;
+      const wpx=X(e)-X(a);
+      if(wpx>58)g+=`<text x="${(X(a)+X(e))/2}" y="${y0+h/2+4}" font-size="10.5" font-weight="600" text-anchor="middle" fill="${pastE>a&&e<=nowT?'#fff':c}">${names[i]}</text>`;
+      if(isDelay&&i===cur&&shiftM>0.5){
+        const e0=T(s[i+1]);
+        g+=`<rect x="${X(e0)}" y="${y0}" width="${Math.max(0,X(e)-X(e0))}" height="${h}" fill="url(#myHatch)" stroke="#DC2626" stroke-width="1.2" stroke-dasharray="4 2" rx="3"/>`;
+      }
+    }
+  });
+  // 오늘 / 입주
+  g+=`<line x1="${X(nowT)}" y1="22" x2="${X(nowT)}" y2="150" stroke="#111827" stroke-width="1.4" stroke-dasharray="3 3"/><text x="${X(nowT)}" y="162" font-size="10" font-weight="700" text-anchor="middle" fill="#111827">오늘</text>`;
+  const mi=(d,y,t,c)=>{const x=X(T(d));return `<path d="M${x} ${y-4} l6 -7 l-12 0 z" fill="${c}"/><text x="${Math.min(x,W-PR-40)}" y="${y+16}" font-size="10" font-weight="600" text-anchor="middle" fill="${c}">${t}</text>`;};
+  g+=mi(s[4],72-4+4,'정상 입주 '+ymd(s[4]).slice(2),'#6B7280');
+  g+=mi(R.moveIn||sB[4],130,'예상 입주 '+ymd(R.moveIn||sB[4]).slice(2),'#DC2626');
+  return `<div style="overflow-x:auto;margin:10px 0 4px;"><svg viewBox="0 0 ${W} 172" style="width:100%;min-width:560px;height:auto;font-family:inherit"><defs><pattern id="myHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#FEE2E2"/><rect width="2.5" height="6" fill="#DC2626"/></pattern></defs>${g}</svg></div>
+  <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--gray-600);margin-bottom:6px;">
+    <span><span style="display:inline-block;width:18px;height:10px;background:#6B7280;border-radius:2px;vertical-align:middle;"></span> 경과(확정)</span>
+    <span><span style="display:inline-block;width:18px;height:10px;border:1.5px dashed #6B7280;border-radius:2px;vertical-align:middle;"></span> 예상</span>
+    <span><span style="display:inline-block;width:18px;height:10px;background:repeating-linear-gradient(45deg,#DC2626 0 2px,#FEE2E2 2px 5px);border:1px dashed #DC2626;border-radius:2px;vertical-align:middle;"></span> 지연분</span>
+  </div>`;
+}
+
+/* ── 대출: 누적 이자·월 납부액 (경과=실선, 예상=점선) ── */
+function drawLoan(R){
+  const L=R.loan;if(!L)return;
+  const BL=C_BL(),RD=C_RD(),tN=yr(new Date());
+  const K=Math.min(L.N,Math.max(L.nIn+24,L.nNow+12,36));
+  const cum=(sch)=>{const a=[{x:yr(L.start),y:0}];let c=0;for(let k=0;k<K;k++){c+=sch[k].i;a.push({x:yr(addM(L.start,k+1)),y:c});}return a;};
+  const pay=[];for(let k=0;k<K;k++)pay.push({x:yr(addM(L.start,k+1)),y:L.sched[k].pay});
+  const dash=ctx=>ctx.p0.parsed.x>=tN?[6,4]:undefined;
+  const ds=[
+    {label:'누적 이자',data:cum(L.sched),borderColor:RD,backgroundColor:RD,borderWidth:3,pointRadius:0,yAxisID:'y',segment:{borderDash:dash}},
+    {label:'금리 +1%p 가정 누적 이자',data:cum(L.sched2),borderColor:C_GY,borderWidth:2,borderDash:[2,4],pointRadius:0,yAxisID:'y'},
+    {label:'월 납부액',data:pay,borderColor:BL,backgroundColor:BL,borderWidth:2.5,pointRadius:0,stepped:true,yAxisID:'y2',segment:{borderDash:dash}}];
+  mkChart('myLoanChart',{type:'line',data:{datasets:ds},options:{
+    interaction:{mode:'index',intersect:false,axis:'x'},
+    scales:{x:Object.assign({},axYear,{min:Math.floor(yr(L.start)),max:Math.ceil(yr(addM(L.start,K)))}),
+      y:{position:'left',beginAtZero:true,title:{display:true,text:'누적 이자',font:{size:10}},ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},
+      y2:{position:'right',beginAtZero:true,title:{display:true,text:'월 납부액',font:{size:10}},ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{display:false}}},
+    plugins:{legend:{display:false},myOverlay:{vlines:[{x:tN,label:'오늘'}].concat(R.moveIn?[{x:yr(R.moveIn),label:'입주',color:C_GR()}]:[])},
+      tooltip:{callbacks:{title:tipYear,label:c=>`${c.dataset.label}: ${fmtM(c.parsed.y)}`}}}}});
+}
+
+/* ── 분담금 구성 (가로 누적 막대) ── */
+const barLabels={id:'barLabels',afterDatasetsDraw(chart){
+  const {ctx}=chart;
+  chart.data.datasets.forEach((d,di)=>{
+    const m=chart.getDatasetMeta(di);
+    m.data.forEach((e,i)=>{
+      const v=d.data[i];if(!v||v<=0)return;
+      const w=Math.abs(e.x-e.base);if(w<64)return;
+      ctx.save();ctx.fillStyle='#fff';ctx.font='600 10.5px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(fmtM(v),(e.x+e.base)/2,e.y);ctx.restore();
+    });
+  });
+}};
+function drawShare(R){
+  if(R.rights==null||!(n_(MY.price)>0))return;
+  const A=n_(MY.appraisal),P=n_(MY.price),sh=Math.max(R.share||0,0);
+  const prem=Math.max(P-A,0);
+  mkChart('myShareChart',{type:'bar',plugins:[barLabels],data:{labels:['조합원 분양가 구성','총 투입 구성'],datasets:[
+    {label:'권리가액',data:[R.rights,0],backgroundColor:C_GR()},
+    {label:'감정가(종전자산)',data:[0,A],backgroundColor:'#0F766E'},
+    {label:'프리미엄(매매가−감정가)',data:[0,prem],backgroundColor:C_OR()},
+    {label:'분담금',data:[sh,sh],backgroundColor:C_RD()}]},
+   options:{indexAxis:'y',scales:{x:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},y:{stacked:true,ticks:{font:{size:11}}}},
+    plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtM(c.parsed.x)}`}}}}});
+}
+
+/* ── 미래 가치: 시세 시나리오(점선) vs 총 투입(실선) / 비용 구성 vs 시세 ── */
+function drawFuture(R,F){
+  const BL=C_BL(),GR_=C_GR(),OR=C_OR(),RD=C_RD(),t0=yr(new Date()),t1=yr(R.moveIn);
+  const colr=[C_GY,BL,GR_];
+  const ds=F.sc.map((s,i)=>({label:`${s.nm} (연 ${s.g}%)`,data:[{x:t0,y:F.nearNew},{x:t1,y:s.v,lab:fmtM(s.v),dx:-8,dy:i===1?-9:14,align:'right'}],borderColor:colr[i],backgroundColor:colr[i],borderDash:[6,4],borderWidth:2.5,pointRadius:[0,5]}));
+  ds.push({label:'총 투입 비용',data:[{x:t0,y:F.totalCost,lab:'총 투입 '+fmtM(F.totalCost),dx:6,dy:-9,align:'left'},{x:t1,y:F.totalCost}],borderColor:RD,backgroundColor:RD,borderWidth:3.5,pointRadius:[4,0]});
+  const all=[F.nearNew,F.totalCost].concat(F.sc.map(s=>s.v));
+  mkChart('myFutureChart',{type:'line',data:{datasets:ds},options:{
+    scales:{x:Object.assign({},axYear,{min:Math.floor(t0),max:Math.ceil(t1+0.2)}),
+      y:{min:Math.floor(Math.min(...all)*0.85/10000)*10000,ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}},
+    plugins:{legend:{display:false},myOverlay:{vlines:[{x:t0,label:'오늘'},{x:t1,label:'입주',color:GR_}]},
+      tooltip:{callbacks:{title:tipYear,label:c=>`${c.dataset.label}: ${fmtM(c.parsed.y)}`}}}}});
+  const pBase=n_(MY.price)+Math.min(R.share||0,0),shBar=Math.max(R.share||0,0);
+  mkChart('myStackChart',{type:'bar',data:{labels:['총 투입','보수 시세','기준 시세','낙관 시세'],datasets:[
+    {label:'매매가',data:[pBase,0,0,0],backgroundColor:BL},
+    {label:'분담금',data:[shBar,0,0,0],backgroundColor:OR},
+    {label:'대출 이자',data:[F.loanInt,0,0,0],backgroundColor:RD},
+    {label:'공사비 증액 추정',data:[F.costAdd,0,0,0],backgroundColor:'#7C3AED'},
+    {label:'예상 시세',data:[0].concat(F.sc.map(s=>s.v)),backgroundColor:[0,1,2,3].map(i=>i?GR_:'transparent')}]},
+   options:{scales:{x:{stacked:true,ticks:{font:{size:11}}},y:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}},
+    plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:c=>c.parsed.y?`${c.dataset.label}: ${fmtM(c.parsed.y)}`:''}}}}});
+}
+
 
 myBuild();myRender();
 
