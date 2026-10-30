@@ -413,6 +413,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 .cl-tip{margin-bottom:10px;padding:10px 13px;background:var(--green-bg);border-radius:var(--r);border-left:3px solid var(--green);font-size:12px;color:#065F46;line-height:1.6;}
 
 /* sc 색상은 위에서 통합 정의 */
+#myDbBadge:empty{display:none}
+@media(max-width:820px){.my-grid{grid-template-columns:1fr !important;}}
 </style>
 </head>
 <body>
@@ -420,8 +422,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <!-- 모바일 하단 탭바 -->
 <div class="mobile-tabbar">
   <div class="mobile-tabbar-inner">
-    <button class="mob-tab active" onclick="sw('home',null);setMobTab(this)">
-      <span class="mob-tab-icon">⌂</span>홈
+    <button class="mob-tab active" onclick="sw('my1',null);setMobTab(this)">
+      <span class="mob-tab-icon">🏠</span>내 매물
     </button>
     <button class="mob-tab" onclick="sw('search',null);setMobTab(this)">
       <span class="mob-tab-icon">◎</span>검색
@@ -446,12 +448,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;">
     <div style="width:36px;height:4px;background:var(--gray-200);border-radius:2px;margin:0 auto 16px;"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button onclick="sw('my2',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>⏱</span>지금 확인</button>
+      <button onclick="sw('my3',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>📈</span>시세·미래가치</button>
+      <button onclick="sw('home',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>⌂</span>홈 대시보드</button>
       <button onclick="sw('mydash',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>★</span>마이 대시보드</button>
+      <button onclick="sw('stage',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>≡</span>단계 관리</button>
       <button onclick="sw('news',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>📰</span>뉴스·정책</button>
       <button onclick="sw('risk',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>📊</span>경제 지표</button>
       <button onclick="sw('legal',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>⚖</span>법령·판례</button>
       <button onclick="sw('tax',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>🧾</span>세금 계산기</button>
       <button onclick="sw('rights',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>📋</span>조합원 권리</button>
+      <button onclick="sw('investor',null);closeMobMenu();setMobTab(null)" style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--r-lg);background:#fff;cursor:pointer;font-family:var(--font);font-size:13px;"><span>💰</span>수익 계산기</button>
     </div>
   </div>
 </div>
@@ -491,50 +498,36 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div class="body-wrap">
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="sb-item active" data-tab="home" onclick="sw('home',this)" style="margin:8px 10px;padding:10px 12px;border-radius:var(--r);font-weight:700;font-size:13px;"><span class="sb-icon">⌂</span>홈</div>
-  <div class="sb-div"></div>
-  <div id="sbGroupAnchor"></div>
-  <div id="sbFreeGroup">
-  <div class="sb-sec">
-    <div class="sb-sec-lbl">정비사업 현황</div>
-    <div class="sb-item" data-tab="map" onclick="sw('map',this)"><span class="sb-icon">🗺</span>지도</div>
-    <div class="sb-item" data-tab="search" onclick="sw('search',this)"><span class="sb-icon">◎</span>구역 검색</div>
-    <div class="sb-item" data-tab="news" onclick="sw('news',this)"><span class="sb-icon">📰</span>뉴스·정책</div>
-    <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">📊</span>경제 지표</div>
-    <div class="sb-item" data-tab="trade" onclick="sw('trade',this)"><span class="sb-icon">₩</span>실거래가</div>
+  <div class="sb-sec" style="padding-top:8px;">
+    <div class="sb-sec-lbl" style="color:var(--blue);">내 매물 · 조합원</div>
+    <div class="sb-item active" data-tab="my1" onclick="sw('my1',this)"><span class="sb-icon">🏠</span>내 매물·분담금</div>
+    <div class="sb-item" data-tab="my2" onclick="sw('my2',this)"><span class="sb-icon">⏱</span>지금 확인 (단계·공사비·상환)</div>
+    <div class="sb-item" data-tab="my3" onclick="sw('my3',this)"><span class="sb-icon">📈</span>시세·미래가치</div>
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
-    <div class="sb-sec-lbl">법·제도</div>
-    <div class="sb-item" data-tab="legal" onclick="sw('legal',this)"><span class="sb-icon">⚖</span>법령·판례</div>
+    <div class="sb-sec-lbl">내 사업 참고 정보</div>
+    <div class="sb-item" data-tab="alert" onclick="sw('alert',this)"><span class="sb-icon">△</span>지연 경보<span class="sb-badge" id="sbBadge">-</span></div>
+    <div class="sb-item" data-tab="stage" onclick="sw('stage',this)"><span class="sb-icon">≡</span>단계 관리</div>
     <div class="sb-item" data-tab="tax" onclick="sw('tax',this)"><span class="sb-icon">🧾</span>세금 계산기</div>
     <div class="sb-item" data-tab="rights" onclick="sw('rights',this)"><span class="sb-icon">📋</span>조합원 권리</div>
-  </div>
-  </div>
-  <div class="sb-div"></div>
-  <div id="sbProGroup">
-  <div style="border-left:2px solid var(--blue);border-radius:0;margin:0 10px;padding-left:8px;">
-    <div style="font-size:9.5px;font-weight:700;color:var(--blue);letter-spacing:.05em;padding:6px 0 4px;">STANDARD <span style="font-weight:500;color:var(--gray-400);">(유료)</span></div>
-  </div>
-  <div class="sb-sec" style="padding-top:2px;">
-    <div class="sb-item" data-tab="mydash" onclick="sw('mydash',this)"><span class="sb-icon">★</span>마이 대시보드<span style="margin-left:auto;font-size:9px;font-weight:700;color:var(--blue);border:1px solid var(--blue-mid);background:var(--blue-light);padding:1px 6px;border-radius:4px;">AI 상담</span></div>
-    <div class="sb-item" style="padding-left:34px;font-size:11.5px;color:var(--gray-500);" onclick="goMydashSub('finance')">자금운용 계획</div>
-    <div class="sb-item" style="padding-left:34px;font-size:11.5px;color:var(--gray-500);" onclick="goMydashSub('futurevalue')">내 집 미래가치</div>
-    <div class="sb-item" data-tab="alert" onclick="sw('alert',this)"><span class="sb-icon">△</span>지연 경보<span class="sb-badge" id="sbBadge">-</span></div>
-  </div>
-  <div class="sb-div"></div>
-  <div style="border-left:2px solid #7F77DD;border-radius:0;margin:0 10px;padding-left:8px;">
-    <div style="font-size:9.5px;font-weight:700;color:#7F77DD;letter-spacing:.05em;padding:6px 0 4px;">PREMIUM <span style="font-weight:500;color:var(--gray-400);">(유료)</span></div>
-  </div>
-  <div class="sb-sec" style="padding-top:2px;">
-    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크</div>
-    <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
-    <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
-  </div>
+    <div class="sb-item" data-tab="trade" onclick="sw('trade',this)"><span class="sb-icon">₩</span>실거래가</div>
+    <div class="sb-item" data-tab="risk" onclick="sw('risk',this)"><span class="sb-icon">📊</span>경제 지표</div>
+    <div class="sb-item" data-tab="news" onclick="sw('news',this)"><span class="sb-icon">📰</span>뉴스·정책</div>
+    <div class="sb-item" data-tab="legal" onclick="sw('legal',this)"><span class="sb-icon">⚖</span>법령·판례</div>
   </div>
   <div class="sb-div"></div>
   <div class="sb-sec">
-    <div class="sb-item" data-tab="prism" onclick="sw('prism',this)" style="background:rgba(27,79,216,.08);border:1px solid rgba(27,79,216,.2);border-radius:var(--r);margin:0 4px;"><span class="sb-icon">🏢</span>PRISM <span style="font-size:10px;color:var(--gray-400);margin-left:4px;">(B2B)</span></div>
+    <div class="sb-sec-lbl">탐색 · 투자 데이터 (기존)</div>
+    <div class="sb-item" data-tab="home" onclick="sw('home',this)"><span class="sb-icon">⌂</span>홈 대시보드</div>
+    <div class="sb-item" data-tab="map" onclick="sw('map',this)"><span class="sb-icon">🗺</span>지도</div>
+    <div class="sb-item" data-tab="search" onclick="sw('search',this)"><span class="sb-icon">◎</span>구역 검색</div>
+    <div class="sb-item" data-tab="investor" onclick="sw('investor',this)"><span class="sb-icon">💰</span>수익 계산기</div>
+    <div class="sb-item" data-tab="compare" onclick="sw('compare',this)"><span class="sb-icon">📊</span>구역별 수익 비교</div>
+    <div class="sb-item" data-tab="trend" onclick="sw('trend',this)"><span class="sb-icon">📈</span>시세 추이</div>
+    <div class="sb-item" data-tab="riskboard" onclick="sw('riskboard',this)"><span class="sb-icon">🔍</span>조합 리스크 <span style="font-size:9px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:3px;margin-left:2px;">프리미엄</span></div>
+    <div class="sb-item" data-tab="mydash" onclick="sw('mydash',this)"><span class="sb-icon">★</span>마이 대시보드 (이전)</div>
+    <div class="sb-item" data-tab="prism" onclick="sw('prism',this)"><span class="sb-icon">🏢</span>PRISM <span style="font-size:10px;color:var(--gray-400);margin-left:4px;">(B2B)</span></div>
   </div>
   <div class="sb-bottom">
     <div class="sb-stat"><span class="sb-stat-l">총 데이터</span><span class="sb-stat-v">45,000건+</span></div>
@@ -546,18 +539,32 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <div class="content">
 
+<!-- ══ 내 매물 ══ -->
+<div id="tab-my1" class="tab-panel active">
+  <div class="page-h"><div><h2>내 매물 · 분담금 <span class="ph-badge">조합원</span></h2><p>매매가·감정가·권리가액(비례율)·분양가·분담금·대출을 한 번에</p></div></div>
+  <div style="display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:14px;align-items:start;" class="my-grid"><div id="my1Form"></div><div id="my1Out"></div></div>
+</div>
+<div id="tab-my2" class="tab-panel">
+  <div class="page-h"><div><h2>지금 확인 <span class="ph-badge">조합원</span></h2><p>추진 단계·지연 · 공사비 전망 · 월 상환액 · 조합 문의 스크립트</p></div></div>
+  <div style="display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:14px;align-items:start;" class="my-grid"><div id="my2Form"></div><div id="my2Out"></div></div>
+</div>
+<div id="tab-my3" class="tab-panel">
+  <div class="page-h"><div><h2>시세 · 미래가치 <span class="ph-badge">조합원</span></h2><p>주변 신축 시세와 비교하고, 입주 시점 가치를 시나리오로 확인</p></div></div>
+  <div style="display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:14px;align-items:start;" class="my-grid"><div id="my3Form"></div><div id="my3Out"></div></div>
+</div>
+
 <!-- ══ 홈 ══ -->
-<div id="tab-home" class="tab-panel active">
+<div id="tab-home" class="tab-panel">
   <div class="db-wrap">
     <div class="db-kpi-row">
-      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">전체 사업수</div><span class="kpi-icon">🏙</span></div><div class="kpi-val c-blue">1,174</div><div class="kpi-foot"><span class="kpi-sub">서울 25개 자치구</span><span class="kpi-tag t-neu">추진현황</span></div></div>
-      <div class="kpi-card" style="border-top:2px solid #7F77DD;"><div class="kpi-top"><div class="kpi-lbl">조합설립 이전단계</div><span class="kpi-icon">🌱</span></div><div class="kpi-val" style="color:#7F77DD;">324</div><div class="kpi-foot"><span class="kpi-sub">정비계획~추진위</span><span class="kpi-tag t-neu">27.6%</span></div></div>
-      <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">조합설립~준공</div><span class="kpi-icon">⚙</span></div><div class="kpi-val c-orange">611</div><div class="kpi-foot"><span class="kpi-sub">핵심 타겟 구간</span><span class="kpi-tag t-neu">52.0%</span></div></div>
-      <div class="kpi-card" style="border-top:2px solid var(--gray-400);"><div class="kpi-top"><div class="kpi-lbl">사업 막바지·종결</div><span class="kpi-icon">✕</span></div><div class="kpi-val" style="color:var(--gray-500);">214</div><div class="kpi-foot"><span class="kpi-sub">이전고시~조합청산</span><span class="kpi-tag t-neu">18.2%</span></div></div>
+      <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">총 정비구역</div><span class="kpi-icon">🏙</span></div><div class="kpi-val c-blue" id="kpiTot">—</div><div class="kpi-foot"><span class="kpi-sub">서울 25개 자치구</span><span class="kpi-tag t-neu" id="kpiTotSub">...</span></div></div>
+      <div class="kpi-card vc-green"><div class="kpi-top"><div class="kpi-lbl">준공 완료</div><span class="kpi-icon">✓</span></div><div class="kpi-val c-green" id="kpiDone">—</div><div class="kpi-foot"><span class="kpi-sub">9단계 달성</span><span class="kpi-tag t-up" id="kpiDoneR">...</span></div></div>
+      <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">사업 진행 중</div><span class="kpi-icon">⚙</span></div><div class="kpi-val c-orange" id="kpiActive">—</div><div class="kpi-foot"><span class="kpi-sub">3~8단계 구역</span><span class="kpi-tag t-neu">진행 중</span></div></div>
+      <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 경보</div><span class="kpi-icon">⚠</span></div><div class="kpi-val c-red" id="kpiAlert">—</div><div class="kpi-foot"><span class="kpi-sub">6기간+ 정체</span><span class="kpi-tag t-dn">즉시 점검</span></div></div>
     </div>
     <div class="db-row2">
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">정비몽땅 25.12</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 분포</div><span class="bdg bdg-blue">정비몽땅 25.12</span></div><div class="cc-body"><div class="cw"><canvas id="stageDonut"></canvas></div><div class="stage-leg" id="stageLeg"></div></div></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>구별 활성도</div><span class="bdg bdg-green">실데이터</span></div><div class="cc-body" style="overflow-y:auto;"><div class="dist-list" id="distHBar"><div style="color:var(--gray-400);text-align:center;padding:16px;font-size:12px;"><span class="spinner"></span>로딩 중</div></div></div></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 분포</div><span class="bdg bdg-blue">전체</span></div><div class="cc-body"><div class="cw"><canvas id="stageDonut"></canvas></div><div class="stage-leg" id="stageLeg"></div></div></div>
       <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>분기별 사업 현황</div><span class="bdg bdg-gray">2017~2025</span></div><div class="cc-body"><div class="cw"><canvas id="trendChart"></canvas></div></div></div>
     </div>
     <div class="db-row3">
@@ -573,7 +580,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
           <div class="al-list" id="alertListDB"><div style="color:var(--gray-400);padding:20px;text-align:center;font-size:12px;"><span class="spinner"></span>로딩 중...</div></div>
         </div>
       </div>
-      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 현황</div><span class="bdg bdg-blue">정비몽땅 25.12</span></div>
+      <div class="cc"><div class="cc-head"><div class="cc-title"><span class="cc-bar"></span>단계별 현황</div><span class="bdg bdg-blue">실데이터</span></div>
         <div class="cc-body" style="padding:0;overflow-y:auto;">
           <table class="stg-tbl"><thead><tr><th>단계</th><th>단계명</th><th>구역 수</th><th>비율</th><th>진행률</th></tr></thead>
           <tbody id="stageTbodyDB"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--gray-400);"><span class="spinner"></span>로딩 중...</td></tr></tbody></table>
@@ -585,11 +592,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 
 <!-- ══ 마이 대시보드 ══ -->
 <div id="tab-mydash" class="tab-panel">
-  <div class="page-h"><div><h2>마이 대시보드 <span class="ph-badge" style="background:#7F77DD;">Standard+</span></h2><p>내 조합원 프로젝트 현황 · 일정 · 대출 관리</p></div></div>
+  <div class="page-h"><div><h2>마이 대시보드 <span class="ph-badge" style="background:#7F77DD;">Premium+</span></h2><p>내 조합원 프로젝트 현황 · 일정 · 대출 관리</p></div></div>
   <div id="mydashLocked" class="locked-overlay" style="display:none;">
     <div style="font-size:32px;margin-bottom:12px;">🔒</div>
-    <div style="font-size:15px;font-weight:600;color:var(--gray-700);margin-bottom:6px;">Standard 이상 전용 기능입니다</div>
-    <div style="font-size:12px;color:var(--gray-400);margin-bottom:16px;">조합원 인증 후 Standard 플랜부터 이용 가능합니다</div>
+    <div style="font-size:15px;font-weight:600;color:var(--gray-700);margin-bottom:6px;">Premium 이상 전용 기능입니다</div>
+    <div style="font-size:12px;color:var(--gray-400);margin-bottom:16px;">조합원 인증 후 Premium 플랜부터 이용 가능합니다</div>
     <button class="btn-primary" onclick="openAuth()">로그인 / 회원가입</button>
   </div>
   <div id="mydashContent" style="display:none;">
@@ -715,35 +722,25 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
       </div>
     </div>
   </div>
+  <div class="ai-wrap">
+    <div class="ai-head"><div class="ai-av">AI</div><div><div class="ai-title">구역 AI 분석</div><div class="ai-desc">구역 선택 후 질문하세요</div></div></div>
+    <div class="ai-msgs" id="aiMsgs"><div class="ai-msg bot">구역을 선택하면 사업 현황, 단계 이력, 지연 여부, 투자 시사점을 분석합니다.</div></div>
+    <div class="ai-inp-row"><input class="ai-inp" type="text" placeholder="선택 구역에 대해 질문..." id="aiInp" onkeydown="if(event.key==='Enter')sendAI()"><button class="ai-send" onclick="sendAI()">↑</button></div>
+  </div>
 </div>
 
 <!-- ══ 지연 경보 ══ -->
 <div id="tab-alert" class="tab-panel">
-  <div class="page-h"><div><h2>지연 경보</h2><p>내 사업장 지연 현황 · 표준 소요기간 대비 분석</p></div></div>
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-h"><div class="card-title">내 사업장 지연 현황</div></div>
-    <div id="myDelayPanel"><div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>로딩 중...</div></div>
-  </div>
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-h"><div class="card-title">일반적인 단계별 표준 소요기간</div><span class="bdg bdg-gray">일반 참고치</span></div>
-    <table class="dtable"><thead><tr><th>구간</th><th style="text-align:right;">표준 소요기간</th></tr></thead>
-    <tbody>
-      <tr><td>추진위원회 → 조합설립인가</td><td style="text-align:right;font-family:var(--mono);">약 12개월</td></tr>
-      <tr><td>조합설립인가 → 사업시행인가</td><td style="text-align:right;font-family:var(--mono);">약 24개월</td></tr>
-      <tr><td>사업시행인가 → 관리처분인가</td><td style="text-align:right;font-family:var(--mono);">약 12개월</td></tr>
-      <tr><td>관리처분인가 → 착공</td><td style="text-align:right;font-family:var(--mono);">약 12개월</td></tr>
-      <tr><td>착공 → 준공</td><td style="text-align:right;font-family:var(--mono);">약 36개월</td></tr>
-    </tbody></table>
-    <div style="font-size:11px;color:var(--gray-400);margin-top:8px;">※ 업계에서 통상 참고하는 수치이며, 실제 구별·사업장별 소요기간과 다를 수 있습니다. 구 평균·서울시 평균은 실제 인가일자 데이터가 충분히 쌓이는 대로 반영 예정입니다.</div>
-  </div>
+  <div class="page-h"><div><h2>지연 경보</h2><p>최근 3기간 이상 동일 단계 정체 구역 자동 감지</p></div></div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
     <div class="kpi-card vc-red"><div class="kpi-top"><div class="kpi-lbl">고위험 (6기간+)</div></div><div class="kpi-val c-red" id="aHigh">—</div><div class="kpi-foot"><span class="kpi-sub">즉시 점검</span><span class="kpi-tag t-dn">고위험</span></div></div>
     <div class="kpi-card vc-orange"><div class="kpi-top"><div class="kpi-lbl">중위험 (4~5기간)</div></div><div class="kpi-val c-orange" id="aMid">—</div><div class="kpi-foot"><span class="kpi-sub">모니터링 강화</span><span class="kpi-tag t-dn">중위험</span></div></div>
     <div class="kpi-card" style="border-top:2px solid #B45309;"><div class="kpi-top"><div class="kpi-lbl">주의 (3기간)</div></div><div class="kpi-val" style="color:#B45309;" id="aLow">—</div><div class="kpi-foot"><span class="kpi-sub">관찰 필요</span><span class="kpi-tag t-neu">주의</span></div></div>
     <div class="kpi-card vc-blue"><div class="kpi-top"><div class="kpi-lbl">전체 감지</div></div><div class="kpi-val c-blue" id="aTot">—</div><div class="kpi-foot"><span class="kpi-sub">경보 대상 합계</span><span class="kpi-tag t-neu">집계</span></div></div>
   </div>
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-h"><div class="card-title">구별 지연 분포</div><span class="bdg bdg-red">실데이터</span></div><div class="cw2" style="height:200px;"><canvas id="alertDistChart"></canvas></div>
+  <div class="g31" style="margin-bottom:14px;">
+    <div class="card"><div class="card-h"><div class="card-title">구별 지연 분포</div><span class="bdg bdg-red">실데이터</span></div><div class="cw2" style="height:200px;"><canvas id="alertDistChart"></canvas></div></div>
+    <div class="card"><div class="card-h"><div class="card-title">단계별 지연</div></div><div class="cw2" style="height:200px;"><canvas id="alertStageChart"></canvas></div></div>
   </div>
   <div class="sec-lbl">지연 구역 목록</div>
   <div class="al-full" id="alertListFull"><div style="color:var(--gray-400);padding:20px;text-align:center;"><span class="spinner"></span>로딩 중...</div></div>
@@ -1290,7 +1287,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <!-- ══ 구역별 수익 비교 / 시세 추이 / PRISM ══ -->
 <div id="tab-compare" class="tab-panel">
   <div class="page-h">
-    <div><h2>재개발 완공 수익률</h2>
+    <div><h2>재개발 완공 수익률 <span class="ph-badge">투자 데이터</span></h2>
     <p>입주 시점 vs 현재 평당가 · 자치구 평균 점선 비교</p></div>
     <span class="bdg bdg-green" style="align-self:center;">참고 데이터</span>
   </div>
@@ -1341,7 +1338,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div id="tab-trend" class="tab-panel">
   <div style="max-width:1100px;margin:0 auto;">
   <div class="page-h">
-    <div><h2>시세 추이</h2><p>자치구별 아파트 평당가 추이 · 재개발 완료 구역 수익률</p></div>
+    <div><h2>시세 추이 <span class="ph-badge">투자 데이터</span></h2><p>자치구별 아파트 평당가 추이 · 재개발 완료 구역 수익률</p></div>
     <div style="display:flex;gap:8px;align-items:center;">
       <select id="trendGu" style="padding:6px 11px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:#fff;cursor:pointer;outline:none;" onchange="loadTrend()">
         <option value="11650">서초구</option><option value="11680">강남구</option><option value="11710">송파구</option><option value="11590">동작구</option><option value="11440">마포구</option><option value="11410">서대문구</option><option value="11170">용산구</option><option value="11200">성동구</option><option value="11290">성북구</option><option value="11560">영등포구</option>
@@ -1401,8 +1398,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 <div id="tab-riskboard" class="tab-panel">
   <div class="page-h">
     <div>
-      <h2>조합 리스크</h2>
-      <p>사업 지연·언론 보도 기반 객관적 데이터 · 조합원을 위한 리스크 확인 자료</p>
+      <h2>조합 리스크 <span class="ph-badge">투자 참고</span></h2>
+      <p>사업 지연·언론 보도 기반 객관적 데이터 · 투자 판단 참고용</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <select id="rbGuFilter" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:#fff;outline:none;" onchange="renderRiskBoard()">
@@ -1436,7 +1433,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
   <!-- 면책 고지 -->
   <div style="margin-bottom:14px;padding:11px 14px;background:#FEF9EC;border-radius:var(--r);border-left:3px solid #F59E0B;font-size:12px;color:#78350F;line-height:1.7;">
     ⚠ 이 자료는 <strong>사업 지연 기간·언론 보도 건수</strong> 등 공개 데이터 기반 참고 지표입니다.
-    특정 조합·조합장에 대한 법적 판단이 아니며, <strong>내 사업장 상황을 파악하는 보조 자료</strong>로만 활용하세요.
+    특정 조합·조합장에 대한 법적 판단이 아니며, <strong>투자 의사결정의 보조 자료</strong>로만 활용하세요.
     출처: 서울시 정비사업 추진현황(25년 12월), 네이버뉴스 API
   </div>
 
@@ -1622,19 +1619,6 @@ function updateAuthUI(){
     avatarIcon.textContent='👤';menuEmail.textContent='—';menuTier.textContent='로그인이 필요합니다';
     menuLogout.style.display='none';menuLogin.style.display='block';
   }
-  reorderSidebar();
-}
-
-function reorderSidebar(){
-  const anchor=document.getElementById('sbGroupAnchor');
-  const freeGroup=document.getElementById('sbFreeGroup');
-  const proGroup=document.getElementById('sbProGroup');
-  if(!anchor||!freeGroup||!proGroup)return;
-  if(currentUser){
-    anchor.after(proGroup,freeGroup);
-  }else{
-    anchor.after(freeGroup,proGroup);
-  }
 }
 
 function openAuth(){setAuthMode('login');document.getElementById('authOverlay').style.display='flex';setTimeout(()=>document.getElementById('authEmail').focus(),100);}
@@ -1730,32 +1714,6 @@ const SB='https://jhmhocgzjstwrstjwopm.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpobWhvY2d6anN0d3JzdGp3b3BtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMDIzMzEsImV4cCI6MjA5MTU3ODMzMX0.WHk3XfJhgZLELNIgc88oIx7oixvFICr0NoV_ZiBdDpY';
 const SN=['','구역지정','추진위','조합설립','건축심의','사업시행','관리처분','이주','착공','준공'];
 const SC=['','#9CA3AF','#1D4ED8','#6D28D9','#0369A1','#065F46','#92400E','#B45309','#1E3A5F','#059669'];
-// 정비몽땅 사업장목록(2025.12 기준, 1174건) 실제 진행단계 집계 — 정적 데이터
-const STAGE_DETAIL=[
-  {name:'정비계획 수립',count:73,color:'#9CA3AF'},
-  {name:'안전진단',count:10,color:'#9CA3AF'},
-  {name:'정비구역지정',count:41,color:'#9CA3AF'},
-  {name:'지구단위계획수립/건축심의/교통심의',count:8,color:'#9CA3AF'},
-  {name:'추진위원회승인',count:159,color:'#1D4ED8'},
-  {name:'조합설립인가',count:369,color:'#6D28D9'},
-  {name:'조합원 모집신고',count:27,color:'#6D28D9'},
-  {name:'사업시행인가',count:91,color:'#065F46'},
-  {name:'관리처분인가',count:63,color:'#92400E'},
-  {name:'철거',count:9,color:'#B45309'},
-  {name:'착공',count:37,color:'#1E3A5F'},
-  {name:'분양',count:16,color:'#1E3A5F'},
-  {name:'준공인가',count:32,color:'#059669'},
-  {name:'이전고시',count:51,color:'#4B5563'},
-  {name:'조합청산',count:59,color:'#4B5563'},
-  {name:'조합해산',count:104,color:'#4B5563'},
-  {name:'지역주택조합·리모델링',count:25,color:'#D1D5DB'},
-];
-const STAGE_SUMMARY=[
-  {name:'조합설립 이전',count:324,color:'#7F77DD'},
-  {name:'조합설립~준공(핵심 타겟)',count:611,color:'#D97706'},
-  {name:'사업 막바지·종결',count:214,color:'#9CA3AF'},
-  {name:'지역주택·리모델링',count:25,color:'#D1D5DB'},
-];
 const PERIODS=[];
 for(let y=2017;y<=2025;y++)for(let q of['03','06','09','12']){if(y===2025&&+q>12)break;PERIODS.push(`${y}-${q}`);}
 let ALL=[],ALERTS=[],SD={},DD={},CH={};
@@ -1808,7 +1766,11 @@ async function loadAll(){
       return d>=new Date('2026-01-01')&&d<=new Date('2026-03-31');
     }).length:0;
 
+    document.getElementById('kpiTot').textContent=tot.toLocaleString();
     document.getElementById('sbTot').textContent=tot.toLocaleString();
+    document.getElementById('kpiDone').textContent=newQ1.toLocaleString();
+    document.getElementById('kpiDoneR').textContent='신규';
+    document.getElementById('kpiActive').textContent=active.toLocaleString();
 
     // 단계별 분포: redev_projects_seoul 기준
     for(let i=1;i<=9;i++)SD[i]=0;
@@ -1847,39 +1809,26 @@ async function detectAlerts(){
     const h=al.filter(a=>a.stuck>=6).length,m=al.filter(a=>a.stuck>=4&&a.stuck<6).length,l=al.filter(a=>a.stuck===3).length;
     document.getElementById('aHigh').textContent=h;document.getElementById('aMid').textContent=m;
     document.getElementById('aLow').textContent=l;document.getElementById('aTot').textContent=al.length;
-    document.getElementById('sbBadge').textContent=h;
+    document.getElementById('kpiAlert').textContent=h;document.getElementById('sbBadge').textContent=h;
     document.getElementById('alertCountBadge').textContent='총 '+al.length+'건';
     renderAlertsDB(al);renderAlertsFull(al);drawAlertCharts(al);
   }catch(e){console.error(e);}
 }
 
-const GU_COUNTS={'영등포구':121,'성북구':79,'서초구':70,'중랑구':68,'동작구':60,'강동구':58,'송파구':56,'은평구':52,'용산구':50,'강남구':49,'마포구':49,'강북구':47,'서대문구':47,'동대문구':46,'양천구':46,'강서구':43,'구로구':41,'관악구':36,'성동구':35,'광진구':27,'노원구':26,'금천구':24,'도봉구':20,'종로구':13,'중구':11};
-const GU_LAWD_CODE={'종로구':'11110','중구':'11140','용산구':'11170','성동구':'11200','광진구':'11215','동대문구':'11230','중랑구':'11260','성북구':'11290','강북구':'11305','도봉구':'11320','노원구':'11350','은평구':'11380','서대문구':'11410','마포구':'11440','양천구':'11470','강서구':'11500','구로구':'11530','금천구':'11545','영등포구':'11560','동작구':'11590','관악구':'11620','서초구':'11650','강남구':'11680','송파구':'11710','강동구':'11740'};
-const STAGE_REMAIN_YEARS={1:7,2:6,3:5,4:4,5:3,6:2,7:1,8:0.5,9:0};
-const GLOBAL_COPI_DATA=[
-  {date:'25년5월',value:131.17},{date:'25년6월',value:131.35},
-  {date:'25년7월',value:131.52},{date:'25년8월',value:131.68},
-  {date:'25년9월',value:131.85},{date:'25년10월',value:132.12},
-  {date:'25년11월',value:132.45},{date:'25년12월',value:132.70},
-  {date:'26년1월',value:133.52},{date:'26년2월',value:133.76},
-  {date:'26년3월',value:134.53},{date:'26년4월',value:136.88}
-];
-const BASE_COST_PER_M2_2020=1800000;
-function costPerM2(copiValue){return Math.round(BASE_COST_PER_M2_2020*(copiValue/100));}
 function drawDistHBar(){
-  const sorted=Object.entries(GU_COUNTS).sort((a,b)=>b[1]-a[1]);const max=sorted[0]?.[1]||1;
+  const sorted=Object.entries(DD).sort((a,b)=>b[1]-a[1]);const max=sorted[0]?.[1]||1;
   document.getElementById('distHBar').innerHTML=sorted.map(([nm,ct],i)=>
     `<div class="dist-row"><div class="d-rk ${i<3?'t':''}">${i+1}</div><div class="d-nm">${nm}</div><div class="d-bw"><div class="d-bf" style="width:${Math.round(ct/max*100)}%;"></div></div><div class="d-ct">${ct}</div></div>`).join('');
 }
 function drawDonut(){
-  const tot=STAGE_SUMMARY.reduce((a,b)=>a+b.count,0)||1;
+  const vals=Object.values(SD),tot=vals.reduce((a,b)=>a+b,0)||1;
   if(CH.donut)CH.donut.destroy();
   CH.donut=new Chart(document.getElementById('stageDonut'),{type:'doughnut',
-    data:{labels:STAGE_SUMMARY.map(s=>s.name),datasets:[{data:STAGE_SUMMARY.map(s=>s.count),backgroundColor:STAGE_SUMMARY.map(s=>s.color),borderWidth:2,borderColor:'#fff',hoverOffset:4}]},
+    data:{labels:Object.keys(SD).map(k=>SN[k]),datasets:[{data:vals,backgroundColor:Object.keys(SD).map(k=>SC[k]),borderWidth:2,borderColor:'#fff',hoverOffset:4}]},
     options:{...OPTS,cutout:'65%',plugins:{...OPTS.plugins,tooltip:{...OPTS.plugins.tooltip,callbacks:{label:c=>`${c.label}: ${c.raw}개 (${Math.round(c.raw/tot*100)}%)`}}}}
   });
-  document.getElementById('stageLeg').innerHTML=STAGE_SUMMARY.map(s=>
-    `<div class="sl-i"><div class="sl-dot" style="background:${s.color};"></div>${s.name} <b style="font-family:var(--mono);">${s.count}</b></div>`).join('');
+  document.getElementById('stageLeg').innerHTML=Object.entries(SD).map(([k,v])=>
+    `<div class="sl-i"><div class="sl-dot" style="background:${SC[k]};"></div>${SN[k]} <b style="font-family:var(--mono);">${v}</b></div>`).join('');
 }
 function drawTrend(projects){
   // redev_projects_seoul의 zone_designated_first 기준 연도별 신규 구역지정 건수
@@ -1916,6 +1865,12 @@ function drawAlertCharts(al){
     data:{labels:s.map(d=>d[0].replace('구','')),datasets:[{data:s.map(d=>d[1]),backgroundColor:'rgba(220,38,38,.7)',borderColor:'#DC2626',borderWidth:1,borderRadius:4,borderSkipped:false}]},
     options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11}}}}}
   });
+  const sm={};al.forEach(a=>{sm[a.score]=(sm[a.score]||0)+1;});const sk=Object.keys(sm).sort();
+  if(CH.astage)CH.astage.destroy();
+  CH.astage=new Chart(document.getElementById('alertStageChart'),{type:'doughnut',
+    data:{labels:sk.map(k=>SN[k]),datasets:[{data:sk.map(k=>sm[k]),backgroundColor:sk.map(k=>SC[k]),borderWidth:2,borderColor:'#fff'}]},
+    options:{...OPTS,cutout:'55%',plugins:{...OPTS.plugins,legend:{display:true,position:'bottom',labels:{color:'#6B7280',font:{size:10,family:'IBM Plex Sans KR'},padding:8,boxWidth:10}}}}
+  });
 }
 function drawStageBar(){
   const labels=Object.keys(SD).map(k=>SN[k]),vals=Object.values(SD),cols=Object.keys(SD).map(k=>SC[k]);
@@ -1931,11 +1886,9 @@ function drawStageTable(){
     <tr><td><span class="bdg ${k==9?'bdg-green':k>=7?'bdg-red':k>=5?'bdg-orange':'bdg-blue'}">${k}단계</span></td><td>${SN[k]}</td><td style="font-family:var(--mono);font-weight:600;">${v.toLocaleString()}</td><td style="font-family:var(--mono);font-weight:600;">${Math.round(v/tot*100)}%</td><td><div style="background:var(--gray-100);height:4px;border-radius:2px;overflow:hidden;width:90px;"><div style="height:100%;border-radius:2px;background:${SC[k]};width:${Math.round(v/tot*100)}%;"></div></div></td></tr>`).join('');
 }
 function drawStageTbodyDB(){
-  const tot=STAGE_DETAIL.reduce((a,b)=>a+b.count,0)||1;
-  document.getElementById('stageTbodyDB').innerHTML=STAGE_DETAIL.map(s=>{
-    const pct=Math.round(s.count/tot*100);
-    return `<tr><td><span class="bdg" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}55;">${s.count}건</span></td><td style="font-size:11.5px;">${s.name}</td><td style="font-family:var(--mono);font-weight:600;">${s.count.toLocaleString()}</td><td style="font-family:var(--mono);font-weight:600;">${pct}%</td><td><div class="pw"><div class="pf" style="width:${pct}%;background:${s.color};"></div></div></td></tr>`;
-  }).join('');
+  const tot=Object.values(SD).reduce((a,b)=>a+b,0)||1;
+  document.getElementById('stageTbodyDB').innerHTML=Object.entries(SD).map(([k,v])=>`
+    <tr><td><span class="bdg ${k==9?'bdg-green':k>=7?'bdg-red':k>=5?'bdg-orange':'bdg-blue'}">${k}</span></td><td style="font-size:11.5px;">${SN[k]}</td><td style="font-family:var(--mono);font-weight:600;">${v.toLocaleString()}</td><td style="font-family:var(--mono);font-weight:600;">${Math.round(v/tot*100)}%</td><td><div class="pw"><div class="pf" style="width:${Math.round(v/tot*100)}%;background:${SC[k]};"></div></div></td></tr>`).join('');
 }
 
 function renderAlertsDB(al){
@@ -2095,6 +2048,8 @@ async function selZ(name){
   document.getElementById('tlGrid').innerHTML=
     `<div class="tl-hrow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm" style="font-size:9.5px;color:var(--gray-400);padding:5px 10px;">기간</div>${dynPeriods.map(p=>`<div class="tl-cell" style="padding:5px 0;"><div class="tl-plbl">${p.slice(2).replace('-','Q')}</div></div>`).join('')}</div>
     <div class="tl-drow" style="display:grid;grid-template-columns:${cols};min-width:${130+dynPeriods.length*36}px;"><div class="tl-nm">${name.length>14?name.slice(0,14)+'…':name}</div>${dynPeriods.map(p=>{const sc=pm[p]||0;const color=SC[sc];return sc&&color?`<div class="tl-cell"><div class="tl-dot" style="background:${color};border-color:${color};" title="${p}: ${SN[sc]}(${sc}단계)"></div></div>`:`<div class="tl-cell"><div class="tl-mt"></div></div>`;}).join('')}</div>`;
+  const ctx=recs.slice(-5).map(r=>`${r.period}: ${r.stage}(${r.stage_score}단계)`).join(', ');
+  document.getElementById('aiMsgs').innerHTML=`<div class="ai-msg bot"><strong>[${name}]</strong> 최근 이력: ${ctx}<br><br>이 구역에 대해 질문하거나 분석을 요청하세요.</div>`;
   if(!ALL.find(r=>r.project_name===name))ALL=[...ALL,...recs];
 }
 function jumpZ(name){sw('search',document.querySelector('[data-tab="search"]'));document.getElementById('zoneInp').value=name;searchZ(name);}
@@ -2330,33 +2285,15 @@ function goToSearchFromMap(){
 }
 
 // ── 마이 대시보드 ──
-let myProjects=[],selectedProjectId=null,mydashSubTab='overview',curMydashProj=null;
+let myProjects=[],selectedProjectId=null;
 
 async function renderMyDash(){
   const locked=document.getElementById('mydashLocked');
   const content=document.getElementById('mydashContent');
+  if(!currentUser){locked.style.display='flex';content.style.display='none';return;}
+  if(!canAccess('premium')){locked.style.display='flex';content.style.display='none';return;}
   locked.style.display='none';content.style.display='block';
-  if(!currentUser){
-    renderSampleMyDash();
-    return;
-  }
   await loadMyProjects();
-}
-
-function renderSampleMyDash(){
-  document.getElementById('myProjCount').textContent='미리보기';
-  document.getElementById('aiUsageDisplay').textContent='로그인 후 이용 가능';
-  const list=document.getElementById('myProjList');
-  list.innerHTML='<div class="my-proj-item active">신영1 (샘플)</div>';
-  const sample={id:'sample',project_name:'신영1',gu_name:'종로구',mortgage_amount:38000,mortgage_rate:3.8,moving_loan_amount:0,moving_loan_rate:0,memo:''};
-  renderProjectDetail(sample);
-  const detail=document.getElementById('myProjDetail');
-  if(detail){
-    const banner=document.createElement('div');
-    banner.style.cssText='margin-bottom:12px;padding:10px 14px;background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:var(--r);font-size:12px;color:var(--navy);';
-    banner.innerHTML='👀 <strong>미리보기 모드</strong> — 신영1 구역 샘플 데이터입니다. 로그인하면 내 구역으로 등록해 실제 데이터를 관리할 수 있어요. <span style="color:var(--blue);cursor:pointer;font-weight:600;" onclick="openAuth()">로그인 →</span>';
-    detail.prepend(banner);
-  }
 }
 
 async function loadMyProjects(){
@@ -2381,64 +2318,29 @@ function selectProject(id){
 }
 
 function renderProjectDetail(proj){
-  curMydashProj=proj;
-  mydashSubTab='overview';
-  renderMydashSub();
-}
-
-function goMydashSub(tab){
-  sw('mydash',document.querySelector('[data-tab="mydash"]'));
-  setTimeout(()=>{mydashSubTab=tab;renderMydashSub();},200);
-}
-
-function switchMydashSub(tab){
-  mydashSubTab=tab;
-  renderMydashSub();
-}
-
-function mydashNavHtml(){
-  const tabs=[{k:'overview',l:'개요'},{k:'finance',l:'자금운용 계획'},{k:'futurevalue',l:'내 집 미래가치'}];
-  return `<div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--gray-100);">${tabs.map(t=>
-    `<button onclick="switchMydashSub('${t.k}')" style="padding:8px 14px;font-size:12.5px;font-weight:600;border:none;background:none;cursor:pointer;font-family:var(--font);color:${mydashSubTab===t.k?'var(--blue)':'var(--gray-400)'};border-bottom:2px solid ${mydashSubTab===t.k?'var(--blue)':'transparent'};margin-bottom:-1px;">${t.l}</button>`
-  ).join('')}<button onclick="sw('alert',document.querySelector('[data-tab=\\'alert\\']'))" style="padding:8px 14px;font-size:12.5px;font-weight:600;border:none;background:none;cursor:pointer;font-family:var(--font);color:var(--gray-400);border-bottom:2px solid transparent;margin-bottom:-1px;margin-left:auto;">지연 경보 →</button></div>`;
-}
-
-function renderMydashSub(){
-  const proj=curMydashProj;
-  if(!proj)return;
   const zoneData=ALL.filter(r=>r.project_name===proj.project_name);
   const lastStage=zoneData.sort((a,b)=>b.period>a.period?1:-1)[0];
   const stageScore=lastStage?.stage_score||0;
-  const nav=mydashNavHtml();
-  let body='';
-  if(mydashSubTab==='finance')body=renderFinanceTab(proj,stageScore);
-  else if(mydashSubTab==='futurevalue')body=renderFutureValueTab(proj,stageScore);
-  else body=renderOverviewTab(proj,stageScore,lastStage);
-  document.getElementById('myProjDetail').innerHTML=nav+body;
-  if(mydashSubTab==='futurevalue')initFvTab(proj.id,proj.gu_name||'',stageScore);
-  if(mydashSubTab==='finance')setTimeout(()=>initFinanceTab(proj.id,stageScore,proj.gu_name||''),30);
-}
-
-function renderOverviewTab(proj,stageScore,lastStage){
+  const mortgageMonthly=proj.mortgage_amount&&proj.mortgage_rate?Math.round(proj.mortgage_amount*10000*(proj.mortgage_rate/100)/12):0;
+  const movingMonthly=proj.moving_loan_amount&&proj.moving_loan_rate?Math.round(proj.moving_loan_amount*10000*(proj.moving_loan_rate/100)/12):0;
+  const totalMonthly=mortgageMonthly+movingMonthly;
   const stages=[{n:'구역지정',s:1},{n:'추진위',s:2},{n:'조합설립',s:3},{n:'사업시행',s:4},{n:'관리처분',s:5},{n:'이주',s:6},{n:'착공',s:7},{n:'분양',s:8},{n:'준공',s:9}];
   const scheduleHtml=`<div class="schedule-bar">${stages.map(st=>{
     const cls=st.s<stageScore?'done':st.s===stageScore?'current':'future';
     return`<div class="sch-step"><div class="sch-dot ${cls}">${st.s<stageScore?'✓':st.s}</div><div class="sch-label">${st.n}</div><div class="sch-date" style="color:${st.s===stageScore?'var(--blue)':'var(--gray-400)'};">${st.s===stageScore?'▶ 현재':''}</div></div>`;
   }).join('')}</div>`;
-  return `
+  document.getElementById('myProjDetail').innerHTML=`
     <div class="card">
       <div class="card-h">
         <div class="card-title">${proj.project_name}</div>
         <div style="display:flex;gap:6px;">
-          ${proj.id==='sample'
-            ? '<span style="font-size:11px;padding:5px 10px;background:var(--gray-50);color:var(--gray-400);border-radius:var(--r);">미리보기</span>'
-            : `<button style="font-size:11px;padding:5px 10px;background:var(--red-bg);color:var(--red);border:1px solid #FECACA;border-radius:var(--r);cursor:pointer;" onclick="deleteProject(${proj.id})">삭제</button>`}
+          <button style="font-size:11px;padding:5px 10px;background:var(--red-bg);color:var(--red);border:1px solid #FECACA;border-radius:var(--r);cursor:pointer;" onclick="deleteProject(${proj.id})">삭제</button>
         </div>
       </div>
       <div class="my-kpi-row" style="margin-bottom:14px;">
         <div style="background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:var(--r);padding:12px;"><div style="font-size:10px;color:var(--blue);margin-bottom:4px;font-weight:600;">현재 단계</div><div style="font-size:14px;font-weight:600;color:var(--navy);">${lastStage?.stage||'데이터 없음'}</div></div>
+        <div style="background:var(--red-bg);border:1px solid #FECACA;border-radius:var(--r);padding:12px;"><div style="font-size:10px;color:var(--red);margin-bottom:4px;font-weight:600;">월 이자 부담</div><div style="font-size:14px;font-weight:600;color:var(--red);">${totalMonthly?totalMonthly.toLocaleString()+'원':'미입력'}</div></div>
         <div style="background:var(--gray-50);border:1px solid var(--border);border-radius:var(--r);padding:12px;"><div style="font-size:10px;color:var(--gray-400);margin-bottom:4px;">구역 위치</div><div style="font-size:14px;font-weight:600;">${proj.gu_name||'—'}</div></div>
-        <div style="background:var(--gray-50);border:1px solid var(--border);border-radius:var(--r);padding:12px;cursor:pointer;" onclick="sw('alert',document.querySelector('[data-tab=\\'alert\\']'))"><div style="font-size:10px;color:var(--gray-400);margin-bottom:4px;">지연 현황</div><div style="font-size:14px;font-weight:600;color:var(--blue);">지연 경보 보기 →</div></div>
       </div>
       <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">사업추진 일정</div>
       ${scheduleHtml}
@@ -2450,500 +2352,31 @@ function renderOverviewTab(proj,stageScore,lastStage){
             단계별 조합원 체크리스트
             <span style="font-size:10px;font-weight:400;color:var(--gray-400);">${stageScore ? SN[stageScore]+'('+stageScore+'단계)' : '단계 정보 없음'}</span>
           </div>
-          <span style="font-size:10px;color:var(--blue);cursor:pointer;" onclick="sw('rights',document.querySelector('[data-tab=\\'rights\\']'))">법령 상세 보기 →</span>
+          <span style="font-size:10px;color:var(--blue);cursor:pointer;" onclick="sw('rights',document.querySelector('[data-tab=\'rights\']'))">법령 상세 보기 →</span>
         </div>
         ${stageScore ? renderChecklist(stageScore, proj.id) : '<div style="font-size:12px;color:var(--gray-400);">구역 단계 정보를 불러올 수 없습니다</div>'}
-        <div style="margin-top:12px;padding:12px 14px;background:var(--gray-50);border:1px dashed var(--gray-300);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div>
-            <div style="font-size:12.5px;font-weight:600;color:var(--gray-500);display:flex;align-items:center;gap:6px;">📨 정보공개청구 자동생성 <span style="font-size:9.5px;font-weight:700;color:#fff;background:var(--gray-400);padding:1px 7px;border-radius:10px;">개발 중</span></div>
-            <div style="font-size:11px;color:var(--gray-400);margin-top:3px;">도시정비법 제124조 근거, 조합에 보낼 정보공개 요청 공문을 자동으로 만들어드려요</div>
-          </div>
-          <button disabled style="padding:7px 14px;background:var(--gray-200);color:var(--gray-400);border:none;border-radius:var(--r);font-size:11.5px;font-weight:600;cursor:not-allowed;white-space:nowrap;">공문 생성</button>
-        </div>
       </div>
 
       <div style="margin-top:14px;">
         <div style="font-size:11px;font-weight:600;color:var(--gray-600);margin-bottom:6px;">📝 내 메모 <span style="font-size:10px;color:var(--gray-400);font-weight:400;">(조합 공지, 특이사항 자유 입력)</span></div>
-        <textarea id="projMemo_${proj.id}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;font-family:var(--font);resize:vertical;min-height:80px;outline:none;box-sizing:border-box;" placeholder="조합에서 공지한 일정, 특이사항 등을 자유롭게 메모하세요..." ${proj.id==='sample'?'disabled':''}>${proj.memo||''}</textarea>
-        <button class="btn-primary" style="margin-top:6px;font-size:11px;padding:6px 14px;" onclick="${proj.id==='sample'?'openAuth()':`saveMemo(${proj.id})`}">${proj.id==='sample'?'로그인 후 메모 작성':'메모 저장'}</button>
+        <textarea id="projMemo_${proj.id}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;font-family:var(--font);resize:vertical;min-height:80px;outline:none;box-sizing:border-box;" placeholder="조합에서 공지한 일정, 특이사항 등을 자유롭게 메모하세요...">${proj.memo||''}</textarea>
+        <button class="btn-primary" style="margin-top:6px;font-size:11px;padding:6px 14px;" onclick="saveMemo(${proj.id})">메모 저장</button>
       </div>
     </div>
+    ${(proj.mortgage_amount||proj.moving_loan_amount)?`
+    <div class="card">
+      <div class="card-h"><div class="card-title">대출 현황</div></div>
+      <div class="loan-row">
+        ${proj.mortgage_amount?`<div class="loan-card"><div class="loan-label">담보대출 이자 (월)</div><div class="loan-val">${mortgageMonthly.toLocaleString()}원</div><div class="loan-sub">${proj.mortgage_amount.toLocaleString()}만원 · 연 ${proj.mortgage_rate}%</div></div>`:''}
+        ${proj.moving_loan_amount?`<div class="loan-card"><div class="loan-label">이주비대출 이자 (월)</div><div class="loan-val">${movingMonthly.toLocaleString()}원</div><div class="loan-sub">${proj.moving_loan_amount.toLocaleString()}만원 · 연 ${proj.moving_loan_rate}%</div></div>`:''}
+      </div>
+      ${totalMonthly?`<div style="margin-top:10px;padding:12px;background:var(--red-bg);border-radius:var(--r);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:600;color:var(--red);">월 총 이자 부담</span><span style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--red);">${totalMonthly.toLocaleString()}원</span></div>`:''}
+    </div>`:''}
     <div class="card">
       <div class="ai-head" style="border-radius:var(--r) var(--r) 0 0;margin:-16px -18px 12px;padding:10px 16px;"><div class="ai-av">AI</div><div><div class="ai-title">AI 상담 <span style="font-size:10px;opacity:.6;">(도시정비법 기반)</span></div><div class="ai-desc">월 30회 · 잔여 ${Math.max(0,30-(currentProfile?.ai_usage_count||0))}회</div></div></div>
-      <div id="myAiMsgs" style="min-height:100px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"><div class="ai-msg bot">이 구역의 남은 절차와 예상 소요 시간이 궁금하면 물어보세요. 예: "앞으로 뭐가 남았고 얼마나 걸려?"</div></div>
-      <div style="display:flex;gap:7px;"><input class="ai-inp" type="text" id="myAiInp" placeholder="예: 앞으로 남은 절차와 예상 기간이 궁금해요" ${proj.id==='sample'?'onclick="openAuth()" readonly':`onkeydown="if(event.key==='Enter')sendMyAI(${proj.id})"`}><button class="ai-send" onclick="${proj.id==='sample'?'openAuth()':`sendMyAI(${proj.id})`}">↑</button></div>
+      <div id="myAiMsgs" style="min-height:100px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"><div class="ai-msg bot">이 구역 관련 법적 절차, 일정, 조합원 권리 등을 질문해보세요.</div></div>
+      <div style="display:flex;gap:7px;"><input class="ai-inp" type="text" id="myAiInp" placeholder="예: 착공한다는데 법적 절차가 맞나요?" onkeydown="if(event.key==='Enter')sendMyAI(${proj.id})"><button class="ai-send" onclick="sendMyAI(${proj.id})">↑</button></div>
     </div>`;
-}
-
-function renderFinanceTab(proj,stageScore){
-  return `
-    <div class="card">
-      <div class="card-h"><div class="card-title">분담금 계산</div></div>
-      <div class="inp-row">
-        <div><div class="inp-lbl">감정평가금액 (만원)</div><input class="inp-field" type="number" id="finEval_${proj.id}" placeholder="예: 50000"></div>
-        <div><div class="inp-lbl">비례율 (%)</div><input class="inp-field" type="number" step="0.01" id="finRatio_${proj.id}" placeholder="예: 105.3"></div>
-      </div>
-      <div class="inp-row">
-        <div><div class="inp-lbl">권리가액 직접입력 (만원, 선택)</div><input class="inp-field" type="number" id="finRight_${proj.id}" placeholder="입력 시 위 두 값 대신 사용"></div>
-        <div>
-          <div class="inp-lbl">조합원분양가 (만원) · 산정년도</div>
-          <div style="display:flex;gap:6px;">
-            <input class="inp-field" type="number" id="finPrice1_${proj.id}" placeholder="예: 80000" style="flex:1;">
-            <select class="inp-field" id="finPriceYear_${proj.id}" style="width:88px;flex-shrink:0;">${Array.from({length:2026-2010+1},(_,i)=>2026-i).map(y=>`<option value="${y}">${y}년</option>`).join('')}</select>
-          </div>
-        </div>
-      </div>
-      <div class="inp-row">
-        <div><div class="inp-lbl">전용면적 (㎡)</div><input class="inp-field" type="number" id="finSqm_${proj.id}" placeholder="예: 84.5"></div>
-        <div><div class="inp-lbl">일반분양가 (만원, 선택)</div><input class="inp-field" type="number" id="finGeneralPrice_${proj.id}" placeholder="예: 95000"></div>
-      </div>
-      <button class="btn-primary" style="margin-top:6px;" onclick="calcFin1('${proj.id}',${stageScore||0},'${proj.gu_name||''}')">계산</button>
-      <div id="finResult1_${proj.id}" style="margin-top:14px;"><div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">값을 입력하고 계산을 눌러주세요</div></div>
-      <div style="font-size:11px;color:var(--gray-400);margin-top:10px;">※ 권리가액 = 감정평가금액 × 비례율 (직접입력 시 그 값 우선) · 분담금 = 조합원분양가 − 권리가액. 참고용 추정치입니다.</div>
-    </div>
-    <div class="card">
-      <div class="card-h"><div class="card-title">대출 및 월상환액</div></div>
-      <div class="inp-row">
-        <div><div class="inp-lbl">이주비대출·주담대 금액 (만원)</div><input class="inp-field" type="number" id="finLoanAmt_${proj.id}" placeholder="예: 40000"></div>
-        <div><div class="inp-lbl">대출 금리 (%)</div><input class="inp-field" type="number" step="0.01" id="finLoanRate_${proj.id}" placeholder="예: 4.2"></div>
-      </div>
-      <button class="btn-primary" style="margin-top:6px;" onclick="calcFin2('${proj.id}',true)">저장 및 계산</button>
-      <div id="finResult2_${proj.id}" style="margin-top:14px;"><div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;">대출금액과 금리를 입력하고 저장을 눌러주세요</div></div>
-    </div>
-    <div class="card">
-      <div class="card-h"><div class="card-title">내 분담금 연도별 전망</div><span class="bdg bdg-gray">추세 연장 추정</span></div>
-      <div class="cw2" style="height:180px;"><canvas id="finShareChart_${proj.id}"></canvas></div>
-      <div id="finShareNote_${proj.id}" style="margin-top:10px;font-size:11px;color:var(--gray-400);"></div>
-      <div style="font-size:11px;color:var(--gray-400);margin-top:6px;">※ 막대(왼쪽 축)는 연도별 예상 분담금, 선(오른쪽 축)은 ㎡당 공사단가입니다. 국토부 기본형건축비 참고치에 한국건설기술연구원 COPI 지수 변동을 반영한 추정치이며, 실제와 다를 수 있습니다.</div>
-    </div>`;
-}
-
-function renderFutureValueTab(proj,stageScore){
-  return `
-    <div class="card">
-      <div class="card-h"><div class="card-title">내 집 미래가치 예상</div></div>
-      <div id="fvPriceSummary_${proj.id}" style="margin-bottom:12px;"></div>
-      <button class="btn-primary" onclick="calcFutureValue('${proj.id}','${proj.gu_name||''}',${stageScore||0})">다시 계산</button>
-      <div id="fvResult_${proj.id}" style="margin-top:12px;"></div>
-      <div id="fvCompare_${proj.id}" style="margin-top:16px;"></div>
-    </div>`;
-}
-
-function initFvTab(projId,guName,stageScore){
-  const fin1=loadFinState(finKey1(projId));
-  if(fin1&&fin1.price){
-    calcFutureValue(projId,guName,stageScore);
-  }else{
-    const summaryEl=document.getElementById('fvPriceSummary_'+projId);
-    if(summaryEl)summaryEl.innerHTML='<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">먼저 "자금운용 계획" 탭에서 조합원분양가를 입력하면 여기 자동으로 반영됩니다.</div>';
-  }
-}
-
-function finKey1(projId){return 'fin1_'+projId;}
-function finKey2(projId){return 'fin2_'+projId;}
-function loadFinState(key){try{return JSON.parse(localStorage.getItem(key)||'null');}catch(e){return null;}}
-function saveFinState(key,obj){try{localStorage.setItem(key,JSON.stringify(obj));}catch(e){}}
-const fmtMan=v=>v>=10000?(v/10000).toFixed(2)+'억':Math.round(v).toLocaleString()+'만원';
-
-async function calcFin1(projId,stageScore,guName){
-  const ev=parseFloat(document.getElementById('finEval_'+projId)?.value)||0;
-  const ratio=parseFloat(document.getElementById('finRatio_'+projId)?.value)||0;
-  const rightInput=document.getElementById('finRight_'+projId)?.value;
-  const rightManual=rightInput?parseFloat(rightInput):null;
-  const price=parseFloat(document.getElementById('finPrice1_'+projId)?.value)||0;
-  const sqmInput=parseFloat(document.getElementById('finSqm_'+projId)?.value)||0;
-  const generalPrice=parseFloat(document.getElementById('finGeneralPrice_'+projId)?.value)||null;
-  const resEl=document.getElementById('finResult1_'+projId);
-  if(!price){resEl.innerHTML='<div style="font-size:12px;color:var(--red);">조합원분양가를 입력해주세요</div>';return;}
-  const rightValue=(rightManual!=null&&!isNaN(rightManual))?rightManual:Math.round(ev*(ratio/100));
-  const share=price-rightValue;
-  const latestCopi=GLOBAL_COPI_DATA[GLOBAL_COPI_DATA.length-1].value;
-  const curCostPerM2=costPerM2(latestCopi);
-  const curCostPerPyeong=Math.round(curCostPerM2*3.3058);
-  const sqm=sqmInput?Math.round(sqmInput):0;
-  const pyeongEq=sqmInput?(sqmInput/3.3058).toFixed(1):0;
-  const priceYear=parseInt(document.getElementById('finPriceYear_'+projId)?.value)||new Date().getFullYear();
-  saveFinState(finKey1(projId),{ev,ratio,right:rightManual,price,sqm:sqmInput,generalPrice,priceYear});
-  drawFinCopiChart(projId,stageScore);
-  resEl.innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">권리가액</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${fmtMan(rightValue)}</div></div>
-      <div style="background:${share>=0?'var(--red-bg)':'var(--green-bg)'};border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:${share>=0?'var(--red)':'var(--green)'};">${share>=0?'추가 분담금':'환급 예상액'}</div><div style="font-size:16px;font-weight:600;margin-top:3px;color:${share>=0?'var(--red)':'var(--green)'};">${fmtMan(Math.abs(share))}</div></div>
-    </div>
-    ${sqm?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">${sqm}㎡(${pyeongEq}평) 기준 참고 ㎡당 공사단가</div><div style="font-size:15px;font-weight:600;margin-top:3px;">${curCostPerM2.toLocaleString()}원/㎡</div></div>
-      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">평당 공사단가</div><div style="font-size:15px;font-weight:600;margin-top:3px;">${curCostPerPyeong.toLocaleString()}원/평</div></div>
-    </div>`:''}
-    <div id="finMarketRef_${projId}" style="margin-bottom:8px;"></div>
-    <div style="font-size:10.5px;color:var(--green);">✓ 저장됨 — 다음 접속 시에도 이 값이 유지됩니다</div>`;
-  const marketEl=document.getElementById('finMarketRef_'+projId);
-  if(marketEl&&sqm&&guName){
-    const stat=GU_PRICE_STATS[guName];
-    if(stat){
-      const marketRefTotal=Math.round(stat.pyeong*pyeongEq);
-      const fmt2=v=>(v/10000).toFixed(1)+'억';
-      marketEl.innerHTML=`
-        <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">${guName} 시세 대비 (내 면적 ${sqm}㎡ 환산)</div>
-        <div style="display:flex;flex-direction:column;gap:5px;">
-          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 10px;background:var(--gray-50);border-radius:var(--r);"><span style="color:var(--gray-500);">구 평균 시세 (참고)</span><span style="font-weight:600;">${fmt2(marketRefTotal)}</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 10px;background:var(--blue-light);border-radius:var(--r);"><span style="color:var(--blue);">조합원분양가</span><span style="font-weight:600;color:var(--blue);">${fmt2(price)}</span></div>
-          ${generalPrice?`<div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 10px;background:#EDE9FE;border-radius:var(--r);"><span style="color:#6D28D9;">일반분양가</span><span style="font-weight:600;color:#6D28D9;">${fmt2(generalPrice)}</span></div>`:''}
-        </div>
-        <div style="font-size:10px;color:var(--gray-400);margin-top:6px;">※ 한국부동산원 구 평균 시세를 내 면적 기준으로 환산한 참고치입니다.</div>`;
-    }else{
-      marketEl.innerHTML='<div style="font-size:11px;color:var(--gray-400);">이 구의 시세 데이터를 찾을 수 없습니다</div>';
-    }
-  }
-}
-
-async function getCurrentBaseRate(){
-  try{const res=await fetch('/api/ecos?type=all');const data=await res.json();if(data.success&&data.rate)return data.rate.current;}catch(e){}
-  return null;
-}
-
-async function calcFin2(projId,isManualSave){
-  const amt=parseFloat(document.getElementById('finLoanAmt_'+projId)?.value)||0;
-  const rate=parseFloat(document.getElementById('finLoanRate_'+projId)?.value)||0;
-  const resEl=document.getElementById('finResult2_'+projId);
-  if(!amt||!rate){resEl.innerHTML='<div style="font-size:12px;color:var(--red);">대출금액과 금리를 입력해주세요</div>';return;}
-  resEl.innerHTML='<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>기준금리 확인 중...</div>';
-  const baseRateNow=await getCurrentBaseRate();
-  saveFinState(finKey2(projId),{amt,rate,baseRateAtSave:baseRateNow});
-  renderFin2Normal(projId,amt,rate);
-}
-
-function renderFin2Normal(projId,amt,rate){
-  const resEl=document.getElementById('finResult2_'+projId);
-  const monthly=Math.round(amt*10000*(rate/100)/12);
-  resEl.innerHTML=`
-    <div class="loan-card"><div class="loan-label">예상 월상환액 (이자)</div><div class="loan-val">${monthly.toLocaleString()}원</div><div class="loan-sub">${amt.toLocaleString()}만원 · 연 ${rate}%</div></div>
-    <div style="font-size:10.5px;color:var(--green);margin-top:8px;">✓ 저장됨 — 기준금리 변경 시 자동으로 알려드려요</div>`;
-}
-
-function renderFin2Changed(projId,amt,storedRate,adjustedRate,oldBase,newBase){
-  const resEl=document.getElementById('finResult2_'+projId);
-  const monthly=Math.round(amt*10000*(adjustedRate/100)/12);
-  resEl.innerHTML=`
-    <div class="loan-card" style="background:#FFFBEB;border:1px solid #FDE68A;"><div class="loan-label" style="color:#92400E;">한국은행 기준금리 변경 감지 (${oldBase}% → ${newBase}%)</div><div class="loan-val" style="color:#92400E;">${monthly.toLocaleString()}원</div><div class="loan-sub">추정 조정금리 연 ${adjustedRate.toFixed(2)}% 반영 (기존 ${storedRate}%)</div></div>
-    <div style="display:flex;gap:8px;margin-top:8px;">
-      <button class="btn-primary" style="font-size:11px;padding:6px 14px;" onclick="ackRateChange('${projId}',${amt},${adjustedRate},${newBase})">이 금리로 확인</button>
-      <button class="btn-secondary" style="font-size:11px;padding:6px 14px;" onclick="document.getElementById('finLoanAmt_${projId}').value=${amt};document.getElementById('finLoanRate_${projId}').value=${storedRate};">직접 수정하기</button>
-    </div>`;
-}
-
-function ackRateChange(projId,amt,newRate,newBase){
-  saveFinState(finKey2(projId),{amt,rate:newRate,baseRateAtSave:newBase});
-  document.getElementById('finLoanAmt_'+projId).value=amt;
-  document.getElementById('finLoanRate_'+projId).value=newRate.toFixed(2);
-  renderFin2Normal(projId,amt,newRate);
-}
-
-const R_RISK=0.0562283227536796;
-function drawFinCopiChart(projId,stageScore){
-  if(!window._finCharts)window._finCharts={};
-  const base=GLOBAL_COPI_DATA[0].value,latest=GLOBAL_COPI_DATA[GLOBAL_COPI_DATA.length-1].value;
-  const fin1=loadFinState(finKey1(projId));
-  const shareCanvas=document.getElementById('finShareChart_'+projId);
-  const shareNoteEl=document.getElementById('finShareNote_'+projId);
-  if(shareCanvas&&fin1&&fin1.sqm&&fin1.price){
-    const sqm=Math.round(fin1.sqm);
-    const rightValue=(fin1.right!=null&&!isNaN(fin1.right))?fin1.right:Math.round((fin1.ev||0)*((fin1.ratio||0)/100));
-    const baseShare=fin1.price-rightValue;
-    const monthsSpan=GLOBAL_COPI_DATA.length-1;
-    const annualGrowth=Math.pow(latest/base,12/monthsSpan)-1;
-    const remainYears=Math.max(Math.round(STAGE_REMAIN_YEARS[stageScore]??5),1);
-    const nowYear=new Date().getFullYear();
-    const yearLabels=[`${nowYear}년(현재)`];
-    const shareVals=[baseShare];
-    const costVals=[costPerM2(latest)];
-    for(let y=1;y<=remainYears;y++){
-      const projectedCost=costPerM2(latest)*Math.pow(1+annualGrowth,y);
-      const deltaShare=(projectedCost-costPerM2(latest))*sqm/10000;
-      yearLabels.push(y===remainYears?`${nowYear+y}년(예상 준공)`:`${nowYear+y}년`);
-      shareVals.push(Math.round(baseShare+deltaShare));
-      costVals.push(Math.round(projectedCost));
-    }
-    if(window._finCharts['share_'+projId])window._finCharts['share_'+projId].destroy();
-    window._finCharts['share_'+projId]=new Chart(shareCanvas,{data:{
-      labels:yearLabels,
-      datasets:[
-        {type:'line',label:'㎡당 공사단가',data:costVals,borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.08)',borderWidth:2.5,fill:true,tension:.3,pointRadius:4,pointBackgroundColor:'#D97706',yAxisID:'y',order:1},
-        {type:'bar',label:'예상 분담금',data:shareVals,backgroundColor:shareVals.map((v,i)=>i===0?'rgba(156,163,175,.5)':'rgba(220,38,38,.55)'),borderColor:shareVals.map((v,i)=>i===0?'#9CA3AF':'#DC2626'),borderWidth:1.5,borderRadius:5,borderSkipped:false,yAxisID:'y1',order:2}
-      ]
-    },options:{...OPTS,scales:{
-      x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}},title:{display:true,text:'연도',color:'#9CA3AF',font:{size:10}}},
-      y:{position:'left',grid:{color:'#F3F4F6'},ticks:{color:'#D97706',font:{size:11},callback:v=>Math.round(v/10000)+'만원'},title:{display:true,text:'㎡당 공사단가',color:'#D97706',font:{size:10}}},
-      y1:{position:'right',min:Math.floor(Math.min(...shareVals)*0.95/100)*100,grid:{display:false},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>v.toLocaleString()+'만'},title:{display:true,text:'분담금(만원, 0부터 시작 아님)',color:'#9CA3AF',font:{size:10}}}
-    },plugins:{...OPTS.plugins,legend:{display:true,position:'top',labels:{color:'#6B7280',font:{size:10.5,family:'IBM Plex Sans KR'},boxWidth:10,padding:10}},tooltip:{callbacks:{label:c=>c.dataset.type==='line'?`㎡당 공사단가: ${c.raw.toLocaleString()}원`:`예상 분담금: ${c.raw.toLocaleString()}만원`}}}}});
-    if(shareNoteEl)shareNoteEl.innerHTML=`최근 1년 공사단가 상승률(연 ${(annualGrowth*100).toFixed(1)}%)이 계속된다고 가정하고, 예상 준공(${remainYears}년 후)까지 연도별 추세를 연장한 값입니다. 실제 공사비 변동은 시장 상황에 따라 다를 수 있습니다.`;
-  }else if(shareCanvas&&shareNoteEl){
-    shareNoteEl.innerHTML='"분담금 계산"에서 조합원분양가와 전용면적을 입력하면 연도별 전망을 볼 수 있어요.';
-  }
-}
-
-async function initFinanceTab(projId,stageScore,guName){
-  const fin1=loadFinState(finKey1(projId));
-  if(fin1){
-    if(fin1.ev)document.getElementById('finEval_'+projId).value=fin1.ev;
-    if(fin1.ratio)document.getElementById('finRatio_'+projId).value=fin1.ratio;
-    if(fin1.right!=null)document.getElementById('finRight_'+projId).value=fin1.right;
-    if(fin1.price)document.getElementById('finPrice1_'+projId).value=fin1.price;
-    if(fin1.sqm)document.getElementById('finSqm_'+projId).value=fin1.sqm;
-    if(fin1.generalPrice)document.getElementById('finGeneralPrice_'+projId).value=fin1.generalPrice;
-    if(fin1.priceYear)document.getElementById('finPriceYear_'+projId).value=fin1.priceYear;
-    if(fin1.price)calcFin1(projId,stageScore,guName);
-  }
-  const fin2=loadFinState(finKey2(projId));
-  if(fin2){
-    document.getElementById('finLoanAmt_'+projId).value=fin2.amt;
-    document.getElementById('finLoanRate_'+projId).value=fin2.rate;
-    const resEl=document.getElementById('finResult2_'+projId);
-    resEl.innerHTML='<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>기준금리 확인 중...</div>';
-    const currentBase=await getCurrentBaseRate();
-    if(currentBase!=null&&fin2.baseRateAtSave!=null&&Math.abs(currentBase-fin2.baseRateAtSave)>=0.01){
-      const delta=currentBase-fin2.baseRateAtSave;
-      const adjusted=Math.max(fin2.rate+delta,0);
-      renderFin2Changed(projId,fin2.amt,fin2.rate,adjusted,fin2.baseRateAtSave,currentBase);
-    }else{
-      renderFin2Normal(projId,fin2.amt,fin2.rate);
-    }
-  }
-  drawFinCopiChart(projId,stageScore);
-}
-
-function fvMonthList(yearsAgo,count){
-  count=count||6;
-  const now=new Date();const arr=[];
-  for(let i=0;i<count;i++){const d=new Date(now);d.setFullYear(d.getFullYear()-yearsAgo);d.setMonth(d.getMonth()-i);arr.push(''+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0'));}
-  return arr;
-}
-async function fetchTradeItems(lawdCd,months){
-  let all=[];
-  for(const ym of months){
-    try{const res=await fetch(`/api/apt-trade?lawdCd=${lawdCd}&dealYmd=${ym}&numOfRows=300`);const data=await res.json();if(data.success&&data.items)all=all.concat(data.items);}catch(e){}
-  }
-  return all;
-}
-function avgPyeongFromItems(items,areaMin,areaMax){
-  const filtered=items.filter(d=>{const area=parseFloat(d.area)||0;return area>=areaMin&&area<=areaMax;});
-  const pyeongPrices=filtered.map(d=>{const amt=parseInt(d.dealAmount)||0;const area=parseFloat(d.area)||1;return amt/(area/3.3058);}).filter(v=>v>0);
-  if(!pyeongPrices.length)return null;
-  return pyeongPrices.reduce((a,b)=>a+b,0)/pyeongPrices.length;
-}
-async function fvAvgPyeong(lawdCd,months){
-  return avgPyeongFromItems(await fetchTradeItems(lawdCd,months),60,85);
-}
-const KB_GRADE_GROUPS={
-  1:['서초구','강남구'],
-  2:['용산구','송파구'],
-  3:['성동구','마포구','광진구','양천구'],
-  4:['영등포구','강동구','동작구','중구','종로구'],
-  5:['서대문구','강서구','동대문구','성북구','은평구','관악구'],
-  6:['노원구','구로구','중랑구','금천구','강북구','도봉구']
-};
-function getGuGrade(guName){
-  for(const g of Object.keys(KB_GRADE_GROUPS))if(KB_GRADE_GROUPS[g].includes(guName))return parseInt(g);
-  return null;
-}
-const CITY_REPRESENTATIVE_GU=['강남구','송파구','마포구','동작구','관악구','노원구'];
-async function fetchGuAvgPyeong(guName,months,areaMin,areaMax){
-  const lawdCd=GU_LAWD_CODE[guName];
-  if(!lawdCd)return null;
-  return avgPyeongFromItems(await fetchTradeItems(lawdCd,months),areaMin,areaMax);
-}
-async function smartAvgPyeong(guName,yearsAgo){
-  const lawdCd=GU_LAWD_CODE[guName];
-  if(!lawdCd)return{value:null,note:null};
-  let months=fvMonthList(yearsAgo,6);
-  let items=await fetchTradeItems(lawdCd,months);
-  let val=avgPyeongFromItems(items,60,85);
-  if(val!=null)return{value:val,note:null};
-  val=avgPyeongFromItems(items,40,110);
-  if(val!=null)return{value:val,note:'면적 확장(40~110㎡)'};
-  months=fvMonthList(yearsAgo,12);
-  items=await fetchTradeItems(lawdCd,months);
-  val=avgPyeongFromItems(items,40,110);
-  if(val!=null)return{value:val,note:'면적·기간 확장(40~110㎡, 12개월)'};
-  const grade=getGuGrade(guName);
-  const recentMonths6=fvMonthList(yearsAgo,6);
-  if(grade!=null){
-    const peers=KB_GRADE_GROUPS[grade].filter(g=>g!==guName);
-    const peerVals=await Promise.all(peers.map(g=>fetchGuAvgPyeong(g,recentMonths6,60,85)));
-    const valid=peerVals.filter(v=>v!=null);
-    if(valid.length)return{value:valid.reduce((a,b)=>a+b,0)/valid.length,note:`KB 시세등급 ${grade}등급 그룹 평균(${peers.join('·')})`};
-  }
-  const repGus=CITY_REPRESENTATIVE_GU.filter(g=>g!==guName);
-  const repVals=await Promise.all(repGus.map(g=>fetchGuAvgPyeong(g,recentMonths6,60,85)));
-  const validRep=repVals.filter(v=>v!=null);
-  if(validRep.length)return{value:validRep.reduce((a,b)=>a+b,0)/validRep.length,note:'서울 대표 6개구 평균'};
-  return{value:null,note:null};
-}
-const FV_BENCHMARK_GU=[{name:'강남구',code:'11680'},{name:'서초구',code:'11650'},{name:'송파구',code:'11710'}];
-// 한국부동산원 R-ONE 월별 평균단위매매가격(아파트) 기준, 2026년 8월 최신치 / 5년 전(2021년 8월) 대비 CAGR
-const GU_PRICE_STATS={
-  '종로구':{pyeong:4566,cagr:0.0275},'중구':{pyeong:4948,cagr:0.0305},'용산구':{pyeong:7271,cagr:0.0539},
-  '성동구':{pyeong:7550,cagr:0.0645},'광진구':{pyeong:5905,cagr:0.0394},'동대문구':{pyeong:4220,cagr:0.0244},
-  '중랑구':{pyeong:3114,cagr:0.0114},'성북구':{pyeong:3955,cagr:0.0258},'강북구':{pyeong:2936,cagr:-0.0044},
-  '도봉구':{pyeong:2862,cagr:-0.0188},'노원구':{pyeong:3550,cagr:-0.0029},'은평구':{pyeong:3505,cagr:0.0085},
-  '서대문구':{pyeong:4321,cagr:0.0228},'마포구':{pyeong:6237,cagr:0.0531},'양천구':{pyeong:6118,cagr:0.0491},
-  '강서구':{pyeong:4228,cagr:0.0229},'구로구':{pyeong:3236,cagr:0.0200},'금천구':{pyeong:2946,cagr:-0.0011},
-  '영등포구':{pyeong:5524,cagr:0.0416},'동작구':{pyeong:5208,cagr:0.0405},'관악구':{pyeong:3645,cagr:0.0201},
-  '서초구':{pyeong:9756,cagr:0.0749},'강남구':{pyeong:10027,cagr:0.0558},'송파구':{pyeong:8943,cagr:0.0790},
-  '강동구':{pyeong:5321,cagr:0.0450}
-};
-
-async function calcFutureValue(projId,guName,stageScore){
-  const summaryEl=document.getElementById('fvPriceSummary_'+projId);
-  const resultEl=document.getElementById('fvResult_'+projId);
-  const compareEl=document.getElementById('fvCompare_'+projId);
-  const fin1=loadFinState(finKey1(projId));
-  const price=fin1&&fin1.price?fin1.price:null;
-  const generalPrice=fin1&&fin1.generalPrice?fin1.generalPrice:null;
-  if(!price){
-    if(summaryEl)summaryEl.innerHTML='<div style="font-size:12px;color:var(--red);padding:8px 0;">먼저 "자금운용 계획" 탭에서 조합원분양가를 입력해주세요.</div>';
-    resultEl.innerHTML='';
-    return;
-  }
-  const stat=GU_PRICE_STATS[guName];
-  if(!stat){resultEl.innerHTML='<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">해당 구의 시세 데이터를 찾을 수 없습니다</div>';return;}
-  if(compareEl)compareEl.innerHTML='';
-  const cagr=stat.cagr;
-  const guSisePer84=Math.round(stat.pyeong*25.4);
-  const fmt2=v=>v==null?'—':(v/10000).toFixed(1)+'억';
-  if(summaryEl){
-    summaryEl.innerHTML=`
-      <div style="display:grid;grid-template-columns:repeat(${generalPrice?3:2},1fr);gap:10px;">
-        <div style="background:var(--blue-light);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--blue);">조합원분양가</div><div style="font-size:15px;font-weight:600;margin-top:3px;color:var(--blue);">${fmt2(price)}</div></div>
-        ${generalPrice?`<div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">일반분양가</div><div style="font-size:15px;font-weight:600;margin-top:3px;">${fmt2(generalPrice)}</div></div>`:''}
-        <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">${guName} 현재시세 (84㎡ 환산)</div><div style="font-size:15px;font-weight:600;margin-top:3px;">${fmt2(guSisePer84)}</div></div>
-      </div>
-      <div style="font-size:10.5px;color:var(--gray-400);margin-top:6px;">※ 한국부동산원 월별 평균단위매매가격(아파트) 통계 기준입니다.</div>`;
-  }
-  const remainYears=STAGE_REMAIN_YEARS[stageScore]??5;
-  const sigma=0.02;
-  const RISK_RETAIN_RATIO={1:0.50,2:0.55,3:0.65,4:0.75,5:0.85};
-  const hasGeneralPrice=generalPrice!=null&&generalPrice>0;
-  let growthLow,growthHigh,note;
-  if(stageScore>=6||hasGeneralPrice){
-    growthLow=Math.max(cagr-sigma,0);growthHigh=Math.min(cagr+sigma,0.12);
-    note=hasGeneralPrice
-      ? '일반분양가는 이미 시장에서 검증된 가격이라 사업 리스크 할인 없이, 준공까지 남은 기간의 추가 시세 상승 가능성만 반영했습니다.'
-      : '최근 5년 지역 시세 흐름 기반 참고용 추정치입니다. 실제와 다를 수 있습니다.';
-  }else{
-    const retain=RISK_RETAIN_RATIO[stageScore]??0.5;
-    const adj=Math.max(cagr,0)*retain;
-    growthLow=Math.max(adj-sigma*1.5,0);growthHigh=Math.min(adj+sigma*1.5,0.12);
-    note=`사업 초기 단계로 리스크 할인(성장률의 ${Math.round(retain*100)}%만 반영, 89개 구역 실측 캘리브레이션 기반 단계별 조정)을 적용했습니다. 실제와 다를 수 있습니다.`;
-  }
-  const pyeongEq=fin1&&fin1.sqm?fin1.sqm/3.3058:25.4;
-  const myAreaLabel=fin1&&fin1.sqm?`${Math.round(fin1.sqm)}㎡`:'84㎡ 환산';
-  const currentMarketValue=Math.round(stat.pyeong*pyeongEq);
-  const growthBase=hasGeneralPrice?generalPrice:currentMarketValue;
-  const futLow=growthBase*Math.pow(1+growthLow,remainYears);
-  const futHigh=growthBase*Math.pow(1+growthHigh,remainYears);
-  const profitLow=futLow-price,profitHigh=futHigh-price;
-  const roiLow=(profitLow/price*100),roiHigh=(profitHigh/price*100);
-  const fmt=v=>(v/10000).toFixed(1)+'억';
-  resultEl.innerHTML=`
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px;">
-      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">인근 5년 CAGR</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${(cagr*100).toFixed(1)}%</div></div>
-      <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">현재 시세 (${myAreaLabel})</div><div style="font-size:16px;font-weight:600;margin-top:3px;">${fmt(currentMarketValue)}</div></div>
-    </div>
-    <div style="background:#EDE9FE;border-radius:var(--r);padding:10px 12px;margin-bottom:8px;">
-      <div style="font-size:11px;color:#6D28D9;margin-bottom:4px;">예상 미래가치 (${remainYears}년 후, ${hasGeneralPrice?'일반분양가 기준':'지역시세 기준'})</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div><div style="font-size:10px;color:#6D28D9;opacity:.7;">최소</div><div style="font-size:17px;font-weight:700;color:#6D28D9;">${fmt(futLow)}</div></div>
-        <div><div style="font-size:10px;color:#6D28D9;opacity:.7;">최대</div><div style="font-size:17px;font-weight:700;color:#6D28D9;">${fmt(futHigh)}</div></div>
-      </div>
-    </div>
-    <div style="background:${profitLow>=0?'var(--green-bg)':'var(--red-bg)'};border-radius:var(--r);padding:10px 12px;margin-bottom:8px;">
-      <div style="font-size:11px;color:${profitLow>=0?'var(--green)':'var(--red)'};margin-bottom:4px;">예상 수익금액 (미래가치 − 조합원분양가)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div><div style="font-size:10px;color:${profitLow>=0?'var(--green)':'var(--red)'};opacity:.7;">최소 (수익률 ${roiLow.toFixed(0)}%)</div><div style="font-size:17px;font-weight:700;color:${profitLow>=0?'var(--green)':'var(--red)'};">${fmt(profitLow)}</div></div>
-        <div><div style="font-size:10px;color:${profitLow>=0?'var(--green)':'var(--red)'};opacity:.7;">최대 (수익률 ${roiHigh.toFixed(0)}%)</div><div style="font-size:17px;font-weight:700;color:${profitLow>=0?'var(--green)':'var(--red)'};">${fmt(profitHigh)}</div></div>
-      </div>
-    </div>
-    <div class="cw2" style="height:160px;margin-bottom:8px;"><canvas id="fvFanChart_${projId}"></canvas></div>
-    <div style="font-size:11px;color:var(--gray-400);">${note}</div>`;
-  const fanCanvas=document.getElementById('fvFanChart_'+projId);
-  if(fanCanvas){
-    if(!window._finCharts)window._finCharts={};
-    if(window._finCharts['fvfan_'+projId])window._finCharts['fvfan_'+projId].destroy();
-    const nowYear=new Date().getFullYear();
-    const fanLabels=[`${nowYear}년(현재)`];
-    const fanLow=[growthBase],fanHigh=[growthBase];
-    const yStep=Math.max(remainYears,1);
-    for(let y=1;y<=yStep;y++){
-      fanLabels.push(y===yStep?`${nowYear+y}년(예상 준공)`:`${nowYear+y}년`);
-      fanLow.push(Math.round(growthBase*Math.pow(1+growthLow,y)));
-      fanHigh.push(Math.round(growthBase*Math.pow(1+growthHigh,y)));
-    }
-    window._finCharts['fvfan_'+projId]=new Chart(fanCanvas,{type:'line',data:{
-      labels:fanLabels,
-      datasets:[
-        {label:'낙관적(최대)',data:fanHigh,borderColor:'#6D28D9',backgroundColor:'rgba(109,40,217,.08)',borderWidth:2,tension:.3,pointRadius:3,pointBackgroundColor:'#6D28D9',fill:'+1'},
-        {label:'보수적(최소)',data:fanLow,borderColor:'#9CA3AF',backgroundColor:'rgba(156,163,175,.15)',borderWidth:2,borderDash:[4,3],tension:.3,pointRadius:3,pointBackgroundColor:'#9CA3AF',fill:false}
-      ]
-    },options:{...OPTS,scales:{x:{grid:{display:false},ticks:{color:'#9CA3AF',font:{size:10}}},y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:11},callback:v=>(v/10000).toFixed(1)+'억'}}},plugins:{...OPTS.plugins,legend:{display:true,position:'top',labels:{color:'#6B7280',font:{size:10.5,family:'IBM Plex Sans KR'},boxWidth:10,padding:10}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${(c.raw/10000).toFixed(1)}억`}}}}});
-  }
-  if(compareEl){
-    const rows=FV_BENCHMARK_GU.map(g=>({name:g.name,val:GU_PRICE_STATS[g.name]?Math.round(GU_PRICE_STATS[g.name].pyeong*25.4):null}));
-    rows.push({name:guName+' (현재시세, 84㎡ 환산)',val:guSisePer84,highlight:true});
-    rows.push({name:guName+' (내 조합원분양가)',val:Math.round(price),highlight:true,isTotal:true});
-    if(generalPrice)rows.push({name:guName+' (일반분양가)',val:Math.round(generalPrice),highlight:true,isTotal:true});
-    rows.push({name:guName+' (준공 후 예상 미래가치)',val:Math.round((futLow+futHigh)/2),highlight:true,isTotal:true});
-    const validVals=rows.map(r=>r.val).filter(v=>v!=null);
-    const max=Math.max(...validVals,1);
-    compareEl.innerHTML=`
-      <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin:4px 0 8px;text-transform:uppercase;letter-spacing:.04em;">강남·서초·송파 대비 위치 (84㎡ 환산가 기준)</div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        ${rows.map(r=>{
-          const pct=r.val?Math.round(r.val/max*100):0;
-          const barColor=r.highlight?'var(--blue)':'#9CA3AF';
-          const displayVal=r.val==null?'데이터 없음':(r.val/10000).toFixed(1)+'억'+(r.isTotal?'':' (84㎡ 환산)');
-          return `<div style="display:flex;align-items:center;gap:8px;">
-            <div style="width:170px;font-size:11.5px;color:${r.highlight?'var(--blue)':'var(--gray-600)'};font-weight:${r.highlight?600:400};flex-shrink:0;">${r.name}</div>
-            <div style="flex:1;background:var(--gray-100);height:14px;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;"></div></div>
-            <div style="width:70px;text-align:right;font-size:11.5px;font-family:var(--mono);color:var(--gray-700);flex-shrink:0;">${displayVal}</div>
-          </div>`;
-        }).join('')}
-      </div>
-      <div style="font-size:10.5px;color:var(--gray-400);margin-top:8px;">※ 강남·서초·송파·내 구역 현재시세는 한국부동산원 통계를 84㎡ 기준으로 환산한 값이며, 조합원분양가·일반분양가·예상 미래가치는 입력하신 실제 금액 기준이라 면적이 다를 수 있습니다.</div>`;
-  }
-}
-async function renderMyDelayPanel(){
-  const panel=document.getElementById('myDelayPanel');
-  if(!panel)return;
-  let zoneName='신영1',guName='종로구',isSample=true;
-  if(currentUser&&Array.isArray(myProjects)&&myProjects.length){
-    zoneName=myProjects[0].project_name;guName=myProjects[0].gu_name||'';isSample=false;
-  }
-  panel.innerHTML='<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;"><span class="spinner"></span>조회 중...</div>';
-  try{
-    const sel='select=zone_name,gu_name,stage_label,delay_months,is_stagnant,over_months';
-    let zi=await sbf('redev_projects_seoul',`${sel}&zone_name=eq.${encodeURIComponent(zoneName)}&gu_name=eq.${encodeURIComponent(guName)}&limit=1`);
-    if(!Array.isArray(zi)||!zi.length)zi=await sbf('redev_projects_seoul',`${sel}&zone_name=eq.${encodeURIComponent(zoneName)}&limit=1`);
-    const z=Array.isArray(zi)&&zi.length?zi[0]:null;
-    const sampleTag=isSample?'<span style="font-size:10px;color:var(--gray-400);margin-left:6px;">(미리보기: 로그인 후 내 구역으로 교체)</span>':'';
-    if(!z){
-      panel.innerHTML=`<div style="font-size:12px;color:var(--gray-400);">"${zoneName}" 구역의 지연 정보를 찾을 수 없습니다.${sampleTag}</div>`;
-      return;
-    }
-    const delayed=!!z.is_stagnant;
-    const statusColor=delayed?'var(--red)':'var(--green)';
-    const statusBg=delayed?'var(--red-bg)':'var(--green-bg)';
-    const statusText=delayed?'지연':'정상 진행';
-    panel.innerHTML=`
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div><div style="font-size:13px;font-weight:600;">${z.gu_name||''} ${z.zone_name}</div>${sampleTag}</div>
-        <span style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;background:${statusBg};color:${statusColor};">${statusText}</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-        <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">현재 단계</div><div style="font-size:14px;font-weight:600;margin-top:3px;">${z.stage_label||'—'}</div></div>
-        <div style="background:var(--gray-50);border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);">지연 개월</div><div style="font-size:14px;font-weight:600;margin-top:3px;">${z.delay_months!=null?z.delay_months+'개월':'—'}</div></div>
-        <div style="background:${delayed?'var(--red-bg)':'var(--gray-50)'};border-radius:var(--r);padding:10px 12px;"><div style="font-size:11px;color:${delayed?'var(--red)':'var(--gray-400)'};">표준 초과</div><div style="font-size:14px;font-weight:600;margin-top:3px;color:${delayed?'var(--red)':'inherit'};">${z.over_months!=null?z.over_months+'개월':'—'}</div></div>
-      </div>`;
-  }catch(e){panel.innerHTML='<div style="font-size:12px;color:var(--gray-400);">지연 정보를 불러오지 못했습니다</div>';}
 }
 
 async function saveMemo(id){
@@ -2968,17 +2401,11 @@ async function sendMyAI(projId){
   msgs.innerHTML+=`<div class="ai-msg bot" id="myAiTyping"><span class="spinner"></span>분석 중...</div>`;
   msgs.scrollTop=msgs.scrollHeight;
   const proj=myProjects.find(p=>p.id===projId);
-  const zoneRecs=ALL.filter(r=>r.project_name===proj?.project_name).sort((a,b)=>a.period>b.period?1:-1);
-  const zoneCtx=zoneRecs.slice(-6).map(r=>`${r.period}:${r.stage}(${r.stage_score}단계)`).join(', ');
-  const curScore=zoneRecs.length?zoneRecs[zoneRecs.length-1].stage_score:0;
-  const remainYears=STAGE_REMAIN_YEARS[curScore];
-  const stageOrder=['','구역지정','추진위','조합설립','건축심의','사업시행','관리처분','이주','착공','준공'];
-  const remainStages=curScore?stageOrder.slice(curScore+1).filter(Boolean).join(' → '):'정보없음';
-  const durationRef='추진위→조합설립 약12개월, 조합설립→사업시행인가 약24개월, 사업시행인가→관리처분인가 약12개월, 관리처분인가→착공 약12개월, 착공→준공 약36개월 (업계 일반 참고치)';
+  const zoneCtx=ALL.filter(r=>r.project_name===proj?.project_name).slice(-6).map(r=>`${r.period}:${r.stage}(${r.stage_score}단계)`).join(', ');
   try{
     const res=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       messages:[{role:'user',content:msg}],
-      system:`당신은 재건축·재개발 전문 AI입니다. 도시및주거환경정비법을 기반으로 답변하세요. 사용자가 남은 절차나 예상 소요 시간을 물으면, 아래 참고 소요기간과 현재 단계를 근거로 남은 단계와 대략적인 예상 기간을 함께 안내하세요(단, 참고치이며 실제와 다를 수 있다고 밝힐 것). 마크다운 금지. 600자 이내. 한국어.\\n구역: ${proj?.project_name||'미선택'}\\n현재단계: ${zoneCtx||'정보없음'}\\n남은 단계: ${remainStages}\\n표준 단계별 참고 소요기간: ${durationRef}\\n메모: ${proj?.memo||'없음'}`
+      system:`당신은 재건축·재개발 전문 AI입니다. 도시및주거환경정비법을 기반으로 답변하세요. 마크다운 금지. 600자 이내. 한국어.\n구역: ${proj?.project_name||'미선택'}\n현재단계: ${zoneCtx||'정보없음'}\n메모: ${proj?.memo||'없음'}`
     })});
     const typing=document.getElementById('myAiTyping');if(!typing)return;
     if(!res.ok){typing.innerHTML='오류가 발생했습니다.';return;}
@@ -2998,7 +2425,6 @@ async function sendMyAI(projId){
 
 let selectedProjName='',selectedProjGu='';
 function openAddProject(){
-  if(!currentUser){openAuth();return;}
   const maxProj=canAccess('black')?99:2;
   if(myProjects.length>=maxProj){alert(`최대 ${maxProj}개까지 등록 가능합니다.`);return;}
   const modal=document.getElementById('addProjModal');
@@ -3056,6 +2482,7 @@ async function sw(tab,el){
   const tabEl=document.getElementById('tab-'+tab);if(tabEl)tabEl.classList.add('active');
   document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll(`[data-tab="${tab}"]`).forEach(n=>n.classList.add('active'));
+  if(tab==='my1'||tab==='my2'||tab==='my3')setTimeout(myRender,30);
   if(tab==='investor')setTimeout(calcSim,80);
   if(tab==='trade')setTimeout(loadTrade,80);
   if(tab==='trend')setTimeout(()=>{
@@ -3064,8 +2491,49 @@ async function sw(tab,el){
     if(c){c.style.width='100%';}
     loadTrend();
   },80);
-  if(tab==='riskboard')setTimeout(renderRiskBoard,80);
-  if(tab==='alert')setTimeout(renderMyDelayPanel,80);
+  if(tab==='riskboard'){
+    // 세션 복원 + loadProfile 완료 대기 (최대 3초)
+    if(!currentProfile){
+      await new Promise(resolve=>{
+        let tries=0;
+        const check=setInterval(()=>{
+          if(currentProfile||++tries>30){clearInterval(check);resolve();}
+        },100);
+      });
+    }
+    // 여전히 없으면 getSession으로 강제 복원 시도
+    if(!currentProfile){
+      try{
+        const{data:{session}}=await _SB.auth.getSession();
+        if(session?.user){
+          currentUser=session.user;
+          await loadProfile();
+        }
+      }catch(e){}
+    }
+    const tier=currentProfile?.tier||'free';
+    if(!['premium','black','b2b'].includes(tier)){
+      // 프리미엄 미달 → 잠금 화면 표시
+      const tabEl2=document.getElementById('tab-riskboard');
+      if(tabEl2){
+        tabEl2.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;">
+          <div style="font-size:48px;">🔒</div>
+          <div style="font-size:20px;font-weight:700;color:var(--gray-900);">프리미엄 전용 기능</div>
+          <div style="font-size:14px;color:var(--gray-500);text-align:center;line-height:1.8;">
+            조합 리스크 현황은 <strong>프리미엄(Premium)</strong> 이상 구독자만 열람 가능합니다.<br>
+            사업 지연·언론 보도 기반 객관적 데이터로 투자를 판단하세요.
+          </div>
+          <button onclick="openAuth()" style="padding:12px 28px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;">
+            프리미엄 업그레이드 →
+          </button>
+          <div style="font-size:11px;color:var(--gray-400);">월 49,900원 · Premium 이상</div>
+        </div>`;
+        tabEl2.classList.add('active');
+      }
+      return;
+    }
+    setTimeout(renderRiskBoard,80);
+  }
   if(tab==='risk')setTimeout(loadRisk,80);
   if(tab==='compare')setTimeout(initCompareChart,80);
   if(tab==='legal')setTimeout(()=>searchLaw(),80);
@@ -3709,7 +3177,7 @@ function renderOneItem(projId, idx, item) {
   const checks = getClChecks(projId);
   const done = !!checks[String(idx)];
   const lawHtml = item.law ? `<span class="cl-law">⚖ ${item.law}</span>` : '';
-  return `<div class="cl-item${done ? ' cl-done' : ''}" onclick="toggleCl('${projId}', ${idx}, this)">
+  return `<div class="cl-item${done ? ' cl-done' : ''}" onclick="toggleCl(${projId}, ${idx}, this)">
     <div class="cl-box">${done ? '✓' : ''}</div>
     <div style="flex:1;">
       <div class="cl-text">${item.text}</div>
@@ -4219,6 +3687,395 @@ init();
   };
   document.body.appendChild(s);
 })();
+</script>
+<script>
+/* ══════════ 내 매물 (조합원 개인 도구) ══════════
+ * 입력값은 이 브라우저(localStorage)에만 저장되며 서버로 전송되지 않습니다.
+ * 단위: 금액=만원(조합 전체 합계만 억원), 기간=분기/개월
+ */
+const MY_KEY='redev_my_v1';
+const MY_DEF={zone:'',unit:'',price:'',buyDate:'',appraisal:'',ratioMode:'auto',totRev:'',totCost:'',totAppr:'',ratioDirect:'',
+  salePrice:'',paid:'',pyeong:'',loan:'',rate:'',loanYears:'30',repay:'grace',
+  stage:'7',dMgmt:'',dMove:'',dStart:'',moveInOverride:'',extraDelayQ:'0',
+  cost0:'',costBase:'',wL:'40',gL:'4',wM:'45',gM:'3.5',wO:'15',gO:'3',
+  nearNew:'',gLow:'0',gMid:'2',gHigh:'4',inclCost:'1',
+  refs:[{n:'',sale:'',cur:'',yr:''},{n:'',sale:'',cur:'',yr:''},{n:'',sale:'',cur:'',yr:''}]};
+let MY=(function(){try{const o=JSON.parse(localStorage.getItem(MY_KEY)||'{}');return Object.assign({},MY_DEF,o,{refs:(o.refs&&o.refs.length?o.refs:MY_DEF.refs)});}catch(e){return JSON.parse(JSON.stringify(MY_DEF));}})();
+function mySave(){try{localStorage.setItem(MY_KEY,JSON.stringify(MY));}catch(e){}}
+const NQ={6:8,7:4,8:20};            // 단계별 정상 체류 분기 (지연경보와 동일 기준)
+const STAGE_NM={6:'관리처분인가 후 (이주 전)',7:'이주·철거 중',8:'착공 후 (공사 중)'};
+
+/* ── 유틸 ── */
+const n_=v=>{const x=parseFloat(String(v).replace(/,/g,''));return isFinite(x)?x:0;};
+const has_=v=>String(v).trim()!==''&&isFinite(parseFloat(String(v).replace(/,/g,'')));
+function fmtM(m){                    // 만원 → "5억 2,000만"
+  if(!isFinite(m))return '—';
+  const neg=m<0,a=Math.round(Math.abs(m));
+  const e=Math.floor(a/10000),r=a%10000;
+  let s=e>0?`${e}억${r?` ${r.toLocaleString()}만`:''}`:`${r.toLocaleString()}만`;
+  return (neg?'-':'')+s;
+}
+function pD(s){if(!s)return null;const d=new Date(String(s).slice(0,10)+'T00:00:00');return isNaN(d)?null:d;}
+function addM(d,m){const x=new Date(d.getTime());const day=x.getDate();x.setMonth(x.getMonth()+Math.round(m));if(x.getDate()<day)x.setDate(0);return x;}
+function monthsBetween(a,b){return (b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth())+(b.getDate()-a.getDate())/30;}
+function ymd(d){return d?`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`:'—';}
+function iso(d){return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:'';}
+
+/* ── 핵심 계산 ── */
+function myCalc(){
+  const R={};const today=new Date();
+  // 1) 권리가액·분담금
+  const A=n_(MY.appraisal),P=n_(MY.price);
+  let ratio=null;
+  if(MY.ratioMode==='direct'){ratio=has_(MY.ratioDirect)?n_(MY.ratioDirect):null;}
+  else if(has_(MY.totRev)&&has_(MY.totCost)&&n_(MY.totAppr)>0){ratio=(n_(MY.totRev)-n_(MY.totCost))/n_(MY.totAppr)*100;}
+  R.ratio=ratio;
+  R.rights=(ratio!=null&&A>0)?A*ratio/100:null;
+  R.share=(R.rights!=null&&has_(MY.salePrice))?n_(MY.salePrice)-R.rights:null;     // +납부 / -환급
+  R.shareLeft=(R.share!=null)?R.share-n_(MY.paid):null;
+  R.premium=(P>0&&A>0)?P-A:null;
+  R.invest=(P>0&&R.share!=null)?P+R.share:null;     // 매매가 + 분담금
+  // 2) 단계·지연·입주예정
+  const st=+MY.stage;const dM=pD(MY.dMgmt),dV=pD(MY.dMove),dS=pD(MY.dStart);
+  const startOf=st===6?dM:st===7?dV:dS;
+  R.stage=st;R.startDate=startOf;
+  if(startOf){
+    R.elapsedQ=monthsBetween(startOf,today)/3;
+    R.delayQ=Math.floor(R.elapsedQ-NQ[st]);                 // 지연경보와 동일: 경과분기 − 정상분기
+    R.grade=R.delayQ>=6?'high':R.delayQ>=3?'mid':R.delayQ>=1?'caution':'ok';
+    // 정상 일정 역산
+    let moveStart,constStart;
+    if(st===6){moveStart=addM(dM,NQ[6]*3);constStart=addM(moveStart,NQ[7]*3);}
+    else if(st===7){moveStart=dV;constStart=addM(dV,NQ[7]*3);}
+    else{constStart=dS;}
+    R.constStartN=constStart;
+    R.completeN=addM(constStart,NQ[8]*3);
+    R.moveInN=addM(R.completeN,3);                          // 준공 후 입주 3개월 가정
+    const extra=Math.max(R.delayQ,0)+n_(MY.extraDelayQ);
+    R.extraQ=extra;
+    R.moveInD=addM(R.moveInN,extra*3);
+  }
+  R.moveIn=pD(MY.moveInOverride)||R.moveInD||null;
+  R.moveInSrc=pD(MY.moveInOverride)?'직접 입력':(R.moveInD?'정상 일정 + 지연 반영':'');
+  // 3) 공사비
+  const c0=n_(MY.cost0),cb=pD(MY.costBase);
+  const w=[n_(MY.wL),n_(MY.wM),n_(MY.wO)],g=[n_(MY.gL),n_(MY.gM),n_(MY.gO)];
+  const ws=w[0]+w[1]+w[2];
+  R.gBlend=ws>0?(w[0]*g[0]+w[1]*g[1]+w[2]*g[2])/ws:0;
+  if(c0>0&&cb&&R.moveIn){
+    const complete=addM(R.moveIn,-3);
+    R.costYears=Math.max(0,monthsBetween(cb,complete)/12);
+    R.costF=c0*Math.pow(1+R.gBlend/100,R.costYears);
+    R.costUp=R.costF/c0-1;
+    R.costMy=n_(MY.pyeong)>0?(R.costF-c0)*n_(MY.pyeong):null;
+  }
+  // 4) 대출
+  R.loan=null;
+  const L=n_(MY.loan),r=n_(MY.rate);
+  if(L>0&&has_(MY.rate)){
+    const start=pD(MY.buyDate)||today;
+    const N=Math.max(1,Math.round(n_(MY.loanYears)*12));
+    const nIn=R.moveIn?Math.max(0,Math.round(monthsBetween(start,R.moveIn))):0;
+    const nNow=Math.max(0,Math.floor(monthsBetween(start,today)));
+    const sched=loanSched(L,r,N,MY.repay,nIn);
+    const sum=(a,from,to,k)=>{let s=0;for(let i=from;i<to&&i<a.length;i++)s+=a[i][k];return s;};
+    const cur=sched[Math.min(nNow,sched.length-1)];
+    R.loan={start,N,nIn,nNow,sched,cur,
+      intIn:sum(sched,0,nIn,'i'),prinIn:sum(sched,0,nIn,'p'),
+      intLeft:sum(sched,nNow,nIn,'i'),prinLeft:sum(sched,nNow,nIn,'p'),
+      intAll:sum(sched,0,N,'i')};
+    const s2=loanSched(L,r+1,N,MY.repay,nIn);
+    R.loan.intInPlus1=sum(s2,0,nIn,'i');
+    R.loan.curPlus1=s2[Math.min(nNow,s2.length-1)];
+  }
+  return R;
+}
+// 월별 [{pay,p,i,bal}] — repay: grace(입주까지 이자만→이후 원리금균등) / equal(원리금균등) / principal(원금균등)
+function loanSched(L,rate,N,type,nIn){
+  const m=rate/100/12,out=[];let bal=L;
+  const annuity=(B,n)=>m>0?B*m/(1-Math.pow(1+m,-n)):B/n;
+  let pmtEq=type==='equal'?annuity(L,N):0;
+  for(let k=1;k<=N;k++){
+    const i=bal*m;let p=0;
+    if(type==='grace'){
+      if(k<=nIn)p=0;
+      else{const rem=N-Math.max(nIn,0);if(k===nIn+1)pmtEq=annuity(bal,rem);p=Math.min(bal,pmtEq-i);}
+    }else if(type==='equal'){p=Math.min(bal,pmtEq-i);}
+    else{p=Math.min(bal,L/N);}
+    if(k===N)p=bal;
+    bal=Math.max(0,bal-p);out.push({pay:p+i,p,i,bal});
+  }
+  return out;
+}
+
+/* ── 입력 UI 생성 ── */
+function fld(k,label,type,ph,note){
+  const v=MY[k]??'';
+  return `<div><div class="inp-lbl">${label}</div><input class="inp-field" data-my="${k}" type="${type}" ${type==='number'?'step="any"':''} placeholder="${ph||''}" value="${String(v).replace(/"/g,'&quot;')}">${note?`<div style="font-size:10px;color:var(--gray-400);margin-top:2px;">${note}</div>`:''}</div>`;
+}
+function sel(k,label,opts){
+  return `<div><div class="inp-lbl">${label}</div><select class="inp-field" data-my="${k}">${opts.map(o=>`<option value="${o[0]}" ${String(MY[k])===String(o[0])?'selected':''}>${o[1]}</option>`).join('')}</select></div>`;
+}
+const row2=(a,b)=>`<div class="inp-row">${a}${b}</div>`;
+const kpi=(lbl,val,sub,cls)=>`<div class="kpi-card ${cls||'vc-blue'}"><div class="kpi-top"><div class="kpi-lbl">${lbl}</div></div><div class="kpi-val ${cls?'c-'+cls.replace('vc-',''):'c-blue'}" style="font-size:20px;">${val}</div><div class="kpi-sub">${sub||''}</div></div>`;
+const note=t=>`<div style="font-size:11px;color:var(--gray-400);line-height:1.6;margin-top:8px;">${t}</div>`;
+const KG='display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px;';
+const PRIV='<div style="font-size:11px;color:var(--gray-400);margin-bottom:12px;">🔒 입력값은 이 기기 브라우저에만 저장되며 서버로 전송되지 않습니다. <a href="#" onclick="myExport();return false;" style="color:var(--blue);">내보내기</a> · <a href="#" onclick="myReset();return false;" style="color:var(--red);">초기화</a></div>';
+
+function myBuild(){
+  document.getElementById('my1Form').innerHTML=
+   `<div class="card"><div class="card-h"><div class="card-title">내 매물 기본 정보</div></div>
+    <div style="position:relative;">${fld('zone','구역명','text','예: 노량진4구역')}<datalist id="myZoneList"></datalist></div>
+    <div style="height:8px"></div>
+    ${row2(fld('unit','동·호 / 평형(메모)','text','예: 84㎡ 배정'),fld('buyDate','매매일','date',''))}
+    ${row2(fld('price','매매가 (만원)','number','예: 120000'),fld('appraisal','감정가 · 종전자산 (만원)','number','예: 45000','관리처분계획서의 내 종전자산 평가액'))}
+    <div style="font-size:11.5px;font-weight:600;color:var(--gray-700);margin:12px 0 6px;">비례율 (권리가액 = 감정가 × 비례율)</div>
+    ${sel('ratioMode','비례율 입력 방식',[['auto','조합 총액으로 자동 계산'],['direct','비례율 직접 입력']])}
+    <div id="ratioAuto" style="margin-top:8px;">
+      ${row2(fld('totRev','총 종후자산 · 분양수입 (억원)','number','예: 25000'),fld('totCost','총 사업비 (억원)','number','예: 12000'))}
+      ${fld('totAppr','총 종전자산 · 조합원 감정평가 합계 (억원)','number','예: 9000')}
+      ${note('비례율 = (종후자산 총액 − 총사업비) ÷ 종전자산 총액 × 100. 관리처분계획(안) 총회 자료에서 확인할 수 있어요.')}
+    </div>
+    <div id="ratioDirect" style="margin-top:8px;">${fld('ratioDirect','비례율 (%)','number','예: 105.3')}</div>
+    <div style="font-size:11.5px;font-weight:600;color:var(--gray-700);margin:12px 0 6px;">분양가 · 분담금</div>
+    ${row2(fld('salePrice','조합원 분양가 (만원)','number','예: 90000'),fld('paid','지금까지 납부한 분담금 (만원)','number','0'))}
+    ${fld('pyeong','배정 평형 (공급면적, 평)','number','예: 34')}
+    <div style="font-size:11.5px;font-weight:600;color:var(--gray-700);margin:12px 0 6px;">대출</div>
+    ${row2(fld('loan','대출금액 (만원)','number','예: 50000'),fld('rate','금리 (연 %)','number','예: 4.5'))}
+    ${row2(sel('repay','상환 방식',[['grace','입주까지 이자만 → 이후 원리금균등'],['equal','처음부터 원리금균등'],['principal','원금균등']]),fld('loanYears','대출 기간 (년)','number','30'))}
+    ${PRIV}</div>`;
+
+  document.getElementById('my2Form').innerHTML=
+   `<div class="card"><div class="card-h"><div class="card-title">추진 단계 · 일정 입력</div><span class="bdg bdg-gray" id="myDbBadge"></span></div>
+    ${sel('stage','현재 단계',[[6,'관리처분인가 후 (이주 전)'],[7,'이주·철거 중'],[8,'착공 후 (공사 중)']])}
+    <div style="height:8px"></div>
+    ${row2(fld('dMgmt','관리처분인가일','date',''),fld('dMove','이주 개시일','date',''))}
+    ${row2(fld('dStart','착공일','date',''),fld('moveInOverride','입주예정일 (조합 발표 시)','date',''))}
+    ${fld('extraDelayQ','추가로 가정할 지연 (분기)','number','0','조합 일정이 더 밀릴 경우를 가정해 보세요')}
+    <div style="margin-top:8px;"><button class="btn-secondary" onclick="myLoadDb()">DB에서 내 구역 일정 불러오기</button></div>
+    </div>
+    <div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">공사비 가정 (직접 수정 가능)</div></div>
+    ${row2(fld('cost0','현 공사비 단가 (만원/평)','number','예: 900','계약서·총회 자료의 평당 단가'),fld('costBase','단가 기준 시점','date',''))}
+    <div class="inp-lbl" style="margin-top:6px;">상승 요인별 비중(%) · 연 상승률(%) — 가정값입니다</div>
+    ${row2(fld('wL','인건비 비중','number',''),fld('gL','인건비 연 상승률','number',''))}
+    ${row2(fld('wM','자재비 비중','number',''),fld('gM','자재비 연 상승률','number',''))}
+    ${row2(fld('wO','유류·기타 비중','number',''),fld('gO','유류·기타 연 상승률','number',''))}
+    ${note('상승률은 예시 가정이에요. 건설공사비지수(한국건설기술연구원) 등 최근 추세를 보고 직접 조정하세요.')}
+    </div>`;
+
+  document.getElementById('my3Form').innerHTML=
+   `<div class="card"><div class="card-h"><div class="card-title">주변 시세 · 시나리오 입력</div></div>
+    ${fld('nearNew','내 평형과 같은 규모 인근 신축 현 시세 (만원)','number','예: 200000','인근 재개발·재건축 신축 단지 실거래가 기준')}
+    <div style="margin:8px 0;"><button class="btn-secondary" onclick="sw('trade',document.querySelector('[data-tab=trade]'))">실거래가 탭에서 확인 →</button></div>
+    <div class="inp-lbl" style="margin-top:6px;">입주 시점까지 연 시세 상승률 시나리오 (%)</div>
+    ${row2(fld('gLow','보수','number',''),fld('gMid','기준','number',''))}
+    ${fld('gHigh','낙관','number','')}
+    ${sel('inclCost','공사비 증액 추정분을 비용에 포함',[['1','포함 (보수적)'],['0','제외']])}
+    </div>
+    <div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">비교 사례 (재개발·재건축 신축)</div></div>
+    <div style="overflow-x:auto;"><table class="dtable" style="min-width:420px;"><thead><tr><th>단지명</th><th>분양가(만원)</th><th>현 시세(만원)</th><th>입주년</th></tr></thead><tbody>
+    ${MY.refs.map((r,i)=>`<tr>${['n','sale','cur','yr'].map(f=>`<td style="padding:6px;"><input class="inp-field" data-ref="${i}:${f}" type="${f==='n'?'text':'number'}" value="${String(r[f]).replace(/"/g,'&quot;')}"></td>`).join('')}</tr>`).join('')}
+    </tbody></table></div><div id="myRefOut"></div></div>`;
+
+  document.querySelectorAll('[data-my]').forEach(el=>{
+    const h=()=>{MY[el.dataset.my]=el.value;mySave();myRender();};
+    el.addEventListener('input',h);el.addEventListener('change',h);
+  });
+  document.querySelectorAll('[data-ref]').forEach(el=>{
+    const h=()=>{const[i,f]=el.dataset.ref.split(':');MY.refs[+i][f]=el.value;mySave();myRender();};
+    el.addEventListener('input',h);
+  });
+  const zi=document.querySelector('[data-my="zone"]');
+  if(zi){zi.setAttribute('list','myZoneList');zi.addEventListener('focus',myLoadZoneNames,{once:true});}
+}
+let _zn=false;
+async function myLoadZoneNames(){
+  if(_zn)return;_zn=true;
+  try{const rows=await sbfAll('redev_projects_seoul','select=zone_name,gu_name');
+    document.getElementById('myZoneList').innerHTML=rows.map(r=>`<option value="${r.zone_name}">${r.gu_name||''}</option>`).join('');}catch(e){}
+}
+async function myLoadDb(){
+  const b=document.getElementById('myDbBadge');const z=(MY.zone||'').trim();
+  if(!z){b.textContent='구역명을 먼저 입력하세요';return;}
+  b.textContent='조회 중…';
+  try{
+    const rows=await sbfAll('redev_projects_seoul',`select=zone_name,gu_name,stage_label,mgmt_approved_last,mgmt_approved_first,move_out_start,construction_start&zone_name=ilike.*${encodeURIComponent(z)}*`);
+    if(!rows.length){b.textContent='일치하는 구역 없음';return;}
+    const r=rows[0];const f=s=>s?String(s).slice(0,10):'';
+    if(f(r.mgmt_approved_last||r.mgmt_approved_first))MY.dMgmt=f(r.mgmt_approved_last||r.mgmt_approved_first);
+    if(f(r.move_out_start))MY.dMove=f(r.move_out_start);
+    if(f(r.construction_start))MY.dStart=f(r.construction_start);
+    mySave();
+    document.querySelectorAll('[data-my]').forEach(el=>{if(MY[el.dataset.my]!==undefined)el.value=MY[el.dataset.my];});
+    b.textContent=`${r.zone_name} (${r.gu_name||''}) · DB 단계: ${r.stage_label||'—'} · 26.3월 기준`;
+    myRender();
+  }catch(e){b.textContent='조회 실패';}
+}
+function myExport(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(MY,null,2));a.download='my_property.json';a.click();}
+function myReset(){if(!confirm('내 매물 입력값을 모두 지웁니다. 계속할까요?'))return;try{localStorage.removeItem(MY_KEY);}catch(e){}MY=JSON.parse(JSON.stringify(MY_DEF));myBuild();myRender();}
+
+/* ── 결과 렌더링 ── */
+const GR={ok:['정상','green'],caution:['주의','orange'],mid:['지연','orange'],high:['심각 지연','red']};
+function myRender(){
+  const R=myCalc();
+  const rd=document.getElementById('ratioDirect'),ra=document.getElementById('ratioAuto');
+  if(rd&&ra){rd.style.display=MY.ratioMode==='direct'?'block':'none';ra.style.display=MY.ratioMode==='direct'?'none':'block';}
+  /* 1 */
+  const o1=document.getElementById('my1Out');
+  if(o1){
+    const sh=R.share==null?'—':fmtM(Math.abs(R.share));
+    const shLbl=R.share==null?'예상 분담금':(R.share>=0?'예상 분담금 (납부)':'예상 환급금');
+    const shl=R.shareLeft==null?'':(R.shareLeft>=0?`남은 납부 ${fmtM(R.shareLeft)}`:`환급 예정 ${fmtM(-R.shareLeft)}`);
+    o1.innerHTML=`<div style="${KG}">
+      ${kpi('매매가',P_(MY.price),'매매일 '+(MY.buyDate||'—'),'vc-blue')}
+      ${kpi('감정가(종전자산)',P_(MY.appraisal),R.premium!=null?`매매가−감정가(프리미엄) ${fmtM(R.premium)}`:'','vc-blue')}
+      ${kpi('비례율',R.ratio!=null?R.ratio.toFixed(2)+'%':'—','총액 입력 또는 직접 입력','vc-orange')}
+      ${kpi('권리가액',R.rights!=null?fmtM(R.rights):'—','감정가 × 비례율','vc-green')}
+      ${kpi('조합원 분양가',P_(MY.salePrice),MY.unit||'','vc-blue')}
+      ${kpi(shLbl,sh,shl,R.share!=null&&R.share<0?'vc-green':'vc-red')}
+      ${kpi('총 투입(매매가+분담금)',R.invest!=null?fmtM(R.invest):'—',n_(MY.pyeong)>0&&R.invest!=null?`평당 ${fmtM(R.invest/n_(MY.pyeong))}`:'','vc-red')}
+      ${kpi('대출',MY.loan?fmtM(n_(MY.loan)):'—',has_(MY.rate)?`연 ${n_(MY.rate)}%`:'','vc-orange')}
+    </div>${R.share==null?note('감정가·비례율·조합원 분양가를 입력하면 분담금이 계산돼요. 분담금 = 조합원 분양가 − 권리가액 (음수면 환급).'):''}
+    ${note('※ 참고용 계산입니다. 확정 금액은 관리처분계획서·조합 안내를 기준으로 확인하세요. 청산금·추가분담금·세금은 별도입니다.')}`;
+  }
+  /* 2 */
+  const o2=document.getElementById('my2Out');
+  if(o2){
+    let h='';
+    // 단계·지연
+    if(R.startDate){
+      const [gl,gc]=GR[R.grade];
+      h+=`<div class="card"><div class="card-h"><div class="card-title">추진 단계 · 지연 여부</div><span class="bdg ${gc==='green'?'bdg-green':gc==='orange'?'bdg-orange':'bdg-red'}">${gl}</span></div>
+      <div style="${KG}">
+        ${kpi('현재 단계',STAGE_NM[R.stage],'시작 '+ymd(R.startDate),'vc-blue')}
+        ${kpi('경과 / 정상',`${R.elapsedQ.toFixed(1)} / ${NQ[R.stage]}분기`,'지연경보와 동일 기준','vc-blue')}
+        ${kpi('지연',R.delayQ>0?`${R.delayQ}분기`:'없음',`지연 반영 +${R.extraQ}분기`,gc==='green'?'vc-green':gc==='orange'?'vc-orange':'vc-red')}
+        ${kpi('예상 입주',ymd(R.moveIn),R.moveInSrc+(R.moveInN?` · 정상 ${ymd(R.moveInN)}`:''),'vc-orange')}
+      </div>
+      ${note(`정상 일정 가정: 관리처분→이주 ${NQ[6]}분기, 이주→착공 ${NQ[7]}분기, 착공→준공 ${NQ[8]}분기, 준공→입주 3개월. 현재 단계가 정상 기간을 넘긴 만큼을 지연으로 보고 입주 시점에 더했어요. 조합 발표 일정이 있으면 '입주예정일'에 직접 입력하세요.`)}</div>`;
+    }else h+=`<div class="card"><div class="empty"><div class="ei">⏱</div><p>왼쪽에서 현재 단계와 해당 단계의 시작일(관리처분인가일 / 이주 개시일 / 착공일)을 입력하세요.</p></div></div>`;
+    // 공사비
+    h+=`<div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">공사비 단가 전망</div></div>`;
+    if(R.costF){
+      h+=`<div style="${KG}">
+        ${kpi('현 단가',fmtM(n_(MY.cost0))+'/평','기준 '+(MY.costBase||'—'),'vc-blue')}
+        ${kpi('입주 시점 예상 단가',fmtM(R.costF)+'/평',`약 ${R.costYears.toFixed(1)}년 · 연 ${R.gBlend.toFixed(2)}%`,'vc-orange')}
+        ${kpi('상승률',`+${(R.costUp*100).toFixed(1)}%`,'가중 평균 가정','vc-red')}
+        ${kpi('내 평형 추가 부담 상한',R.costMy!=null?fmtM(R.costMy):'평형 입력 필요','(단가 증가분 × 배정 평수)','vc-red')}
+      </div>${note('내 평형 추가 부담은 증가분이 전부 조합원에게 전가된다고 본 상한 추정이에요. 실제는 도급계약의 물가변동 조항(고정/변동), 일반분양 수입 변동 등에 따라 달라지므로 총회 자료·계약서의 공사비 증액 조건을 꼭 확인하세요.')}`;
+    }else h+=`<div class="empty" style="padding:20px;"><p>현 공사비 단가·기준 시점·입주예정(위 일정)을 입력하면 계산돼요.</p></div>`;
+    h+='</div>';
+    // 대출
+    h+=`<div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">대출 원금·이자</div></div>`;
+    if(R.loan){
+      const L=R.loan,c=L.cur;
+      h+=`<div style="${KG}">
+        ${kpi('이번 달 납부',fmtM(c.pay),`원금 ${fmtM(c.p)} · 이자 ${fmtM(c.i)}`,'vc-blue')}
+        ${kpi('입주까지 총 이자(대출 시작~)',fmtM(L.intIn),`원금 상환 ${fmtM(L.prinIn)} · ${L.nIn}개월`,'vc-red')}
+        ${kpi('오늘부터 입주까지',fmtM(L.intLeft+L.prinLeft),`이자 ${fmtM(L.intLeft)} + 원금 ${fmtM(L.prinLeft)}`,'vc-orange')}
+        ${kpi('금리 +1%p면',fmtM(L.intInPlus1),`입주까지 이자 (+${fmtM(L.intInPlus1-L.intIn)}) · 월 ${fmtM(L.curPlus1.pay)}`,'vc-red')}
+      </div>
+      <div style="font-size:11.5px;color:var(--gray-600);margin-bottom:8px;">대출 만기까지 총 이자: <b>${fmtM(L.intAll)}</b> · 입주예정일 ${R.moveIn?ymd(R.moveIn):'미정(입력 필요)'}${R.moveInSrc?' ('+R.moveInSrc+')':''}</div>
+      <div style="overflow-x:auto;"><table class="dtable" style="min-width:520px;"><thead><tr><th>구간</th><th style="text-align:right;">납부 원금</th><th style="text-align:right;">납부 이자</th><th style="text-align:right;">월 납부(말)</th><th style="text-align:right;">연말 잔액</th></tr></thead><tbody>${loanYearRows(L)}</tbody></table></div>
+      ${note('고정금리 가정입니다. 변동금리·중도상환·이주비/중도금 대출 조건은 반영하지 않았어요. 실제 약정 조건으로 확인하세요.')}`;
+    }else h+=`<div class="empty" style="padding:20px;"><p>대출금액과 금리를 입력하세요. (입주예정일이 있으면 입주까지 총액도 계산돼요)</p></div>`;
+    h+='</div>';
+    // 스크립트
+    h+=`<div class="card" style="margin-top:12px;"><div class="card-h"><div class="card-title">조합 문의 스크립트 <span class="bdg bdg-blue">AI</span></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">${['일정(이주·철거·착공)','분담금·비례율 근거','공사비 증액','대출·이주비','정보공개 요청'].map((t,i)=>`<label style="font-size:12px;"><input type="checkbox" class="myTopic" value="${t}" ${i<2?'checked':''}> ${t}</label>`).join('')}</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;"><button class="btn-primary" onclick="myScript(false)">기본 문안 만들기</button><button class="btn-secondary" onclick="myScript(true)">AI로 다듬기</button><button class="btn-secondary" onclick="myCopyScript()">복사</button></div>
+      <textarea id="myScriptOut" class="inp-field" style="height:210px;font-family:inherit;line-height:1.6;" placeholder="주제를 고르고 '기본 문안 만들기'를 누르세요."></textarea>
+      ${note('AI로 다듬기를 누르면 입력 내용 요약(구역·일정·지연 정도)이 AI로 전송돼요. 매매가·대출 등 금액은 보내지 않습니다.')}</div>`;
+    const keep=document.getElementById('myScriptOut');const kv=keep?keep.value:'';
+    const checked=[...document.querySelectorAll('.myTopic')].filter(x=>x.checked).map(x=>x.value);
+    o2.innerHTML=h;
+    const nk=document.getElementById('myScriptOut');if(nk&&kv)nk.value=kv;
+    document.querySelectorAll('.myTopic').forEach(x=>{if(checked.length)x.checked=checked.includes(x.value);});
+  }
+  /* 3 */
+  const o3=document.getElementById('my3Out');
+  if(o3){
+    let h='';
+    const nearNew=n_(MY.nearNew);
+    const yrs=R.moveIn?Math.max(0,monthsBetween(new Date(),R.moveIn)/12):null;
+    if(nearNew>0&&R.invest!=null&&yrs!=null){
+      const loanInt=R.loan?R.loan.intIn:0,costAdd=(MY.inclCost==='1'&&R.costMy)?R.costMy:0;
+      const totalCost=R.invest+loanInt+costAdd;
+      const sc=[['보수',MY.gLow],['기준',MY.gMid],['낙관',MY.gHigh]].map(([nm,g])=>{const v=nearNew*Math.pow(1+n_(g)/100,yrs);return {nm,g:n_(g),v,pf:v-totalCost,roi:(v-totalCost)/totalCost*100};});
+      h+=`<div class="card"><div class="card-h"><div class="card-title">내 집의 미래 가치 (입주 시점)</div><span class="bdg bdg-gray">입주까지 약 ${yrs.toFixed(1)}년</span></div>
+      <div style="${KG}">
+        ${kpi('총 투입 비용',fmtM(totalCost),`매매가+분담금 ${fmtM(R.invest)}${loanInt?` + 이자 ${fmtM(loanInt)}`:''}${costAdd?` + 공사비 ${fmtM(costAdd)}`:''}`,'vc-red')}
+        ${kpi('지금 신축 시세와 비교',fmtM(nearNew-R.invest),'신축 현 시세 − (매매가+분담금)',nearNew-R.invest>=0?'vc-green':'vc-red')}
+      </div>
+      <div style="overflow-x:auto;"><table class="dtable" style="min-width:480px;"><thead><tr><th>시나리오</th><th>연 상승률</th><th style="text-align:right;">입주 시 예상 시세</th><th style="text-align:right;">예상 차익</th><th style="text-align:right;">투입 대비</th></tr></thead><tbody>
+      ${sc.map(s=>`<tr><td>${s.nm}</td><td>${s.g}%</td><td style="text-align:right;">${fmtM(s.v)}</td><td style="text-align:right;color:${s.pf>=0?'var(--green)':'var(--red)'};font-weight:600;">${fmtM(s.pf)}</td><td style="text-align:right;">${s.roi.toFixed(1)}%</td></tr>`).join('')}
+      </tbody></table></div>
+      ${note('시나리오는 가정입니다(전망이 아닙니다). 양도세·취득세·중개비·보유세, 추가분담금 확정 여부는 반영되지 않았어요. 세금은 <a href="#" onclick="sw(\'tax\',document.querySelector(\'[data-tab=tax]\'));return false;" style="color:var(--blue)">세금 계산기</a>에서 따로 확인하세요.')}</div>`;
+    }else h+=`<div class="card"><div class="empty"><div class="ei">📈</div><p>인근 신축 현 시세를 입력하고, 1·2번 화면에서 매매가·분양가·감정가·입주일정을 채우면 계산돼요.</p></div></div>`;
+    o3.innerHTML=h;
+  }
+  const ro=document.getElementById('myRefOut');
+  if(ro){
+    const cy=new Date().getFullYear();
+    const rows=MY.refs.filter(r=>n_(r.sale)>0&&n_(r.cur)>0).map(r=>{const up=n_(r.cur)/n_(r.sale)-1,yy=n_(r.yr)>0?Math.max(1,cy-n_(r.yr)):null;return {n:r.n||'(이름 없음)',up,ann:yy?Math.pow(1+up,1/yy)-1:null};});
+    ro.innerHTML=rows.length?`<div style="margin-top:10px;font-size:12px;">${rows.map(r=>`<div>${r.n}: 분양가 대비 <b>${(r.up*100).toFixed(1)}%</b>${r.ann!=null?` · 연환산 ${(r.ann*100).toFixed(1)}%`:''}</div>`).join('')}
+      ${rows.some(r=>r.ann!=null)?`<div style="margin-top:6px;"><button class="btn-secondary" onclick="myApplyRef()">평균 연환산을 '기준' 시나리오에 반영</button></div>`:''}</div>`:'';
+  }
+}
+function P_(v){return has_(v)?fmtM(n_(v)):'—';}
+function loanYearRows(L){
+  const rows=[];const yrs=Math.ceil(L.N/12);const nIn=L.nIn;
+  const seg=(label,a,b)=>{if(b<=a)return;let p=0,i=0;for(let k=a;k<b&&k<L.sched.length;k++){p+=L.sched[k].p;i+=L.sched[k].i;}const last=L.sched[Math.min(b,L.sched.length)-1];
+    rows.push(`<tr><td>${label}</td><td style="text-align:right;">${fmtM(p)}</td><td style="text-align:right;">${fmtM(i)}</td><td style="text-align:right;">${fmtM(last.pay)}</td><td style="text-align:right;">${fmtM(last.bal)}</td></tr>`);};
+  if(nIn>0)seg(`입주까지 (${nIn}개월)`,0,Math.min(nIn,L.N));
+  for(let y=0;y<yrs&&rows.length<9;y++){
+    if(y*12+12<=nIn)continue;
+    const a=Math.max(nIn,y*12),b=Math.min((y+1)*12,L.N);
+    const part=a>y*12?` (입주 후 ${b-a}개월)`:'';
+    seg(`${y+1}년차${part}`,a,b);
+  }
+  if(yrs>8)rows.push(`<tr><td colspan="5" style="text-align:center;color:var(--gray-400);">… 이후 생략 (만기까지 총 이자는 위에 표시)</td></tr>`);
+  return rows.join('');
+}
+function myApplyRef(){
+  const cy=new Date().getFullYear();const a=MY.refs.filter(r=>n_(r.sale)>0&&n_(r.cur)>0&&n_(r.yr)>0).map(r=>Math.pow(n_(r.cur)/n_(r.sale),1/Math.max(1,cy-n_(r.yr)))-1);
+  if(!a.length)return;MY.gMid=(a.reduce((x,y)=>x+y,0)/a.length*100).toFixed(1);mySave();
+  const el=document.querySelector('[data-my="gMid"]');if(el)el.value=MY.gMid;myRender();
+}
+
+/* ── 조합 문의 스크립트 ── */
+function myScriptBase(){
+  const R=myCalc();const topics=[...document.querySelectorAll('.myTopic')].filter(x=>x.checked).map(x=>x.value);
+  const z=MY.zone||'(구역명)';const lines=[];
+  lines.push(`안녕하세요. ${z} 조합원입니다${MY.unit?`(${MY.unit})`:''}. 아래 사항을 문의드립니다.`);
+  let i=1;
+  if(topics.includes('일정(이주·철거·착공)')){
+    let q=`${i++}. 현재 ${STAGE_NM[+MY.stage]} 단계로 알고 있습니다.`;
+    if(R.startDate)q+=` 이 단계가 ${ymd(R.startDate)}에 시작되어 약 ${R.elapsedQ.toFixed(1)}분기가 지났는데, 일반적인 기간(${NQ[R.stage]}분기)을 ${R.delayQ>0?`${R.delayQ}분기 넘겼습니다`:'감안하면 일정이 궁금합니다'}.`;
+    q+=` 이주·철거 완료 시점, 착공일, 준공 및 입주 예정일의 현재 계획과 변경 사유가 있다면 서면으로 안내 부탁드립니다.`;
+    lines.push(q);
+  }
+  if(topics.includes('분담금·비례율 근거'))lines.push(`${i++}. 관리처분계획 기준 비례율, 제 권리가액, 분담금 산정 근거(종전·종후자산 평가 내역, 총사업비 항목)와 추후 변동 가능성 및 확정 시점을 알려주세요.`);
+  if(topics.includes('공사비 증액'))lines.push(`${i++}. 현재 공사비 도급 단가와 물가변동에 따른 증액 조항(방식·시점·상한)이 어떻게 되어 있는지, 증액 시 조합원 분담금에 미치는 영향 추정치가 있는지 알려주세요.`);
+  if(topics.includes('대출·이주비'))lines.push(`${i++}. 이주비·중도금 대출의 금리 조건, 이자 지원 여부, 입주 지연 시 이자 부담 처리 방식을 알려주세요.`);
+  if(topics.includes('정보공개 요청'))lines.push(`${i++}. 도시 및 주거환경정비법 제124조에 따라 총회 의결 자료, 예산·결산 내역, 용역·계약 현황 등 관련 자료의 열람·복사를 요청드립니다. 열람 가능한 일시와 방법을 알려주세요.`);
+  lines.push('답변은 문자 또는 서면(이메일)으로 부탁드리며, 회신 가능한 시점을 함께 알려주시면 감사하겠습니다.');
+  return lines.join('\n\n');
+}
+function myScript(useAI){
+  const out=document.getElementById('myScriptOut');const base=myScriptBase();
+  out.value=base;if(!useAI)return;
+  out.value=base+'\n\n(AI가 다듬는 중…)';
+  fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    messages:[{role:'user',content:'아래는 재개발 조합원이 조합 사무실에 보낼 문의 초안입니다. 정중하되 요점이 분명하고 근거를 요구하는 어조로 다듬어 주세요. 사실을 새로 지어내지 말고, 마크다운 없이 문자/이메일로 바로 보낼 수 있는 한국어 본문만 출력하세요.\n\n'+base}],
+    system:'당신은 도시정비사업 조합원을 돕는 글쓰기 도우미입니다. 법적 단정이나 투자 조언은 하지 않습니다.'})})
+  .then(r=>r.json()).then(j=>{const t=(j.content&&j.content[0]&&j.content[0].text)||j.text||(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'';out.value=t?t.trim():base;})
+  .catch(()=>{out.value=base+'\n\n(AI 연결 실패 — 기본 문안을 사용하세요)';});
+}
+function myCopyScript(){const t=document.getElementById('myScriptOut');if(!t||!t.value)return;t.select();try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}}
+
+myBuild();myRender();
+
 </script>
 </body>
 <!-- build: 1780932042 -->
